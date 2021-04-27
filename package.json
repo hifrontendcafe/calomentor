@@ -5,13 +5,13 @@
     "packages/*"
   ],
   "scripts": {
-    "web-dev": "lerna run dev --scope=client"
+    "web-dev": "lerna run dev --scope=web"
   },
   "devDependencies": {
     "lerna": "^4.0.0",
     "typescript": "^4.2.4"
   },
   "dependencies": {
-    "client": "file:packages/client"
+    "web": "file:packages/web"
   }
 }
