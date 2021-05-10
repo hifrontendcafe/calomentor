@@ -1,0 +1,15 @@
+{
+  "name": "server",
+  "version": "0.0.1",
+  "description": "",
+  "main": "handler.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "serverless-plugin-typescript": "^1.1.9",
+    "typescript": "^4.2.4"
+  }
+}
