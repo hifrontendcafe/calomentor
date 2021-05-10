@@ -1,0 +1,1 @@
+serverless invoke local -f functionName
