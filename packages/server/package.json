@@ -4,7 +4,8 @@
   "description": "",
   "main": "handler.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "deploy-dev": "serverless deploy -s dev",
+    "deploy-prod": "serverless deploy -s prod"
   },
   "author": "",
   "license": "ISC",
