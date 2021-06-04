@@ -11,6 +11,9 @@
     "packages/*"
   ],
   "scripts": {
-    "web-dev": "lerna run dev --scope=web"
+    "web-dev": "lerna run dev --scope=web",
+    "sls-offline": "lerna run start-offline --scope=server",
+    "sls-deploy-dev": "lerna run deploy-dev --scope=server",
+    "sls-deploy-prod": "lerna run deploy-prod --scope=server"
   }
 }
