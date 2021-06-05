@@ -6,7 +6,7 @@
   "scripts": {
     "deploy-dev": "serverless deploy -s dev",
     "deploy-prod": "serverless deploy -s prod",
-    "start-offline": "serverless offline"
+    "start-offline": "serverless offline --printOutput"
   },
   "author": "",
   "license": "ISC",

@@ -76,7 +76,7 @@ resources:
         KeySchema:
           -
             AttributeName: id
-            KeyType: RANGE
+            KeyType: HASH
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
@@ -92,7 +92,7 @@ resources:
         KeySchema:
           -
             AttributeName: id
-            KeyType: RANGE
+            KeyType: HASH
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
@@ -108,7 +108,7 @@ resources:
         KeySchema:
           -
             AttributeName: id
-            KeyType: RANGE
+            KeyType: HASH
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
