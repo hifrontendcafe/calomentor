@@ -1,9 +1,9 @@
 ## Frontend
 
-- lerna run web-dev
+- yarn web-dev
 
 ## Backend
 
-- lerna run sls-offline
-- lerna run sls-deploy-dev
-- lerna run sls-deploy-prod
+- yarn sls-offline
+- yarn sls-deploy-dev
+- yarn sls-deploy-prod

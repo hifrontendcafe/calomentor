@@ -1,1 +1,9 @@
-export interface GlobalResponse { statusCode: number; body: string }
+interface GlobalBody {
+  code: number;
+  message: string;
+  data: any;
+}
+export interface GlobalResponse {
+  statusCode: number;
+  body: GlobalBody;
+}
