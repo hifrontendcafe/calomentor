@@ -1,5 +1,5 @@
 import { Handler, Context, Callback } from "aws-lambda";
-import { testService } from "./services/adminService";
+import { testService } from "./services/testService";
 
 export const test: Handler = async (
   event: any,
