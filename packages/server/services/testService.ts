@@ -8,10 +8,10 @@ export const testService = async (
 ): Promise<GlobalResponse> => {
   return {
     statusCode: 200,
-    body: {
+    body: JSON.stringify({
       code: 200,
       message: "hola",
       data: {},
-    },
+    }),
   };
 };
