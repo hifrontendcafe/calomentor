@@ -30,7 +30,7 @@ functions:
     handler: index.test
     events:
       - http:
-          path: api/test
+          path: test
           method: get
           cors:
             origin: '*'
@@ -39,7 +39,7 @@ functions:
     handler: index.activateMentor
     events:
       - http:
-          path: api/mentor/activate/{id}
+          path: mentor/activate/{id}
           method: patch
           cors:
             origin: '*'
