@@ -18,20 +18,8 @@
     "serverless-step-functions": "^2.30.0",
     "typescript": "^4.2.4"
   },
-<<<<<<< HEAD
-  "private": true,
-  "workspaces": [
-    "packages/*"
-  ],
-  "scripts": {
-    "web-dev": "lerna run dev --scope=web",
-    "sls-offline": "lerna run start-offline --scope=server",
-    "sls-deploy-dev": "lerna run deploy-dev --scope=server",
-    "sls-deploy-prod": "lerna run deploy-prod --scope=server"
-=======
   "dependencies": {
     "aws-lambda": "^1.0.6",
     "aws-sdk": "^2.913.0"
->>>>>>> dd43f9e747cc8f382b9638d3633dfe8d25455e69
   }
 }
