@@ -46,3 +46,52 @@ export const activateMentorService = (
     callback(null, response);
   });
 };
+
+export const createUserService = (
+  event: any,
+  context: Context,
+  callback: Callback<any>
+): void => {
+  const { idDiscord, userDiscord, nombreCompleto, email, urlFoto, links, rol, status, especialidades } = JSON.parse(event.body);
+  const mentor = {
+    idDiscord,
+    userDiscord,
+    nombreCompleto,
+    email,
+    urlFoto,
+    links,
+    rol,
+    status,
+    especialidades
+  }
+
+  const createUser = mentor => {
+    console.log('Creating mentor');
+    const mentorInfo = {
+      TableName: TABLE_NAME_USER,
+      Item: mentor,
+    };
+    return dynamoDb.put(mentorInfo).promise()
+      .then(res => mentor);
+  };
+
+  createUser(mentor)
+    .then(res => {
+      callback(null, {
+        statusCode: 200,
+        body: JSON.stringify({
+          message: `User created succesfully`,
+          candidateId: res.id
+        })
+      });
+    })
+    .catch(err => {
+      console.log(err);
+      callback(null, {
+        statusCode: 500,
+        body: JSON.stringify({
+          message: `Unable to create user. Error ${err}`
+        })
+      })
+    });
+};

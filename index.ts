@@ -1,6 +1,6 @@
 import { Handler, Context, Callback } from "aws-lambda";
 import { testService } from "./services/testService";
-import { activateMentorService } from "./services/mentorService";
+import { createUserService, activateMentorService } from "./services/mentorService";
 
 
 export const test: Handler = async (
@@ -14,6 +14,12 @@ export const activateMentor: Handler = (
   context: Context,
   callback: Callback<any>
 ) => activateMentorService(event, context, callback);
+
+export const createUser: Handler = (
+  event: any,
+  context: Context,
+  callback: Callback<any>
+) => createUserService(event, context, callback);
 
 export const mentorshipConfirmation: Handler = (
   event: any,
