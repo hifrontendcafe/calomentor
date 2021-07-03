@@ -53,6 +53,42 @@ functions:
           cors:
             origin: '*'
             maxAge: 86400
+  getUsers:
+    handler: index.getUsers
+    events:
+      - http:
+          path: user
+          method: get
+          cors:
+            origin: '*'
+            maxAge: 86400
+  getUserById:
+    handler: index.getUserById
+    events:
+      - http:
+          path: user/{id}
+          method: get
+          cors:
+            origin: '*'
+            maxAge: 86400
+  deleteUserById:
+    handler: index.deleteUserById
+    events:
+      - http:
+          path: user/{id}
+          method: delete
+          cors:
+            origin: '*'
+            maxAge: 86400
+  updateUserById:
+    handler: index.updateUserById
+    events:
+      - http:
+          path: user/{id}
+          method: put
+          cors:
+            origin: '*'
+            maxAge: 86400
   mentorshipConfirmation:
     handler: index.mentorshipConfirmation
 
