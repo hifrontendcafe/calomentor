@@ -7,7 +7,7 @@ export const sendEmail = async (to: string, subject: string, html: string) => {
     secure: true,
     auth: {
       user: "frontendcafe@gmail.com",
-      pass: "f3c.youtub3",
+      pass: "",
     },
   });
 
