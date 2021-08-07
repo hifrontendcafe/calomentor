@@ -6,8 +6,8 @@ export const sendEmail = async (to: string, subject: string, html: string) => {
     port: 465,
     secure: true,
     auth: {
-      user: "frontendcafe@gmail.com",
-      pass: "",
+      user: process.env.CALOMENTOR_MAIL,
+      pass: process.env.CALOMENTOR_MAIL_PASS,
     },
   });
 
