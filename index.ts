@@ -1,18 +1,11 @@
 import { Handler, Context, Callback } from "aws-lambda";
-import { testService } from "./services/testService";
-import { createUserService, activateMentorService, getUsersService, getUserByIdService, deleteUserByIdService, updateUserByIdService } from "./services/userService";
+import { createUserService, activateUserService, getUsersService, getUserByIdService, deleteUserByIdService, updateUserByIdService } from "./services/userService";
 
-export const test: Handler = async (
-  event: any,
-  context: Context,
-  callback: any
-) => await testService(event, context, callback);
-
-export const activateMentor: Handler = (
+export const activateUser: Handler = (
   event: any,
   context: Context,
   callback: Callback<any>
-) => activateMentorService(event, context, callback);
+) => activateUserService(event, context, callback);
 
 export const createUser: Handler = (
   event: any,
