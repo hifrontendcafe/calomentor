@@ -91,34 +91,15 @@ functions:
             maxAge: 86400
   mentorshipConfirmation:
     handler: index.mentorshipConfirmation
-
-stepFunctions:
-  stateMachines:
-    mentorship:
-      name: mentorship
-      events: 
-        - http:
-            path: api/mentorship
-            method: post
-            response:
-              headers:
-                Content-Type: "'application/json'"
-                X-Application-Id: "'calomentor'"
-              template:
-                application/json: |
-                  {
-                    "status": 200,
-                    "info": "OK"
-                  }
-      definition:
-        StartAt: SEND_CONFIRMATION_MAIL
-        States:
-          SEND_CONFIRMATION_MAIL:
-            Type: Task
-            Resource: arn:aws:states:::lambda:invoke
-            Parameters:
-                FunctionName: { "Fn::Join": [ ":", ["arn:aws:lambda:sa-east-1", { "Ref": "AWS::AccountId" }, "function:${self:service}-${self:provider.stage}-mentorshipConfirmation"]]}
-            End: true
+  mentorshipTest:
+    handler: index.mentorshipConfirmation
+    events:
+      - http:
+          path: mentorship/test
+          method: post
+          cors:
+            origin: '*'
+            maxAge: 86400
 
 resources:
   Resources:

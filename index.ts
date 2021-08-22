@@ -1,6 +1,7 @@
 import { Handler, Context, Callback } from "aws-lambda";
 import { testService } from "./services/testService";
 import { createUserService, activateMentorService, getUsersService, getUserByIdService, deleteUserByIdService, updateUserByIdService } from "./services/userService";
+import { mentorshipService } from "./services/mentorshipService";
 
 export const test: Handler = async (
   event: any,
@@ -48,13 +49,4 @@ export const mentorshipConfirmation: Handler = (
   event: any,
   context: Context,
   callback: Callback<any>
-) => {
-  callback(null, {
-    statusCode: 200,
-    body: JSON.stringify({
-      code: 200,
-      message: "error",
-      data: "hola",
-    }),
-  });
-};
+) => mentorshipService(event, context, callback);
