@@ -1,60 +1,77 @@
 import { Callback, Context } from "aws-lambda";
 import { TABLE_NAME_USER } from "../constants";
 import { GlobalResponse } from "../types/globalTypes";
-import { throwError } from "../utils/throwError";
+import { throwResponse } from "../utils/throwResponse";
+import { createAndUpdateUserValidations } from "../utils/validations";
 
 const AWS = require("aws-sdk"); // eslint-disable-line import/no-extraneous-dependencies
 
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
+let responseMessage = "";
 
 export const createUserService = (
   event: any,
   context: Context,
   callback: Callback<any>
 ): void => {
-
-  const { idDiscord, userDiscord, nombreCompleto, email, urlFoto, links, rol, status, especialidades } = JSON.parse(event.body);
-  const user = {
-    id: idDiscord,
-    userDiscord,
-    nombreCompleto,
+  const {
+    discord_id,
+    discord_username,
+    full_name,
     email,
-    urlFoto,
+    url_photo,
+    role,
     links,
-    rol,
-    status,
-    especialidades
+    skills,
+  } = JSON.parse(event.body);
+
+  if (!discord_id || typeof discord_id !== "string" ) {
+    responseMessage = "Bad Request: discord_id is required.";
+    throwResponse(callback, responseMessage, 400);
   }
 
-  if (!idDiscord || !userDiscord || !nombreCompleto) {
-    const errorMessage = "Bad Request: idDiscord, userDiscord y nombreCompleto son campos requeridos";
-   return throwError(event, context, callback, errorMessage, 400);
-  }
+  createAndUpdateUserValidations(
+    callback,
+    discord_username,
+    full_name,
+    email,
+    url_photo,
+    role,
+    links,
+    skills
+  );
 
-  const userInfo = {
-    TableName: TABLE_NAME_USER,
-    Item: user,
+  const user = {
+    id: discord_id,
+    discord_username,
+    full_name,
+    email,
+    url_photo,
+    role,
+    links,
+    skills,
+    isActive: false,
   };
 
-  dynamoDb.put(userInfo).promise()
-    .then(res => {
-      callback(null, {
-        statusCode: 200,
-        body: JSON.stringify({
-          message: `User created succesfully`,
-          userId: res.id
-        })
-      });
-    })
-    .catch(err => {
-      console.log(err);
-      callback(null, {
-        statusCode: 500,
-        body: JSON.stringify({
-          message: `Unable to create user. Error ${err}`
-        })
-      })
-    });
+  const params = {
+    TableName: TABLE_NAME_USER,
+    Item: user,
+    ConditionExpression: "attribute_not_exists(id)",
+  };
+
+  dynamoDb.put(params, (error, data) => {
+    if (error) {
+      if (error.code === "ConditionalCheckFailedException") {
+        responseMessage = `Unable to create user. Id ${discord_id} already exists.`;
+        throwResponse(callback, responseMessage, 400);
+      }
+      responseMessage = `Unable to create user. Error: ${error}`;
+      throwResponse(callback, responseMessage, 500);
+    } else {
+      responseMessage = `User created succesfully`;
+      throwResponse(callback, responseMessage, 200);
+    }
+  });
 };
 
 export const getUsersService = (
@@ -62,27 +79,23 @@ export const getUsersService = (
   context: Context,
   callback: Callback<any>
 ): void => {
-
   const params = {
     TableName: TABLE_NAME_USER,
-    ProjectionExpression: "id, nombreCompleto"
+    ExpressionAttributeNames: {
+      "#role": "role",
+    },
+    ProjectionExpression:
+      "id, discord_username, full_name, email, url_photo, #role, links, skills, isActive",
   };
 
-  const onScan = (err, data) => {
+  dynamoDb.scan(params, (err, data) => {
     if (err) {
-      console.log('Scan failed to load data. Error JSON:', JSON.stringify(err, null, 2));
-      callback(err);
+      const responseMessage = `Unable to get all Users. Error: ${err}`;
+      throwResponse(callback, responseMessage, 500);
     } else {
-      console.log("Scan succeeded.");
-      return callback(null, {
-        statusCode: 200,
-        body: JSON.stringify({
-          users: data.Items
-        })
-      });
+      throwResponse(callback, "", 200, data.Items);
     }
-  };
-  dynamoDb.scan(params, onScan);
+  });
 };
 
 export const getUserByIdService = (
@@ -90,27 +103,24 @@ export const getUserByIdService = (
   context: Context,
   callback: Callback<any>
 ): void => {
-
   const params = {
     TableName: TABLE_NAME_USER,
-    Key: {
-      id: event.pathParameters.id,
-    }
+    Key: { id: event.pathParameters.id },
   };
 
-  dynamoDb.get(params).promise()
-    .then(result => {
-      const response = {
-        statusCode: 200,
-        body: JSON.stringify(result.Item),
-      };
-      callback(null, response);
-    })
-    .catch(error => {
-      console.error(error);
-      callback(new Error(`Couldn\'t fetch user with id: ${event.pathParameters.id}`));
-      return;
-    });
+  dynamoDb.get(params, (err, data) => {
+    if (err) {
+      responseMessage = `Unable to get user by id. Error: ${err}`;
+      throwResponse(callback, responseMessage, 500);
+    } else {
+      if (Object.keys(data).length === 0) {
+        responseMessage = `User with id ${event.pathParameters.id} not found`;
+        throwResponse(callback, responseMessage, 404);
+      } else {
+        throwResponse(callback, "", 200, data.Item);
+      }
+    }
+  });
 };
 
 export const deleteUserByIdService = (
@@ -118,28 +128,27 @@ export const deleteUserByIdService = (
   context: Context,
   callback: Callback<any>
 ): void => {
-
   const params = {
     TableName: TABLE_NAME_USER,
-    ProjectionExpression: "idDiscord, userDiscord, nombreCompleto",
-    Key: {
-      id: event.pathParameters.id,
-    }
+    ProjectionExpression: "discord_id, discord_username, full_name",
+    Key: { id: event.pathParameters.id },
+    ReturnValues: "ALL_OLD",
   };
 
-  dynamoDb.delete(params).promise()
-    .then(result => {
-      const response = {
-        statusCode: 200,
-        body: JSON.stringify(result.Item),
-      };
-      callback(null, response);
-    })
-    .catch(error => {
-      console.error(error);
-      callback(new Error(`Couldn\'t delete user with id: ${event.pathParameters.id}`));
-      return;
-    });
+  dynamoDb.delete(params, (err, data) => {
+    if (err) {
+      responseMessage = `Unable to delete user. Error: ${err}`;
+      throwResponse(callback, responseMessage, 500);
+    } else {
+      if (Object.keys(data).length === 0) {
+        responseMessage = `Unable to delete user. Id ${event.pathParameters.id} not found`;
+        throwResponse(callback, responseMessage, 404);
+      } else {
+        responseMessage = "User deleted succesfully";
+        throwResponse(callback, responseMessage, 200);
+      }
+    }
+  });
 };
 
 export const updateUserByIdService = (
@@ -147,91 +156,92 @@ export const updateUserByIdService = (
   context: Context,
   callback: Callback<any>
 ): void => {
-  const { userDiscord, nombreCompleto, email, urlFoto, links, rol, status, especialidades } = JSON.parse(event.body);
+  const { discord_username, full_name, email, url_photo, role, links, skills } =
+    JSON.parse(event.body);
+
+  createAndUpdateUserValidations(
+    callback,
+    discord_username,
+    full_name,
+    email,
+    url_photo,
+    role,
+    links,
+    skills
+  );
+
   const params = {
     TableName: TABLE_NAME_USER,
-    Key: {
-      id: event.pathParameters.id,
-    },
+    Key: { id: event.pathParameters.id },
     ExpressionAttributeNames: {
-      '#status': 'status',
+      "#role": "role",
     },
     ExpressionAttributeValues: {
-      ":userDiscord": userDiscord,
-      ":nombreCompleto": nombreCompleto,
-      ":status": status,
+      ":discord_username": discord_username,
+      ":full_name": full_name,
       ":email": email,
-      ":rol": rol,
-      ":urlFoto": urlFoto,
-      ":especialidades": especialidades,
-      ":links": links
+      ":role": role,
+      ":url_photo": url_photo,
+      ":skills": skills,
+      ":links": links,
     },
-    UpdateExpression: "SET userDiscord = :userDiscord, nombreCompleto = :nombreCompleto, #status = :status, email = :email, rol = :rol, urlFoto = :urlFoto, especialidades = :especialidades, links = :links",
+    ConditionExpression: "attribute_exists(id)",
+    UpdateExpression:
+      "SET discord_username = :discord_username, full_name = :full_name, email = :email, #role = :role, url_photo = :url_photo, skills = :skills, links = :links",
     ReturnValues: "ALL_NEW",
   };
-  dynamoDb.update(params, (error, result) => {
-    let response: GlobalResponse;
+
+  dynamoDb.update(params, (error, data) => {
     if (error) {
-      response = {
-        statusCode: 400,
-        body: JSON.stringify({
-          code: 400,
-          message: "error",
-          data: error,
-        }),
-      };
+      if (error.code === "ConditionalCheckFailedException") {
+        responseMessage = `Unable to update user. Id ${event.pathParameters.id} not found`;
+        throwResponse(callback, responseMessage, 404);
+      }
+      responseMessage = `Unable to update user. Error: ${error}`;
+      throwResponse(callback, responseMessage, 500);
     } else {
-      response = {
-        statusCode: 200,
-        body: JSON.stringify({
-          code: 200,
-          message: "success",
-          result: result.Attributes,
-        }),
-      };
+      responseMessage = `User with id ${event.pathParameters.id} updated succesfully.`;
+      throwResponse(callback, responseMessage, 200, data.Attributes);
     }
-    callback(null, response);
   });
 };
 
-export const activateMentorService = (
+export const activateUserService = (
   event: any,
   context: Context,
   callback: Callback<any>
 ): void => {
-  const { data } = JSON.parse(event.body);
+  const { isActive } = JSON.parse(event.body);
+
+  if (!isActive || typeof isActive !== "boolean") {
+    responseMessage = "Bad Request: isActive property is missing or it's not boolean.";
+    throwResponse(callback, responseMessage, 400);
+  }
+
   const params = {
     TableName: TABLE_NAME_USER,
     Key: {
       id: event.pathParameters.id,
     },
     ExpressionAttributeValues: {
-      ":active": data.status,
+      ":isActive": isActive,
     },
-    UpdateExpression: "SET active = :active",
+    ConditionExpression: "attribute_exists(id)",
+    UpdateExpression: "SET isActive = :isActive",
     ReturnValues: "ALL_NEW",
   };
-  dynamoDb.update(params, (error, result) => {
-    let response: GlobalResponse;
+
+  dynamoDb.update(params, (error, data) => {
     if (error) {
-      response = {
-        statusCode: 400,
-        body: JSON.stringify({
-          code: 400,
-          message: "error",
-          data: error,
-        }),
-      };
+      if (error.code === "ConditionalCheckFailedException") {
+        responseMessage = `Unable to activate user. Id ${event.pathParameters.id} not found`;
+        throwResponse(callback, responseMessage, 404);
+      }
+      responseMessage = `Unable to activate user. Error: ${error}`,
+      throwResponse(callback, responseMessage, 500);
     } else {
-      response = {
-        statusCode: 200,
-        body: JSON.stringify({
-          code: 200,
-          message: "success",
-          result: result.Attributes,
-        }),
-      };
+      responseMessage = `User with id ${event.pathParameters.id} activated succesfully.`;
+      throwResponse(callback, responseMessage, 200, data.Attributes);
     }
-    callback(null, response);
   });
 };
