@@ -26,20 +26,11 @@ plugins:
   - serverless-pseudo-parameters
 
 functions:
-  hello:
-    handler: index.test
-    events:
-      - http:
-          path: test
-          method: get
-          cors:
-            origin: '*'
-            maxAge: 86400
   activate:
-    handler: index.activateMentor
+    handler: index.activateUser
     events:
       - http:
-          path: mentor/activate/{id}
+          path: user/activate/{id}
           method: patch
           cors:
             origin: '*'
