@@ -12,6 +12,9 @@ export const throwResponse = (callback, message, statusCode, data = null) => {
   response = {
     statusCode,
     body: JSON.stringify(body),
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+    },
   };
   callback(null, response);
 };
