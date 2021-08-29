@@ -1,32 +1,5 @@
 ## Documentacion para la API de Calomentor
 
-### GET “{{URL}}{{PATH}}”
-
-Descripción: EJEMPLO
-
-**Parámetros:**
-**Body:**
-**Respuesta:**
-Array de objetos, donde cada objeto devuelve:
-
-```bash
-{
-    id: ID_EJEMPLO,
-}
-```
-
-**Ejemplo:**
-
-```js
-fetch(
-      “URL/PATH”,
-      {
-        method: “GET”,
-      },
-)
-.then("// Manejo de Respuesta");
-```
-
 ### POST “{{URL}}/time-slot”
 
 Descripción: Agrega timeslots para un día y mentor específico.
