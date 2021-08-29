@@ -1,5 +1,5 @@
 service: server
-frameworkVersion: '2'
+frameworkVersion: "2"
 
 provider:
   name: aws
@@ -14,10 +14,10 @@ provider:
       statements:
         - Effect: Allow
           Action:
-                - dynamodb:*
-                - s3:*
-                - ses:*
-          Resource: '*'
+            - dynamodb:*
+            - s3:*
+            - ses:*
+          Resource: "*"
 
 plugins:
   - serverless-plugin-typescript
@@ -32,54 +32,42 @@ functions:
       - http:
           path: user/activate/{id}
           method: patch
-          cors:
-            origin: '*'
-            maxAge: 86400
+          cors: true
   createUser:
     handler: index.createUser
     events:
       - http:
           path: user
           method: post
-          cors:
-            origin: '*'
-            maxAge: 86400
+          cors: true
   getUsers:
     handler: index.getUsers
     events:
       - http:
           path: user
           method: get
-          cors:
-            origin: '*'
-            maxAge: 86400
+          cors: true
   getUserById:
     handler: index.getUserById
     events:
       - http:
           path: user/{id}
           method: get
-          cors:
-            origin: '*'
-            maxAge: 86400
+          cors: true
   deleteUserById:
     handler: index.deleteUserById
     events:
       - http:
           path: user/{id}
           method: delete
-          cors:
-            origin: '*'
-            maxAge: 86400
+          cors: true
   updateUserById:
     handler: index.updateUserById
     events:
       - http:
           path: user/{id}
           method: put
-          cors:
-            origin: '*'
-            maxAge: 86400
+          cors: true
   mentorshipConfirmation:
     handler: index.mentorshipConfirmation
   mentorshipTest:
@@ -88,55 +76,68 @@ functions:
       - http:
           path: mentorship/test
           method: post
-          cors:
-            origin: '*'
-            maxAge: 86400
+          cors: true
+  addTimeSlot:
+    handler: index.addTimeSlot
+    events:
+      - http:
+          path: time-slot
+          method: post
+          cors: true
+  getTimeSlotsByUserId:
+    handler: index.getTimeSlotsByUser
+    events:
+      - http:
+          path: time-slot/{id}
+          method: get
+          cors: true
+  updateTimeSlot:
+    handler: index.updateSlot
+    events:
+      - http:
+          path: time-slot
+          method: patch
+          cors: true
 
 resources:
   Resources:
     CalomentorUserDynamoDB:
-      Type: 'AWS::DynamoDB::Table'
+      Type: "AWS::DynamoDB::Table"
       DeletionPolicy: Retain
       Properties:
         AttributeDefinitions:
-          -
-            AttributeName: id
+          - AttributeName: id
             AttributeType: S
         KeySchema:
-          -
-            AttributeName: id
+          - AttributeName: id
             KeyType: HASH
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
         TableName: user
     CalomentorTimeSlotDynamoDB:
-      Type: 'AWS::DynamoDB::Table'
+      Type: "AWS::DynamoDB::Table"
       DeletionPolicy: Retain
       Properties:
         AttributeDefinitions:
-          -
-            AttributeName: id
+          - AttributeName: id
             AttributeType: S
         KeySchema:
-          -
-            AttributeName: id
+          - AttributeName: id
             KeyType: HASH
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
         TableName: time-slots
     CalomentorMentorshipDynamoDB:
-      Type: 'AWS::DynamoDB::Table'
+      Type: "AWS::DynamoDB::Table"
       DeletionPolicy: Retain
       Properties:
         AttributeDefinitions:
-          -
-            AttributeName: id
+          - AttributeName: id
             AttributeType: S
         KeySchema:
-          -
-            AttributeName: id
+          - AttributeName: id
             KeyType: HASH
         ProvisionedThroughput:
           ReadCapacityUnits: 1

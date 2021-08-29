@@ -1,6 +1,18 @@
 import { Handler, Context, Callback } from "aws-lambda";
 import { mentorshipService } from "./services/mentorshipService";
-import { createUserService, activateUserService, getUsersService, getUserByIdService, deleteUserByIdService, updateUserByIdService } from "./services/userService";
+import {
+  addTimeSlots,
+  updateTimeSlot,
+  getTimeSlotsByUserId,
+} from "./services/timeSlots";
+import {
+  createUserService,
+  activateUserService,
+  getUsersService,
+  getUserByIdService,
+  deleteUserByIdService,
+  updateUserByIdService,
+} from "./services/userService";
 
 export const activateUser: Handler = (
   event: any,
@@ -43,3 +55,21 @@ export const mentorshipConfirmation: Handler = (
   context: Context,
   callback: Callback<any>
 ) => mentorshipService(event, context, callback);
+
+export const addTimeSlot: Handler = (
+  event: any,
+  context: Context,
+  callback: Callback<any>
+) => addTimeSlots(event, context, callback);
+
+export const getTimeSlotsByUser: Handler = (
+  event: any,
+  context: Context,
+  callback: Callback<any>
+) => getTimeSlotsByUserId(event, context, callback);
+
+export const updateSlot: Handler = (
+  event: any,
+  context: Context,
+  callback: Callback<any>
+) => updateTimeSlot(event, context, callback);
