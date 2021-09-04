@@ -68,15 +68,6 @@ functions:
           path: user/{id}
           method: put
           cors: true
-  mentorshipConfirmation:
-    handler: index.mentorshipConfirmation
-  mentorshipTest:
-    handler: index.mentorshipConfirmation
-    events:
-      - http:
-          path: mentorship/test
-          method: post
-          cors: true
   addTimeSlot:
     handler: index.addTimeSlot
     events:
@@ -98,6 +89,50 @@ functions:
           path: time-slot
           method: patch
           cors: true
+          cors:
+            origin: "*"
+            maxAge: 86400
+  mentorshipConfirmation:
+    handler: index.mentorshipConfirmation
+
+stepFunctions:
+  stateMachines:
+    mentorship:
+      name: mentorship
+      events:
+        - http:
+            path: api/mentorship
+            method: post
+            response:
+              headers:
+                Content-Type: "'application/json'"
+                X-Application-Id: "'calomentor'"
+              template:
+                application/json: |
+                  {
+                    "status": 200,
+                    "info": "OK"
+                  }
+      definition:
+        StartAt: MENTORSHIP_INITIAL
+        States:
+          MENTORSHIP_INITIAL:
+            Type: Task
+            Resource: arn:aws:states:::lambda:invoke
+            Parameters:
+              FunctionName:
+                {
+                  "Fn::Join":
+                    [
+                      ":",
+                      [
+                        "arn:aws:lambda:sa-east-1",
+                        { "Ref": "AWS::AccountId" },
+                        "function:${self:service}-${self:provider.stage}-mentorshipConfirmation",
+                      ],
+                    ],
+                }
+            End: true
 
 resources:
   Resources:

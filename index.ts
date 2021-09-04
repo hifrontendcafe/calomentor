@@ -1,5 +1,4 @@
 import { Handler, Context, Callback } from "aws-lambda";
-import { mentorshipService } from "./services/mentorshipService";
 import {
   addTimeSlots,
   updateTimeSlot,
@@ -13,6 +12,15 @@ import {
   deleteUserByIdService,
   updateUserByIdService,
 } from "./services/userService";
+import {
+  cancelMentorship,
+  createMentorship,
+  feedbackFormMentorship,
+  reminderMentorship,
+  updateRoleMentorship,
+} from "./services/mentorshipService";
+
+// User functions handlers
 
 export const activateUser: Handler = (
   event: any,
@@ -50,11 +58,39 @@ export const updateUserById: Handler = (
   callback: Callback<any>
 ) => updateUserByIdService(event, context, callback);
 
-export const mentorshipConfirmation: Handler = (
+// Mentorships functions handlers
+
+export const mentorshipCreate: Handler = (
   event: any,
   context: Context,
   callback: Callback<any>
-) => mentorshipService(event, context, callback);
+) => createMentorship(event, context, callback);
+
+export const mentorshipCancel: Handler = (
+  event: any,
+  context: Context,
+  callback: Callback<any>
+) => cancelMentorship(event, context, callback);
+
+export const mentorshipReminder: Handler = (
+  event: any,
+  context: Context,
+  callback: Callback<any>
+) => reminderMentorship(event, context, callback);
+
+export const mentorshipUpdateRole: Handler = (
+  event: any,
+  context: Context,
+  callback: Callback<any>
+) => updateRoleMentorship(event, context, callback);
+
+export const mentorshipFeedbackForm: Handler = (
+  event: any,
+  context: Context,
+  callback: Callback<any>
+) => feedbackFormMentorship(event, context, callback);
+
+// Time slots functions handlers
 
 export const addTimeSlot: Handler = (
   event: any,
