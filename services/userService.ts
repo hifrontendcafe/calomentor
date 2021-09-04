@@ -1,6 +1,7 @@
 import { Callback, Context } from "aws-lambda";
-import { TABLE_NAME_USER } from "../constants";
+import { TABLE_NAME_USER, TABLE_NAME_TIME_SLOT } from "../constants";
 import { GlobalResponse } from "../types/globalTypes";
+import { v5 as uuidv5 } from "uuid";
 import { throwResponse } from "../utils/throwResponse";
 import { createAndUpdateUserValidations } from "../utils/validations";
 
@@ -25,7 +26,7 @@ export const createUserService = (
     skills,
   } = JSON.parse(event.body);
 
-  if (!discord_id || typeof discord_id !== "string" ) {
+  if (!discord_id || typeof discord_id !== "string") {
     responseMessage = "Bad Request: discord_id is required.";
     throwResponse(callback, responseMessage, 400);
   }
@@ -214,7 +215,8 @@ export const activateUserService = (
   const { isActive } = JSON.parse(event.body);
 
   if (!isActive || typeof isActive !== "boolean") {
-    responseMessage = "Bad Request: isActive property is missing or it's not boolean.";
+    responseMessage =
+      "Bad Request: isActive property is missing or it's not boolean.";
     throwResponse(callback, responseMessage, 400);
   }
 
@@ -237,8 +239,8 @@ export const activateUserService = (
         responseMessage = `Unable to activate user. Id ${event.pathParameters.id} not found`;
         throwResponse(callback, responseMessage, 404);
       }
-      responseMessage = `Unable to activate user. Error: ${error}`,
-      throwResponse(callback, responseMessage, 500);
+      (responseMessage = `Unable to activate user. Error: ${error}`),
+        throwResponse(callback, responseMessage, 500);
     } else {
       responseMessage = `User with id ${event.pathParameters.id} activated succesfully.`;
       throwResponse(callback, responseMessage, 200, data.Attributes);
