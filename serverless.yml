@@ -1,8 +1,15 @@
 service: server
 frameworkVersion: "2"
-
+useDotenv: true
 provider:
   name: aws
+  environment:
+    CALOMENTOR_MAIL: ${file(./config.dev.json):CALOMENTOR_MAIL}
+    CALOMENTOR_MAIL_CLIENT_ID: ${file(./config.dev.json):CALOMENTOR_MAIL_CLIENT_ID}
+    CALOMENTOR_MAIL_CLIENT_SECRET: ${file(./config.dev.json):CALOMENTOR_MAIL_CLIENT_SECRET}
+    CALOMENTOR_MAIL_REFRESH_TOKEN: ${file(./config.dev.json):CALOMENTOR_MAIL_REFRESH_TOKEN}
+    CALOMENTOR_MAIL_ACCESS_TOKEN: ${file(./config.dev.json):CALOMENTOR_MAIL_ACCESS_TOKEN}
+    BASE_URL: ${file(./config.dev.json):BASE_URL}
   runtime: nodejs14.x
   lambdaHashingVersion: 20201221
   region: sa-east-1
@@ -68,15 +75,6 @@ functions:
           path: user/{id}
           method: put
           cors: true
-  mentorshipConfirmation:
-    handler: index.mentorshipConfirmation
-  mentorshipTest:
-    handler: index.mentorshipConfirmation
-    events:
-      - http:
-          path: mentorship/test
-          method: post
-          cors: true
   addTimeSlot:
     handler: index.addTimeSlot
     events:
@@ -98,6 +96,67 @@ functions:
           path: time-slot
           method: patch
           cors: true
+  mentorshipCreate:
+    handler: index.mentorshipCreate
+  mentorshipReminder:
+    handler: index.mentorshipReminder
+
+stepFunctions:
+  stateMachines:
+    createMentorship:
+      role: arn:aws:iam::822886109108:role/service-role/StepFunctions-mentorship-role-88e1969f
+      name: createMentorship
+      events:
+        - http:
+            path: sf/mentorship
+            method: post
+            response:
+              headers:
+                Content-Type: "'application/json'"
+                X-Application-Id: "'calomentor'"
+              template:
+                application/json: |
+                  {
+                    "status": 200,
+                    "info": "OK"
+                  }
+      definition:
+        StartAt: MENTORSHIP_INITIAL
+        States:
+          MENTORSHIP_INITIAL:
+            Type: Task
+            Resource:
+              {
+                "Fn::Join":
+                  [
+                    ":",
+                    [
+                      "arn:aws:lambda:sa-east-1",
+                      { "Ref": "AWS::AccountId" },
+                      "function:${self:service}-${self:provider.stage}-mentorshipCreate",
+                    ],
+                  ],
+              }
+            Next: MENTORSHIP_REMINDER_WAIT
+          MENTORSHIP_REMINDER_WAIT:
+            Type: Wait
+            TimestampPath: "$.responseData.dateToRemind"
+            Next: MENTORSHIP_REMINDER
+          MENTORSHIP_REMINDER:
+            Type: Task
+            Resource:
+              {
+                "Fn::Join":
+                  [
+                    ":",
+                    [
+                      "arn:aws:lambda:sa-east-1",
+                      { "Ref": "AWS::AccountId" },
+                      "function:${self:service}-${self:provider.stage}-mentorshipReminder",
+                    ],
+                  ],
+              }
+            End: true
 
 resources:
   Resources:

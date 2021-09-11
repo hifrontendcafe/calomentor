@@ -113,3 +113,49 @@ fetch("http://localhost:3000/dev/time-slot", {
   }),
 }).then("// Manejo de Respuesta");
 ```
+
+### POST "{{URL}}/sf/mentorship"
+
+Descripción: Crea la mentoria y dispara los eventos de confirmacion y recordatorios 2 hs antes de la mentoria
+
+**Body**
+
+```bash
+{
+    mentor_id: string, //id discord
+    mentee_id: string, //id discord
+    mentee_name: string,
+    mentee_username_discord: string,
+    mentee_email: string,
+    info: string, // opcional
+    time_slot_id: string,
+    time_slot_time: hora en utc 0
+}
+```
+
+**Respuesta:**
+
+```bash
+{
+  message: string,
+  data: objeto con el slot actualizado
+}
+```
+
+**Ejemplo:**
+
+```js
+fetch("http://localhost:3000/dev/sf/mentorship", {
+  method: "POST",
+  body: JSON.stringify({
+    mentor_id: "706602792005140532",
+    mentee_id: "123123",
+    mentee_name: "Fran",
+    mentee_username_discord: "Fran",
+    mentee_email: "fran.mper@gmail.com",
+    info: "",
+    time_slot_id: "7f21711d-8423-4053-9f43-c3d1071429c6",
+    time_slot_time: "21:05",
+  }),
+}).then("// Manejo de Respuesta");
+```
