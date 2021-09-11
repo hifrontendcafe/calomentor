@@ -18,3 +18,7 @@ export const throwResponse = (callback, message, statusCode, data = null) => {
   };
   callback(null, response);
 };
+
+export const throwMentorshipResponse = (callback, response) => {
+  callback(null, response);
+};
