@@ -1,7 +1,5 @@
 import { Callback, Context } from "aws-lambda";
-import { TABLE_NAME_USER, TABLE_NAME_TIME_SLOT } from "../constants";
-import { GlobalResponse } from "../types/globalTypes";
-import { v5 as uuidv5 } from "uuid";
+import { TABLE_NAME_USER } from "../constants";
 import { throwResponse } from "../utils/throwResponse";
 import { createAndUpdateUserValidations } from "../utils/validations";
 
@@ -23,16 +21,15 @@ export const createUserService = (
     url_photo,
     role,
     links,
-    skills,
+    skills
   } = JSON.parse(event.body);
 
   if (!discord_id || typeof discord_id !== "string") {
     responseMessage = "Bad Request: discord_id is required.";
-    throwResponse(callback, responseMessage, 400);
+    return throwResponse(callback, responseMessage, 400);
   }
 
-  createAndUpdateUserValidations(
-    callback,
+  const validationErrorMessage = createAndUpdateUserValidations(
     discord_username,
     full_name,
     email,
@@ -41,6 +38,10 @@ export const createUserService = (
     links,
     skills
   );
+
+  if (validationErrorMessage) {
+    return throwResponse(callback, validationErrorMessage, 400);
+  }
 
   const user = {
     id: discord_id,
@@ -91,7 +92,7 @@ export const getUsersService = (
 
   dynamoDb.scan(params, (err, data) => {
     if (err) {
-      const responseMessage = `Unable to get all Users. Error: ${err}`;
+      responseMessage = `Unable to get all Users. Error: ${err}`;
       throwResponse(callback, responseMessage, 500);
     } else {
       throwResponse(callback, "", 200, data.Items);
@@ -160,8 +161,7 @@ export const updateUserByIdService = (
   const { discord_username, full_name, email, url_photo, role, links, skills } =
     JSON.parse(event.body);
 
-  createAndUpdateUserValidations(
-    callback,
+  const validationErrorMessage = createAndUpdateUserValidations(
     discord_username,
     full_name,
     email,
@@ -170,6 +170,10 @@ export const updateUserByIdService = (
     links,
     skills
   );
+
+  if (validationErrorMessage) {
+    return throwResponse(callback, validationErrorMessage, 400);
+  }
 
   const params = {
     TableName: TABLE_NAME_USER,
@@ -214,10 +218,10 @@ export const activateUserService = (
 ): void => {
   const { isActive } = JSON.parse(event.body);
 
-  if (!isActive || typeof isActive !== "boolean") {
+  if (typeof isActive !== "boolean") {
     responseMessage =
       "Bad Request: isActive property is missing or it's not boolean.";
-    throwResponse(callback, responseMessage, 400);
+    return throwResponse(callback, responseMessage, 400);
   }
 
   const params = {
