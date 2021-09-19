@@ -1,6 +1,7 @@
 export const createAndUpdateUserValidations = (
   discord_username,
   full_name,
+  description,
   email,
   url_photo,
   role,
@@ -16,6 +17,10 @@ export const createAndUpdateUserValidations = (
 
   if (!full_name || typeof full_name !== "string") {
     return errorMessage = "Bad Request: full_name is required or it's not a string.";
+  }
+
+  if (!description || typeof description !== "string") {
+    return description = "Bad Request: description is required or it's not a string.";
   }
 
   if (!email || typeof email !== "string") {

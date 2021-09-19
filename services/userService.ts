@@ -17,6 +17,7 @@ export const createUserService = (
     discord_id,
     discord_username,
     full_name,
+    description,
     email,
     url_photo,
     role,
@@ -32,6 +33,7 @@ export const createUserService = (
   const validationErrorMessage = createAndUpdateUserValidations(
     discord_username,
     full_name,
+    description,
     email,
     url_photo,
     role,
@@ -47,6 +49,7 @@ export const createUserService = (
     id: discord_id,
     discord_username,
     full_name,
+    description,
     email,
     url_photo,
     role,
@@ -87,7 +90,7 @@ export const getUsersService = (
       "#role": "role",
     },
     ProjectionExpression:
-      "id, discord_username, full_name, email, url_photo, #role, links, skills, isActive",
+      "id, discord_username, full_name, description, email, url_photo, #role, links, skills, isActive",
   };
 
   dynamoDb.scan(params, (err, data) => {
@@ -158,12 +161,13 @@ export const updateUserByIdService = (
   context: Context,
   callback: Callback<any>
 ): void => {
-  const { discord_username, full_name, email, url_photo, role, links, skills } =
+  const { discord_username, full_name, description, email, url_photo, role, links, skills } =
     JSON.parse(event.body);
 
   const validationErrorMessage = createAndUpdateUserValidations(
     discord_username,
     full_name,
+    description,
     email,
     url_photo,
     role,
@@ -184,6 +188,7 @@ export const updateUserByIdService = (
     ExpressionAttributeValues: {
       ":discord_username": discord_username,
       ":full_name": full_name,
+      ":description": description,
       ":email": email,
       ":role": role,
       ":url_photo": url_photo,
@@ -192,7 +197,7 @@ export const updateUserByIdService = (
     },
     ConditionExpression: "attribute_exists(id)",
     UpdateExpression:
-      "SET discord_username = :discord_username, full_name = :full_name, email = :email, #role = :role, url_photo = :url_photo, skills = :skills, links = :links",
+      "SET discord_username = :discord_username, full_name = :full_name, description = :description, email = :email, #role = :role, url_photo = :url_photo, skills = :skills, links = :links",
     ReturnValues: "ALL_NEW",
   };
 
