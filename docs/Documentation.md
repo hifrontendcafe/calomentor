@@ -10,7 +10,7 @@ Descripción: Agrega timeslots para un día y mentor específico.
 {
     user_id: ID del mentor (Obligatorio / string),
     slot_date: Fecha del slot (el mes esta basado en las posiciones del array empezando con enero en 00) (Obligatorio / string),
-    slots: Slots de tiempo con hora de inicio de cada slot (Obligatorio / array de objetos / keys "time: string" y "is_occupied: boolean")
+    slot_time: Horario del slot (Obligatorio / string),
 }
 ```
 
@@ -32,23 +32,40 @@ Nota: se validará que para este usuario y esa fecha no exista ningun slot agreg
 fetch("http://localhost:3000/dev/time-slot", {
   method: "POST",
   body: JSON.stringify({
-    user_id: "3",
-    slot_date: "14/11/2021",
-    slots: [
-      {
-        time: "12:00",
-        is_occupied: false,
-      },
-      {
-        time: "13:00",
-        is_occupied: false,
-      },
-    ],
+    user_id: "364256538056982528",
+    slot_date: "31/11/2021",
+    slot_time: "16:00",
   }),
 }).then("// Manejo de Respuesta");
 ```
 
-### GET "{{URL}}/time-slot/{{user_id}}"
+### GET "{{URL}}/time-slot/{{id}}"
+
+Descripción: Busca el slot por id
+
+**Respuesta:**
+
+```bash
+{
+  message: string,
+  data: array de los slots encontrados
+}
+```
+
+Nota: Recordar que en el mes se utiliza enero como 0 y hasta el 11 que sería diciembre.
+
+**Ejemplo:**
+
+```js
+fetch(
+  "http://localhost:3000/dev/time-slot/8e40ecda-9e82-4843-922a-a4a71302b630",
+  {
+    method: "GET",
+  }
+).then("// Manejo de Respuesta");
+```
+
+### GET "{{URL}}/time-slot/user/{{user_id}}"
 
 Descripción: Busca todos los slots para un usuario y fecha específica
 
@@ -72,9 +89,12 @@ Nota: Recordar que en el mes se utiliza enero como 0 y hasta el 11 que sería di
 **Ejemplo:**
 
 ```js
-fetch("http://localhost:3000/dev/time-slot/2?slot_date=14/11/2021", {
-  method: "GET",
-}).then("// Manejo de Respuesta");
+fetch(
+  "http://localhost:3000/dev/time-slot/user/8e40ecda-9e82-4843-922a-a4a71302b630?slot_date=14/11/2021",
+  {
+    method: "GET",
+  }
+).then("// Manejo de Respuesta");
 ```
 
 ### PATCH "{{URL}}/time-slot"
@@ -86,7 +106,7 @@ Descripción: Actualiza el slot con un id específico
 ```bash
 {
   id: string,
-  slot: objeto con el slot a actualizar
+  is_occupied: bool
 }
 ```
 
@@ -106,12 +126,32 @@ fetch("http://localhost:3000/dev/time-slot", {
   method: "PATCH",
   body: JSON.stringify({
     id: "52a26576-d102-4c2b-a4ed-d9a5ac6c423e",
-    slot: {
-      time: "12:00",
-      is_occupied: true,
-    },
+    is_occupied: true,
   }),
 }).then("// Manejo de Respuesta");
+```
+
+### DELETE "{{URL}}/time-slot/{{slot_id}}"
+
+Descripción: elimina el slot con un id específico
+
+**Respuesta:**
+
+```bash
+{
+  message: string,
+}
+```
+
+**Ejemplo:**
+
+```js
+fetch(
+  "http://localhost:3000/dev/time-slot/52a26576-d102-4c2b-a4ed-d9a5ac6c423e",
+  {
+    method: "DELETE",
+  }
+).then("// Manejo de Respuesta");
 ```
 
 ### POST "{{URL}}/sf/mentorship"

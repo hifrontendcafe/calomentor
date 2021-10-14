@@ -12,15 +12,10 @@ export const addTimeSlots = (
   context: Context,
   callback: Callback<any>
 ): void => {
-  const { user_id, slot_date, slots } = JSON.parse(event.body);
+  const { user_id, slot_date, slot_time } = JSON.parse(event.body);
 
-  if (!user_id && !slot_date && !slots) {
+  if (!user_id && !slot_date && !slot_time) {
     const errorMessage = `Bad Request: user_id, date y slots are required`;
-    return throwResponse(callback, errorMessage, 400);
-  }
-
-  if (slots.length < 1) {
-    const errorMessage = `Bad Request: You must add at least one element in slots.`;
     return throwResponse(callback, errorMessage, 400);
   }
 
@@ -28,7 +23,9 @@ export const addTimeSlots = (
     id: uuidv4(),
     user_id,
     slot_date,
-    slots,
+    slot_time,
+    is_occupied: false,
+    is_cancelled: false,
   };
 
   const timeSlotInfo = {
@@ -36,34 +33,12 @@ export const addTimeSlots = (
     Item: timeSlot,
   };
 
-  let slot;
-
-  const params = {
-    TableName: TABLE_NAME_TIME_SLOT,
-    FilterExpression: "slot_date = :slot_date AND user_id = :user_id",
-    ExpressionAttributeValues: {
-      ":slot_date": timeSlot.slot_date,
-      ":user_id": timeSlot.user_id,
-    },
-  };
-  dynamoDb.scan(params, (error, data) => {
-    if (!error) {
-      slot = data.Items;
+  dynamoDb.put(timeSlotInfo, (err, result) => {
+    if (err) {
+      return throwResponse(callback, "Unable to add a Time Slot", 400);
+    } else {
+      return throwResponse(callback, "Time Slot added", 200);
     }
-    if (slot.length > 0) {
-      return throwResponse(
-        callback,
-        `Already have a time slot for day ${timeSlot.slot_date}`,
-        400
-      );
-    }
-    dynamoDb.put(timeSlotInfo, (err, result) => {
-      if (err) {
-        return throwResponse(callback, "Unable to add a Time Slot", 400);
-      } else {
-        return throwResponse(callback, "Time Slot added", 200);
-      }
-    });
   });
 };
 
@@ -72,6 +47,7 @@ export const getTimeSlotsByUserId = (
   context: Context,
   callback: Callback<any>
 ): void => {
+  console.log(event.pathParameters);
   const paramsWithoutDate = {
     TableName: TABLE_NAME_TIME_SLOT,
     FilterExpression: "user_id = :user_id",
@@ -87,16 +63,45 @@ export const getTimeSlotsByUserId = (
       ":user_id": event.pathParameters.id,
     },
   };
+  console.log(event.queryStringParameters?.slot_date);
   dynamoDb.scan(
     event.queryStringParameters?.slot_date ? paramsWithDate : paramsWithoutDate,
     (error, data) => {
       if (error) {
+        console.log(error);
         return throwResponse(callback, "Unable to get Time Slots", 400);
-      } else {
-        return throwResponse(callback, "Success", 200, data.Items);
+      } else if (data.Items.length < 1) {
+        return throwResponse(callback, "Unable to get Time Slots", 400);
       }
+      return throwResponse(callback, "Success", 200, data.Items);
     }
   );
+};
+
+export const getTimeSlotsById = (
+  event: any,
+  context: Context,
+  callback: Callback<any>
+): void => {
+  let responseMessage = "";
+  const params = {
+    TableName: TABLE_NAME_TIME_SLOT,
+    Key: { id: event.pathParameters.id },
+  };
+
+  dynamoDb.get(params, (err, data) => {
+    if (err) {
+      responseMessage = `Unable to get time slot by id. Error: ${err}`;
+      throwResponse(callback, responseMessage, 500);
+    } else {
+      if (Object.keys(data).length === 0) {
+        responseMessage = `Time Slot with id ${event.pathParameters.id} not found`;
+        throwResponse(callback, responseMessage, 404);
+      } else {
+        throwResponse(callback, "", 200, data.Item);
+      }
+    }
+  });
 };
 
 export const updateTimeSlot = (
@@ -104,70 +109,75 @@ export const updateTimeSlot = (
   context: Context,
   callback: Callback<any>
 ): void => {
-  const { id, slot } = JSON.parse(event.body);
+  const { id, is_occupied } = JSON.parse(event.body);
 
-  if (!id && !slot) {
+  if (!id) {
     const errorMessage = `Bad Request: id y slots are required`;
     return throwResponse(callback, errorMessage, 400);
   }
-
-  let slots;
 
   const params = {
     TableName: TABLE_NAME_TIME_SLOT,
     Key: {
       id: id,
     },
+    ExpressionAttributeValues: {
+      ":is_occupied": is_occupied,
+    },
+    UpdateExpression: "SET is_occupied = :is_occupied",
+    ReturnValues: "ALL_NEW",
   };
 
-  dynamoDb.scan(params, (err, data) => {
-    if (!err) {
-      slots = data.Items;
-    }
-
-    if (!slots) {
+  dynamoDb.update(params, (err, result) => {
+    if (err) {
       return throwResponse(
         callback,
-        `Was an error trying to update the slot ${slots[0].slot_date} - ${slot.time}`,
+        `Was an error trying to update the slot`,
         400
       );
+    } else {
+      console.log(result.Attributes);
+      return throwResponse(
+        callback,
+        `The slot was succesfully updated`,
+        200,
+        result.Attributes
+      );
     }
+  });
+};
 
-    slots[0].slots = slots[0].slots.map((s) => {
-      if (s.time === slot.time) {
-        return slot;
-      }
-      return s;
-    });
+export const deleteTimeSlot = (
+  event: any,
+  context: Context,
+  callback: Callback<any>
+): void => {
+  if (!event.pathParameters.id) {
+    const errorMessage = `Bad Request: id y slots are required`;
+    return throwResponse(callback, errorMessage, 400);
+  }
 
-    const params = {
-      TableName: TABLE_NAME_TIME_SLOT,
-      Key: {
-        id: id,
-      },
-      ExpressionAttributeValues: {
-        ":slots": slots[0].slots,
-      },
-      UpdateExpression: "SET slots = :slots",
-      ReturnValues: "ALL_NEW",
-    };
+  const params = {
+    TableName: TABLE_NAME_TIME_SLOT,
+    Key: {
+      id: event.pathParameters.id,
+    },
+  };
 
-    dynamoDb.update(params, (err, result) => {
-      if (err) {
-        return throwResponse(
-          callback,
-          `Was an error trying to update the slot ${slots[0].slot_date} - ${slot.time}`,
-          400
-        );
-      } else {
-        console.log(result.Attributes);
-        return throwResponse(
-          callback,
-          `The slot ${slots[0].slot_date} - ${slot.time} was succesfully updated`,
-          200,
-          result.Attributes
-        );
-      }
-    });
+  dynamoDb.delete(params, (err, result) => {
+    if (err) {
+      return throwResponse(
+        callback,
+        `Was an error trying to delete the slot`,
+        400
+      );
+    } else {
+      return throwResponse(
+        callback,
+        `The slot was succesfully deleted`,
+        200,
+        result.Attributes
+      );
+    }
   });
 };

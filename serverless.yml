@@ -86,6 +86,13 @@ functions:
     handler: index.getTimeSlotsByUser
     events:
       - http:
+          path: time-slot/user/{id}
+          method: get
+          cors: true
+  getTimeSlotsById:
+    handler: index.getTimeSlot
+    events:
+      - http:
           path: time-slot/{id}
           method: get
           cors: true
@@ -95,6 +102,13 @@ functions:
       - http:
           path: time-slot
           method: patch
+          cors: true
+  deleteTimeSlot:
+    handler: index.deleteSlot
+    events:
+      - http:
+          path: time-slot/{id}
+          method: delete
           cors: true
   mentorshipCreate:
     handler: index.mentorshipCreate

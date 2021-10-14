@@ -3,6 +3,8 @@ import {
   addTimeSlots,
   updateTimeSlot,
   getTimeSlotsByUserId,
+  deleteTimeSlot,
+  getTimeSlotsById,
 } from "./services/timeSlots";
 import {
   createUserService,
@@ -104,8 +106,20 @@ export const getTimeSlotsByUser: Handler = (
   callback: Callback<any>
 ) => getTimeSlotsByUserId(event, context, callback);
 
+export const getTimeSlot: Handler = (
+  event: any,
+  context: Context,
+  callback: Callback<any>
+) => getTimeSlotsById(event, context, callback);
+
 export const updateSlot: Handler = (
   event: any,
   context: Context,
   callback: Callback<any>
 ) => updateTimeSlot(event, context, callback);
+
+export const deleteSlot: Handler = (
+  event: any,
+  context: Context,
+  callback: Callback<any>
+) => deleteTimeSlot(event, context, callback);
