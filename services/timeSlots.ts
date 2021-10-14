@@ -47,7 +47,6 @@ export const getTimeSlotsByUserId = (
   context: Context,
   callback: Callback<any>
 ): void => {
-  console.log(event.pathParameters);
   const paramsWithoutDate = {
     TableName: TABLE_NAME_TIME_SLOT,
     FilterExpression: "user_id = :user_id",
@@ -63,12 +62,10 @@ export const getTimeSlotsByUserId = (
       ":user_id": event.pathParameters.id,
     },
   };
-  console.log(event.queryStringParameters?.slot_date);
   dynamoDb.scan(
     event.queryStringParameters?.slot_date ? paramsWithDate : paramsWithoutDate,
     (error, data) => {
       if (error) {
-        console.log(error);
         return throwResponse(callback, "Unable to get Time Slots", 400);
       } else if (data.Items.length < 1) {
         return throwResponse(callback, "Unable to get Time Slots", 400);
@@ -136,7 +133,6 @@ export const updateTimeSlot = (
         400
       );
     } else {
-      console.log(result.Attributes);
       return throwResponse(
         callback,
         `The slot was succesfully updated`,
