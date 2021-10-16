@@ -10,10 +10,11 @@ import {
 } from "../constants";
 import { v4 as uuidv4 } from "uuid";
 import { sendEmail } from "../utils/sendEmail";
+import jwt from "jsonwebtoken";
 
 const axios = require("axios");
 
-const AWS = require("aws-sdk"); // eslint-disable-line import/no-extraneous-dependencies
+const AWS = require("aws-sdk");
 
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
@@ -50,6 +51,8 @@ export const createMentorship = (
   const mentorship = {
     id: uuidv4(),
     mentor_id,
+    mentor_mail: "",
+    mentor_name: "",
     mentee_id,
     mentee_name,
     mentee_username_discord,
@@ -96,10 +99,7 @@ export const createMentorship = (
 
       await axios.patch(`${process.env.BASE_URL}/time-slot`, {
         id: mentorship.time_slot_id,
-        slot: {
-          time: mentorship.time_slot_time,
-          is_occupied: true,
-        },
+        is_occupied: true,
       });
 
       dynamoDb.get(paramsUserId, (err, data) => {
@@ -117,6 +117,8 @@ export const createMentorship = (
               responseCode,
             });
           } else {
+            mentorship.mentor_mail = data.Item?.email;
+            mentorship.mentor_name = data.Item?.full_name;
             const params = {
               TableName: TABLE_NAME_MENTORSHIP,
               Item: mentorship,
@@ -129,20 +131,29 @@ export const createMentorship = (
                   responseCode,
                 });
               } else {
+                const token = jwt.sign(
+                  {
+                    menteeEmail: mentorship.mentee_email,
+                    mentorshipId: data.Item?.id,
+                  },
+                  process.env.JWT_KEY,
+                  {
+                    expiresIn: "30d",
+                  }
+                );
                 const responseCode = "100";
-                const htmlMentee = `<div><span>Hola ${mentee_name} Confirmación de mentoria con ${data.Item?.full_name}</span></div>`;
-                const sendMentee = await sendEmail(
+                const htmlMentee = `<div><span>Hola ${mentee_name} Confirmación de mentoria con ${data.Item?.full_name}, token para cancelar la mentoria ${token}</span></div>`;
+                await sendEmail(
                   mentorship.mentee_email,
                   `HOLA ${mentee_name} `,
                   htmlMentee
                 );
                 const htmlMentor = `<div><span>Hola ${data.Item?.full_name} Confirmación de mentoria con ${mentee_name}</span></div>`;
-                const sendMentor = await sendEmail(
+                await sendEmail(
                   data.Item?.email,
                   `HOLA ${data.Item?.full_name} `,
                   htmlMentor
                 );
-                console.log("MENT", resMentorship);
                 return throwMentorshipResponse(callback, {
                   responseMessage: RESPONSE_CODES[responseCode],
                   responseCode,
@@ -156,6 +167,7 @@ export const createMentorship = (
                       menteeName: mentorship.mentee_name,
                     },
                     dateToRemind,
+                    token,
                   },
                 });
               }
@@ -180,9 +192,60 @@ export const cancelMentorship = (
   context: Context,
   callback: Callback<any>
 ): void => {
-  //TODO: Cancel mentorship
-  //TODO: Send cancel emails to mentor and mentee
+  const { token } = event.pathParameters;
+  const jwtData: any = jwt.verify(token, process.env.JWT_KEY);
+
+  const paramsGet = {
+    TableName: TABLE_NAME_MENTORSHIP,
+    Key: { id: jwtData.mentorshipId },
+  };
+
+  dynamoDb.get(paramsGet, async (err, data) => {
+    if (err) {
+      const responseCode = "-104";
+      return throwMentorshipResponse(callback, {
+        responseMessage: RESPONSE_CODES[responseCode],
+        responseCode,
+      });
+    }
+
+    await axios.patch(`${process.env.BASE_URL}/time-slot`, {
+      id: data.Item?.time_slot_id,
+      is_occupied: false,
+    });
+
+    const params = {
+      TableName: TABLE_NAME_MENTORSHIP,
+      Key: { id: jwtData.mentorshipId },
+      ExpressionAttributeNames: {
+        "#status": "status",
+      },
+      ExpressionAttributeValues: {
+        ":status": STATUS.CANCEL,
+      },
+      UpdateExpression: "SET status = :status",
+      ReturnValues: "ALL_NEW",
+    };
+
+    dynamoDb.update(params, async (error, resMentorship) => {
+      if (error) {
+        const responseCode = "-105";
+        return throwMentorshipResponse(callback, {
+          responseMessage: RESPONSE_CODES[responseCode],
+          responseCode,
+        });
+      }
+      const { mentee_name, mentee_email, mentor_name, mentor_email } =
+        resMentorship.Item;
+
+      const htmlMentee = `<div><span>Hola ${mentee_name} Confirmación de mentoria con ${mentor_name}</span></div>`;
+      await sendEmail(mentee_email, `HOLA ${mentee_name} `, htmlMentee);
+      const htmlMentor = `<div><span>Hola ${mentor_name} Confirmación de mentoria con ${mentee_name}</span></div>`;
+      await sendEmail(mentor_email, `HOLA ${mentor_name} `, htmlMentor);
+    });
+  });
   //TODO: Send cancel discord dm to the mentor and mentee
+  //TODO: Add design to mails
 };
 
 export const reminderMentorship = async (
