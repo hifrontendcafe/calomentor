@@ -11,6 +11,9 @@ import {
 import { v4 as uuidv4 } from "uuid";
 import { sendEmail } from "../utils/sendEmail";
 import jwt from "jsonwebtoken";
+import { confirmationMail } from "../mails/confirmation";
+import { cancelMail } from "../mails/cancel";
+import { reminderMail } from "../mails/reminder";
 
 const axios = require("axios");
 
@@ -135,6 +138,7 @@ export const createMentorship = (
                   {
                     menteeEmail: mentorship.mentee_email,
                     mentorshipId: data.Item?.id,
+                    date: dateToRemind,
                   },
                   process.env.JWT_KEY,
                   {
@@ -142,13 +146,27 @@ export const createMentorship = (
                   }
                 );
                 const responseCode = "100";
-                const htmlMentee = `<div><span>Hola ${mentee_name} Confirmación de mentoria con ${data.Item?.full_name}, token para cancelar la mentoria ${token}</span></div>`;
+                const htmlMentee = confirmationMail({
+                  mentorName: data.Item?.full_name,
+                  menteeName: mentee_name,
+                  date: dateToRemind.toLocaleDateString("es-AR"),
+                  time: dateToRemind.toLocaleTimeString("es-AR"),
+                  cancelLink: `${process.env.BASE_FRONT_URL}/cancel-mentorship?=${token}`,
+                  forMentor: false,
+                });
                 await sendEmail(
                   mentorship.mentee_email,
                   `HOLA ${mentee_name} `,
                   htmlMentee
                 );
-                const htmlMentor = `<div><span>Hola ${data.Item?.full_name} Confirmación de mentoria con ${mentee_name}</span></div>`;
+                const htmlMentor = confirmationMail({
+                  mentorName: data.Item?.full_name,
+                  menteeName: mentee_name,
+                  date: dateToRemind.toLocaleDateString("es-AR"),
+                  time: dateToRemind.toLocaleTimeString("es-AR"),
+                  cancelLink: `${process.env.BASE_FRONT_URL}/cancel-mentorship?=${token}`,
+                  forMentor: true,
+                });
                 await sendEmail(
                   data.Item?.email,
                   `HOLA ${data.Item?.full_name} `,
@@ -184,7 +202,6 @@ export const createMentorship = (
     }
   });
   //TODO: Send confirmation discord dm to the mentor and mentee
-  //TODO: Add design to mails
 };
 
 export const cancelMentorship = (
@@ -238,14 +255,27 @@ export const cancelMentorship = (
       const { mentee_name, mentee_email, mentor_name, mentor_email } =
         resMentorship.Item;
 
-      const htmlMentee = `<div><span>Hola ${mentee_name} Confirmación de mentoria con ${mentor_name}</span></div>`;
+      const dateToRemind = new Date(jwtData.date);
+
+      const htmlMentee = cancelMail({
+        mentorName: mentor_name,
+        menteeName: mentee_name,
+        date: dateToRemind.toLocaleDateString("es-AR"),
+        time: dateToRemind.toLocaleTimeString("es-AR"),
+        forMentor: false,
+      });
       await sendEmail(mentee_email, `HOLA ${mentee_name} `, htmlMentee);
-      const htmlMentor = `<div><span>Hola ${mentor_name} Confirmación de mentoria con ${mentee_name}</span></div>`;
+      const htmlMentor = cancelMail({
+        mentorName: mentor_name,
+        menteeName: mentee_name,
+        date: dateToRemind.toLocaleDateString("es-AR"),
+        time: dateToRemind.toLocaleTimeString("es-AR"),
+        forMentor: true,
+      });
       await sendEmail(mentor_email, `HOLA ${mentor_name} `, htmlMentor);
     });
   });
   //TODO: Send cancel discord dm to the mentor and mentee
-  //TODO: Add design to mails
 };
 
 export const reminderMentorship = async (
@@ -256,15 +286,33 @@ export const reminderMentorship = async (
   const {
     responseData: {
       mentorship: { mentorEmail, menteeEmail, mentorName, menteeName },
+      token,
+      dateToRemind,
     },
   } = event;
-  const htmlMentee = `<div><span>Hola ${menteeName} Recordatorio de mentoria con ${mentorName}</span></div>`;
+  const htmlMentee = reminderMail({
+    mentorName,
+    menteeName,
+    date: dateToRemind.toLocaleDateString("es-AR"),
+    time: dateToRemind.toLocaleTimeString("es-AR"),
+    forMentor: false,
+    cancelLink: `${process.env.BASE_FRONT_URL}/cancel-mentorship?=${token}`,
+    confirmationLink: `${process.env.BASE_FRONT_URL}/confirmation-mentorship?=${token}`,
+  });
   const sendMentee = await sendEmail(
     menteeEmail,
     `HOLA ${menteeName} `,
     htmlMentee
   );
-  const htmlMentor = `<div><span>Hola ${mentorName} Recordatorio de mentoria con ${menteeName}</<span></div>`;
+  const htmlMentor = reminderMail({
+    mentorName,
+    menteeName,
+    date: dateToRemind.toLocaleDateString("es-AR"),
+    time: dateToRemind.toLocaleTimeString("es-AR"),
+    forMentor: true,
+    cancelLink: `${process.env.BASE_FRONT_URL}/cancel-mentorship?=${token}`,
+    confirmationLink: `${process.env.BASE_FRONT_URL}/confirmation-mentorship?=${token}`,
+  });
   const sendMentor = await sendEmail(
     mentorEmail,
     `HOLA ${mentorName} `,
@@ -279,7 +327,6 @@ export const reminderMentorship = async (
     }),
   });
   //TODO: Send reminder discord dm to the mentor and mentee
-  //TODO: Add design to mails
 };
 
 export const updateRoleMentorship = (
