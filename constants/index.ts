@@ -14,5 +14,7 @@ export const RESPONSE_CODES = {
   "-101": "Unable to get the mentor.",
   "-102": "Unable to create the mentorship.",
   "-103": "Unable to get the time slot.",
+  "-104": "Unable to get the mentorship.",
+  "-105": "Unable to update the mentorship.",
   "100": "Succesfully mentorship created.",
 };
