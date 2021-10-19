@@ -129,7 +129,7 @@ export const updateTimeSlot = (
     if (err) {
       return throwResponse(
         callback,
-        `Was an error trying to update the slot`,
+        `There Was an error trying to update the slot`,
         400
       );
     } else {
@@ -165,7 +165,7 @@ export const deleteTimeSlot = (
     if (err || !result.Attributes) {
       return throwResponse(
         callback,
-        `Was an error trying to delete the slot or the slot doesn't exist`,
+        `There Was an error trying to delete the slot or the slot doesn't exist`,
         400
       );
     } else {
