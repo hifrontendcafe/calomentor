@@ -158,13 +158,14 @@ export const deleteTimeSlot = (
     Key: {
       id: event.pathParameters.id,
     },
+    ReturnValues: "ALL_OLD",
   };
 
   dynamoDb.delete(params, (err, result) => {
-    if (err) {
+    if (err || !result.Attributes) {
       return throwResponse(
         callback,
-        `Was an error trying to delete the slot`,
+        `Was an error trying to delete the slot or the slot doesn't exist`,
         400
       );
     } else {
