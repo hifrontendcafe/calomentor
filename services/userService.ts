@@ -40,6 +40,7 @@ export const createUserService = (
     links,
     skills,
     isActive: false,
+    timezone: 25,
   };
 
   const params = {
