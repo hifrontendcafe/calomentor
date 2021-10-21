@@ -1,7 +1,6 @@
 import { Callback, Context } from "aws-lambda";
 import { TABLE_NAME_USER } from "../constants";
 import { throwResponse } from "../utils/throwResponse";
-import { createAndUpdateUserValidations } from "../utils/validations";
 
 const AWS = require("aws-sdk"); // eslint-disable-line import/no-extraneous-dependencies
 
@@ -17,39 +16,24 @@ export const createUserService = (
     discord_id,
     discord_username,
     full_name,
-    description,
+    about_me,
     email,
     url_photo,
     role,
     links,
-    skills
+    skills,
   } = JSON.parse(event.body);
 
   if (!discord_id || typeof discord_id !== "string") {
-    responseMessage = "Bad Request: discord_id is required.";
+    responseMessage = "Bad Request: discord_id is required or is not a string.";
     return throwResponse(callback, responseMessage, 400);
-  }
-
-  const validationErrorMessage = createAndUpdateUserValidations(
-    discord_username,
-    full_name,
-    description,
-    email,
-    url_photo,
-    role,
-    links,
-    skills
-  );
-
-  if (validationErrorMessage) {
-    return throwResponse(callback, validationErrorMessage, 400);
   }
 
   const user = {
     id: discord_id,
     discord_username,
     full_name,
-    description,
+    about_me,
     email,
     url_photo,
     role,
@@ -90,7 +74,7 @@ export const getUsersService = (
       "#role": "role",
     },
     ProjectionExpression:
-      "id, discord_username, full_name, description, email, url_photo, #role, links, skills, isActive",
+      "id, discord_username, full_name, about_me, email, url_photo, #role, links, skills, isActive",
   };
 
   dynamoDb.scan(params, (err, data) => {
@@ -161,44 +145,50 @@ export const updateUserByIdService = (
   context: Context,
   callback: Callback<any>
 ): void => {
-  const { discord_username, full_name, description, email, url_photo, role, links, skills } =
-    JSON.parse(event.body);
+  const data = JSON.parse(event.body);
 
-  const validationErrorMessage = createAndUpdateUserValidations(
-    discord_username,
-    full_name,
-    description,
-    email,
-    url_photo,
-    role,
-    links,
-    skills
-  );
+  const generateUpdateQuery = (fields) => {
+    const allowedFieldsToUpdate = [
+      "discord_username",
+      "full_name",
+      "about_me",
+      "email",
+      "url_photo",
+      "role",
+      "links",
+      "skills",
+    ];
 
-  if (validationErrorMessage) {
-    return throwResponse(callback, validationErrorMessage, 400);
-  }
+    let expression = {
+      UpdateExpression: "set",
+      ExpressionAttributeNames: {},
+      ExpressionAttributeValues: {},
+    };
+
+    Object.entries(fields).forEach(([key, item]) => {
+      if (allowedFieldsToUpdate.includes(key)) {
+        expression.UpdateExpression += ` #${key} = :${key},`;
+        expression.ExpressionAttributeNames[`#${key}`] = key;
+        expression.ExpressionAttributeValues[`:${key}`] = item;
+      }
+    });
+
+    expression.UpdateExpression = expression.UpdateExpression.slice(0, -1);
+
+    if (Object.keys(expression.ExpressionAttributeNames).length === 0) {
+      responseMessage = "Bad Request: no valid fields to update.";
+      return throwResponse(callback, responseMessage, 400);
+    } else return expression;
+  };
+
+  let updateExpression = generateUpdateQuery(data);
 
   const params = {
     TableName: TABLE_NAME_USER,
     Key: { id: event.pathParameters.id },
-    ExpressionAttributeNames: {
-      "#role": "role",
-    },
-    ExpressionAttributeValues: {
-      ":discord_username": discord_username,
-      ":full_name": full_name,
-      ":description": description,
-      ":email": email,
-      ":role": role,
-      ":url_photo": url_photo,
-      ":skills": skills,
-      ":links": links,
-    },
     ConditionExpression: "attribute_exists(id)",
-    UpdateExpression:
-      "SET discord_username = :discord_username, full_name = :full_name, description = :description, email = :email, #role = :role, url_photo = :url_photo, skills = :skills, links = :links",
     ReturnValues: "ALL_NEW",
+    ...updateExpression,
   };
 
   dynamoDb.update(params, (error, data) => {

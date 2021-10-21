@@ -106,6 +106,14 @@ export const createMentorship = (
         is_occupied: true,
       });
 
+      await axios.patch(`${process.env.BASE_URL}/time-slot/mentee`, {
+        id: mentorship.time_slot_id,
+        slot: {
+          mentee_username: mentee_username_discord,
+          mentee_id: mentee_id,
+        },
+      });
+
       dynamoDb.get(paramsUserId, (err, data) => {
         if (err) {
           const responseCode = "-101";
@@ -234,6 +242,14 @@ export const cancelMentorship = (
       is_occupied: false,
     });
 
+    await axios.patch(`${process.env.BASE_URL}/time-slot/mentee`, {
+      id: data.Item?.time_slot_id,
+      slot: {
+        mentee_username: "",
+        mentee_id: "",
+      },
+    });
+
     const params = {
       TableName: TABLE_NAME_MENTORSHIP,
       Key: { id: jwtData.mentorshipId },
@@ -278,6 +294,9 @@ export const cancelMentorship = (
       await sendEmail(mentor_email, `HOLA ${mentor_name} `, htmlMentor);
     });
   });
+
+  //TODO: Cancel mentorship
+  //TODO: Send cancel emails to mentor and mentee
   //TODO: Send cancel discord dm to the mentor and mentee
 };
 
