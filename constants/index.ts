@@ -8,6 +8,7 @@ export const STATUS = {
 };
 
 export const RESPONSE_CODES = {
+  "0": "OK.",
   "-1": "Unexpected error.",
   "-100":
     "Bad Request: Missing params. The required params are mentor_id, mentee_id, mentee_email, status, time_slot_id, time_slot_time",
@@ -16,5 +17,6 @@ export const RESPONSE_CODES = {
   "-103": "Unable to get the time slot.",
   "-104": "Unable to get the mentorship.",
   "-105": "Unable to update the mentorship.",
+  "-106": "Unable to get the timezone.",
   "100": "Succesfully mentorship created.",
 };

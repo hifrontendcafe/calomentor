@@ -26,6 +26,8 @@
   },
   "dependencies": {
     "axios": "^0.21.4",
+    "date-fns": "^2.25.0",
+    "date-fns-tz": "^1.1.6",
     "jsonwebtoken": "^8.5.1",
     "nodemailer": "^6.6.2",
     "uuid": "^8.3.2"

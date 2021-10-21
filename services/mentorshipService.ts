@@ -1,5 +1,4 @@
 import { Callback, Context } from "aws-lambda";
-import { createAndUpdateUserValidations } from "../utils/validations";
 import { throwMentorshipResponse } from "../utils/throwResponse";
 import {
   RESPONSE_CODES,
@@ -9,11 +8,13 @@ import {
   TABLE_NAME_TIME_SLOT,
 } from "../constants";
 import { v4 as uuidv4 } from "uuid";
+const { utcToZonedTime } = require("date-fns-tz");
 import { sendEmail } from "../utils/sendEmail";
 import jwt from "jsonwebtoken";
 import { confirmationMail } from "../mails/confirmation";
 import { cancelMail } from "../mails/cancel";
 import { reminderMail } from "../mails/reminder";
+import timezones from "../constants/timezones.json";
 
 const axios = require("axios");
 
@@ -34,16 +35,9 @@ export const createMentorship = (
     mentee_email,
     info,
     time_slot_id,
-    time_slot_time,
   } = event;
 
-  if (
-    !mentor_id ||
-    !mentee_id ||
-    !mentee_email ||
-    !time_slot_id ||
-    !time_slot_time
-  ) {
+  if (!mentor_id || !mentee_id || !mentee_email || !time_slot_id) {
     const responseCode = "-100";
     return throwMentorshipResponse(callback, {
       responseMessage: RESPONSE_CODES[responseCode],
@@ -64,7 +58,6 @@ export const createMentorship = (
     info,
     status: STATUS.ACTIVE,
     time_slot_id,
-    time_slot_time,
   };
 
   let dateToRemind: Date = new Date();
@@ -90,7 +83,8 @@ export const createMentorship = (
       }
       const slot = timeSlotData.Item;
       const [day, month, year] = slot.slot_date.split("/");
-      const [hours, minutes] = mentorship.time_slot_time.split(":");
+      const [hours, minutes] = slot.slot_time.split(":");
+
       dateToRemind = new Date(
         year,
         month,
@@ -98,21 +92,6 @@ export const createMentorship = (
         parseInt(hours),
         parseInt(minutes)
       );
-
-      dateToRemind.setHours(dateToRemind.getHours() - 2);
-
-      await axios.patch(`${process.env.BASE_URL}/time-slot`, {
-        id: mentorship.time_slot_id,
-        is_occupied: true,
-      });
-
-      await axios.patch(`${process.env.BASE_URL}/time-slot/mentee`, {
-        id: mentorship.time_slot_id,
-        slot: {
-          mentee_username: mentee_username_discord,
-          mentee_id: mentee_id,
-        },
-      });
 
       dynamoDb.get(paramsUserId, (err, data) => {
         if (err) {
@@ -129,24 +108,31 @@ export const createMentorship = (
               responseCode,
             });
           } else {
-            const token = jwt.sign(
-              {
-                menteeEmail: mentorship.mentee_email,
-                mentorshipId: data.Item?.id,
-                date: dateToRemind,
-              },
-              process.env.JWT_KEY,
-              {
-                expiresIn: "90d",
-              }
-            );
             mentorship.mentor_mail = data.Item?.email;
             mentorship.mentor_name = data.Item?.full_name;
-            mentorship.tokenForCancel = token;
             const params = {
               TableName: TABLE_NAME_MENTORSHIP,
               Item: mentorship,
             };
+
+            const timezone = timezones.find(
+              (tz) => tz.id === data.Item?.timeZone
+            );
+
+            if (!timezone) {
+              const responseCode = "-105";
+              return throwMentorshipResponse(callback, {
+                responseMessage: RESPONSE_CODES[responseCode],
+                responseCode,
+              });
+            }
+
+            dateToRemind = utcToZonedTime(
+              dateToRemind,
+              timezone.value[0] || "America/Buenos_Aires"
+            );
+
+            dateToRemind.setHours(dateToRemind.getHours() - 2);
 
             dynamoDb.put(params, async (error, resMentorship) => {
               if (error) {
@@ -156,6 +142,31 @@ export const createMentorship = (
                   responseCode,
                 });
               } else {
+                const token = jwt.sign(
+                  {
+                    menteeEmail: mentorship.mentee_email,
+                    mentorshipId: data.Item?.id,
+                    date: dateToRemind,
+                  },
+                  process.env.JWT_KEY,
+                  {
+                    expiresIn: "90d",
+                  }
+                );
+
+                await axios.patch(`${process.env.BASE_URL}/time-slot`, {
+                  id: mentorship.time_slot_id,
+                  is_occupied: true,
+                });
+
+                await axios.patch(`${process.env.BASE_URL}/time-slot/mentee`, {
+                  id: mentorship.time_slot_id,
+                  slot: {
+                    mentee_username: mentee_username_discord,
+                    mentee_id: mentee_id,
+                    tokenForCancel: token,
+                  },
+                });
                 const responseCode = "100";
                 const htmlMentee = confirmationMail({
                   mentorName: data.Item?.full_name,
@@ -247,6 +258,7 @@ export const cancelMentorship = (
       slot: {
         mentee_username: "",
         mentee_id: "",
+        tokenForCancel: "",
       },
     });
 
@@ -295,8 +307,6 @@ export const cancelMentorship = (
     });
   });
 
-  //TODO: Cancel mentorship
-  //TODO: Send cancel emails to mentor and mentee
   //TODO: Send cancel discord dm to the mentor and mentee
 };
 
@@ -365,4 +375,29 @@ export const feedbackFormMentorship = (
   callback: Callback<any>
 ): void => {
   //TODO: Send feedback form mail to the mentee
+};
+
+export const checkCancelFunction = (
+  event: any,
+  context: Context,
+  callback: Callback<any>
+): void => {
+  const { token } = event.pathParameters;
+  const jwtData: any = jwt.verify(token, process.env.JWT_KEY);
+
+  const paramsGet = {
+    TableName: TABLE_NAME_MENTORSHIP,
+    Key: { id: jwtData.mentorshipId },
+  };
+
+  dynamoDb.get(paramsGet, async (err, data) => {
+    if (err) {
+      return throwMentorshipResponse(callback, {
+        is_cancel: false,
+      });
+    }
+    return throwMentorshipResponse(callback, {
+      is_cancel: data.Item?.status === STATUS.CANCEL,
+    });
+  });
 };
