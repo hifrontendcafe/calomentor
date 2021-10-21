@@ -304,6 +304,11 @@ export const cancelMentorship = (
         forMentor: true,
       });
       await sendEmail(mentor_email, `HOLA ${mentor_name} `, htmlMentor);
+      const responseCode = "0";
+      return throwMentorshipResponse(callback, {
+        responseMessage: RESPONSE_CODES[responseCode],
+        responseCode,
+      });
     });
   });
 
@@ -355,7 +360,10 @@ export const reminderMentorship = async (
     body: JSON.stringify({
       code: 200,
       message: "success",
-      data: {},
+      data: {
+        sendMentee,
+        sendMentor,
+      },
     }),
   });
   //TODO: Send reminder discord dm to the mentor and mentee
