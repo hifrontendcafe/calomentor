@@ -56,6 +56,7 @@ export const createMentorship = (
     mentor_id,
     mentor_mail: "",
     mentor_name: "",
+    tokenForCancel: "",
     mentee_id,
     mentee_name,
     mentee_username_discord,
@@ -120,12 +121,25 @@ export const createMentorship = (
               responseCode,
             });
           } else {
+            const token = jwt.sign(
+              {
+                menteeEmail: mentorship.mentee_email,
+                mentorshipId: data.Item?.id,
+                date: dateToRemind,
+              },
+              process.env.JWT_KEY,
+              {
+                expiresIn: "90d",
+              }
+            );
             mentorship.mentor_mail = data.Item?.email;
             mentorship.mentor_name = data.Item?.full_name;
+            mentorship.tokenForCancel = token;
             const params = {
               TableName: TABLE_NAME_MENTORSHIP,
               Item: mentorship,
             };
+
             dynamoDb.put(params, async (error, resMentorship) => {
               if (error) {
                 const responseCode = "-102";
@@ -134,17 +148,6 @@ export const createMentorship = (
                   responseCode,
                 });
               } else {
-                const token = jwt.sign(
-                  {
-                    menteeEmail: mentorship.mentee_email,
-                    mentorshipId: data.Item?.id,
-                    date: dateToRemind,
-                  },
-                  process.env.JWT_KEY,
-                  {
-                    expiresIn: "30d",
-                  }
-                );
                 const responseCode = "100";
                 const htmlMentee = confirmationMail({
                   mentorName: data.Item?.full_name,
