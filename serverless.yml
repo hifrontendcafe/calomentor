@@ -15,6 +15,9 @@ provider:
   region: sa-east-1
   stackName: calomentor
   apiName: calomentor-api
+  apiGateway:
+    apiKeys:
+      - "es-santa-pero-le-gusta-el-fallafel-by-Agus"
   stage: dev
   iam:
     role:
@@ -40,6 +43,7 @@ functions:
           path: user/activate/{id}
           method: patch
           cors: true
+          private: true
   createUser:
     handler: index.createUser
     events:
@@ -47,6 +51,7 @@ functions:
           path: user
           method: post
           cors: true
+          private: true
   getUsers:
     handler: index.getUsers
     events:
@@ -54,6 +59,7 @@ functions:
           path: user
           method: get
           cors: true
+          private: true
   getUserById:
     handler: index.getUserById
     events:
@@ -61,6 +67,7 @@ functions:
           path: user/{id}
           method: get
           cors: true
+          private: true
   deleteUserById:
     handler: index.deleteUserById
     events:
@@ -68,6 +75,7 @@ functions:
           path: user/{id}
           method: delete
           cors: true
+          private: true
   updateUserById:
     handler: index.updateUserById
     events:
@@ -75,6 +83,7 @@ functions:
           path: user/{id}
           method: put
           cors: true
+          private: true
   addTimeSlot:
     handler: index.addTimeSlot
     events:
@@ -82,6 +91,7 @@ functions:
           path: time-slot
           method: post
           cors: true
+          private: true
   getTimeSlotsByUserId:
     handler: index.getTimeSlotsByUser
     events:
@@ -89,6 +99,7 @@ functions:
           path: time-slot/user/{id}
           method: get
           cors: true
+          private: true
   getTimeSlotsById:
     handler: index.getTimeSlot
     events:
@@ -96,6 +107,7 @@ functions:
           path: time-slot/{id}
           method: get
           cors: true
+          private: true
   updateTimeSlot:
     handler: index.updateSlot
     events:
@@ -103,6 +115,7 @@ functions:
           path: time-slot
           method: patch
           cors: true
+          private: true
   updateMenteeOnSlot:
     handler: index.updateMenteeSlot
     events:
@@ -110,6 +123,7 @@ functions:
           path: time-slot/mentee
           method: patch
           cors: true
+          private: true
   deleteTimeSlot:
     handler: index.deleteSlot
     events:
@@ -117,6 +131,7 @@ functions:
           path: time-slot/{id}
           method: delete
           cors: true
+          private: true
   mentorshipCreate:
     handler: index.mentorshipCreate
   mentorshipReminder:
