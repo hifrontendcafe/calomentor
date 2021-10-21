@@ -103,6 +103,13 @@ functions:
           path: time-slot
           method: patch
           cors: true
+  updateMenteeOnSlot:
+    handler: index.updateMenteeSlot
+    events:
+      - http:
+          path: time-slot/mentee
+          method: patch
+          cors: true
   deleteTimeSlot:
     handler: index.deleteSlot
     events:

@@ -26,6 +26,8 @@ export const addTimeSlots = (
     slot_time,
     is_occupied: false,
     is_cancelled: false,
+    mentee_username: "",
+    mentee_id: "",
   };
 
   const timeSlotInfo = {
@@ -122,6 +124,50 @@ export const updateTimeSlot = (
       ":is_occupied": is_occupied,
     },
     UpdateExpression: "SET is_occupied = :is_occupied",
+    ReturnValues: "ALL_NEW",
+  };
+
+  dynamoDb.update(params, (err, result) => {
+    if (err) {
+      return throwResponse(
+        callback,
+        `There Was an error trying to update the slot`,
+        400
+      );
+    } else {
+      return throwResponse(
+        callback,
+        `The slot was succesfully updated`,
+        200,
+        result.Attributes
+      );
+    }
+  });
+};
+
+export const updateMenteeToTimeSlot = (
+  event: any,
+  context: Context,
+  callback: Callback<any>
+): void => {
+  const { id, mentee_username, mentee_id } = JSON.parse(event.body);
+
+  if (!id) {
+    const errorMessage = `Bad Request: id y slots are required`;
+    return throwResponse(callback, errorMessage, 400);
+  }
+
+  const params = {
+    TableName: TABLE_NAME_TIME_SLOT,
+    Key: {
+      id: id,
+    },
+    ExpressionAttributeValues: {
+      ":mentee_id": mentee_id,
+      ":mentee_username": mentee_username,
+    },
+    UpdateExpression:
+      "SET mentee_id = :mentee_id AND mentee_username = :mentee_username ",
     ReturnValues: "ALL_NEW",
   };
 

@@ -5,6 +5,7 @@ import {
   getTimeSlotsByUserId,
   deleteTimeSlot,
   getTimeSlotsById,
+  updateMenteeToTimeSlot,
 } from "./services/timeSlots";
 import {
   createUserService,
@@ -117,6 +118,12 @@ export const updateSlot: Handler = (
   context: Context,
   callback: Callback<any>
 ) => updateTimeSlot(event, context, callback);
+
+export const updateMenteeSlot: Handler = (
+  event: any,
+  context: Context,
+  callback: Callback<any>
+) => updateMenteeToTimeSlot(event, context, callback);
 
 export const deleteSlot: Handler = (
   event: any,

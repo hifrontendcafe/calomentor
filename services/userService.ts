@@ -16,12 +16,12 @@ export const createUserService = (
     discord_id,
     discord_username,
     full_name,
-    description,
+    about_me,
     email,
     url_photo,
     role,
     links,
-    skills
+    skills,
   } = JSON.parse(event.body);
 
   if (!discord_id || typeof discord_id !== "string") {
@@ -33,7 +33,7 @@ export const createUserService = (
     id: discord_id,
     discord_username,
     full_name,
-    description,
+    about_me,
     email,
     url_photo,
     role,
@@ -74,7 +74,7 @@ export const getUsersService = (
       "#role": "role",
     },
     ProjectionExpression:
-      "id, discord_username, full_name, description, email, url_photo, #role, links, skills, isActive",
+      "id, discord_username, full_name, about_me, email, url_photo, #role, links, skills, isActive",
   };
 
   dynamoDb.scan(params, (err, data) => {
@@ -151,7 +151,7 @@ export const updateUserByIdService = (
     const allowedFieldsToUpdate = [
       "discord_username",
       "full_name",
-      "description",
+      "about_me",
       "email",
       "url_photo",
       "role",

@@ -102,6 +102,14 @@ export const createMentorship = (
         },
       });
 
+      await axios.patch(`${process.env.BASE_URL}/time-slot/mentee`, {
+        id: mentorship.time_slot_id,
+        slot: {
+          mentee_username: mentee_username_discord,
+          mentee_id: mentee_id,
+        },
+      });
+
       dynamoDb.get(paramsUserId, (err, data) => {
         if (err) {
           const responseCode = "-101";
@@ -180,6 +188,13 @@ export const cancelMentorship = (
   context: Context,
   callback: Callback<any>
 ): void => {
+  // await axios.patch(`${process.env.BASE_URL}/time-slot/mentee`, {
+  //   id: time_slot_id,
+  //   slot: {
+  //     mentee_username: "",
+  //     mentee_id: "",
+  //   },
+  // });
   //TODO: Cancel mentorship
   //TODO: Send cancel emails to mentor and mentee
   //TODO: Send cancel discord dm to the mentor and mentee
