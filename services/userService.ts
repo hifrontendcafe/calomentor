@@ -1,5 +1,5 @@
 import { Callback, Context } from "aws-lambda";
-import { TABLE_NAME_USER } from "../constants";
+import { MENTOR_STATUS, TABLE_NAME_USER } from "../constants";
 import { throwResponse } from "../utils/throwResponse";
 
 const AWS = require("aws-sdk"); // eslint-disable-line import/no-extraneous-dependencies
@@ -39,7 +39,7 @@ export const createUserService = (
     role,
     links,
     skills,
-    isActive: false,
+    isActive: MENTOR_STATUS.DEACTIVE,
     timezone: 25,
   };
 
@@ -158,6 +158,7 @@ export const updateUserByIdService = (
       "role",
       "links",
       "skills",
+      "timezone",
     ];
 
     let expression = {
@@ -212,11 +213,13 @@ export const activateUserService = (
   context: Context,
   callback: Callback<any>
 ): void => {
-  const { isActive } = JSON.parse(event.body);
+  const { isActive, byWho } = JSON.parse(event.body);
 
-  if (typeof isActive !== "boolean") {
+  const check = Object.values(MENTOR_STATUS).find((st) => st === isActive);
+
+  if (!isActive || check.length <= 0) {
     responseMessage =
-      "Bad Request: isActive property is missing or it's not boolean.";
+      "Bad Request: isActive property is missing or is not allowable option.";
     return throwResponse(callback, responseMessage, 400);
   }
 
@@ -227,9 +230,10 @@ export const activateUserService = (
     },
     ExpressionAttributeValues: {
       ":isActive": isActive,
+      ":byWho": byWho,
     },
     ConditionExpression: "attribute_exists(id)",
-    UpdateExpression: "SET isActive = :isActive",
+    UpdateExpression: "SET isActive = :isActive AND byWho = :byWho",
     ReturnValues: "ALL_NEW",
   };
 
