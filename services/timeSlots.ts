@@ -19,11 +19,21 @@ export const addTimeSlots = (
     return throwResponse(callback, errorMessage, 400);
   }
 
+  let date = new Date(slot_date);
+  const time = new Date(slot_time);
+
+  date = new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate(),
+    time.getHours(),
+    time.getMinutes()
+  );
+
   const timeSlot = {
     id: uuidv4(),
     user_id,
-    slot_date,
-    slot_time,
+    date: date.getTime(),
     is_occupied: false,
     is_cancelled: false,
     mentee_username: "",
