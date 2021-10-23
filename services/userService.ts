@@ -40,7 +40,7 @@ export const createUserService = (
     links,
     skills,
     isActive: false,
-    timezone: 25,
+    timezone: "25",
   };
 
   const params = {
@@ -158,6 +158,7 @@ export const updateUserByIdService = (
       "role",
       "links",
       "skills",
+      "timezone",
     ];
 
     let expression = {
