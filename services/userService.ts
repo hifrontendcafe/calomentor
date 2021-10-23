@@ -39,7 +39,8 @@ export const createUserService = (
     role,
     links,
     skills,
-    isActive: MENTOR_STATUS.DEACTIVE,
+    isActive: false,
+    status: MENTOR_STATUS.DEACTIVE,
     timezone: 25,
   };
 
