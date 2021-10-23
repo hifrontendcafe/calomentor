@@ -238,3 +238,6 @@ resources:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
         TableName: mentorship
+custom:
+  serverless-offline:
+    httpPort: 3001

@@ -33,7 +33,7 @@ export const addTimeSlots = (
   const timeSlot = {
     id: uuidv4(),
     user_id,
-    date,
+    date: date.getTime(),
     is_occupied: false,
     is_cancelled: false,
     mentee_username: "",
