@@ -8,13 +8,12 @@ import {
   TABLE_NAME_TIME_SLOT,
 } from "../constants";
 import { v4 as uuidv4 } from "uuid";
-const { utcToZonedTime } = require("date-fns-tz");
+import { formatRFC3339, subHours } from "date-fns";
 import { sendEmail } from "../utils/sendEmail";
 import jwt from "jsonwebtoken";
 import { confirmationMail } from "../mails/confirmation";
 import { cancelMail } from "../mails/cancel";
 import { reminderMail } from "../mails/reminder";
-import timezones from "../constants/timezones.json";
 
 const axios = require("axios");
 
@@ -82,16 +81,8 @@ export const createMentorship = (
         });
       }
       const slot = timeSlotData.Item;
-      const [day, month, year] = slot.slot_date.split("/");
-      const [hours, minutes] = slot.slot_time.split(":");
 
-      dateToRemind = new Date(
-        year,
-        month,
-        day,
-        parseInt(hours),
-        parseInt(minutes)
-      );
+      dateToRemind = subHours(new Date(slot.date), 2);
 
       dynamoDb.get(paramsUserId, (err, data) => {
         if (err) {
@@ -115,25 +106,6 @@ export const createMentorship = (
               Item: mentorship,
             };
 
-            const timezone = timezones.find(
-              (tz) => tz.id === data.Item?.timeZone
-            );
-
-            if (!timezone) {
-              const responseCode = "-105";
-              return throwMentorshipResponse(callback, {
-                responseMessage: RESPONSE_CODES[responseCode],
-                responseCode,
-              });
-            }
-
-            dateToRemind = utcToZonedTime(
-              dateToRemind,
-              timezone.value[0] || "America/Buenos_Aires"
-            );
-
-            dateToRemind.setHours(dateToRemind.getHours() - 2);
-
             dynamoDb.put(params, async (error, resMentorship) => {
               if (error) {
                 const responseCode = "-102";
@@ -146,7 +118,7 @@ export const createMentorship = (
                   {
                     menteeEmail: mentorship.mentee_email,
                     mentorshipId: data.Item?.id,
-                    date: dateToRemind,
+                    date: formatRFC3339(dateToRemind),
                   },
                   process.env.JWT_KEY,
                   {
@@ -206,7 +178,7 @@ export const createMentorship = (
                       menteeEmail: mentorship.mentee_email,
                       menteeName: mentorship.mentee_name,
                     },
-                    dateToRemind,
+                    dateToRemind: formatRFC3339(dateToRemind),
                     token,
                   },
                 });
@@ -327,11 +299,12 @@ export const reminderMentorship = async (
       dateToRemind,
     },
   } = event;
+  const date = new Date(dateToRemind);
   const htmlMentee = reminderMail({
     mentorName,
     menteeName,
-    date: dateToRemind.toLocaleDateString("es-AR"),
-    time: dateToRemind.toLocaleTimeString("es-AR"),
+    date: date.toLocaleDateString("es-AR"),
+    time: date.toLocaleTimeString("es-AR"),
     forMentor: false,
     cancelLink: `${process.env.BASE_FRONT_URL}/cancel-mentorship?=${token}`,
     confirmationLink: `${process.env.BASE_FRONT_URL}/confirmation-mentorship?=${token}`,
@@ -344,8 +317,8 @@ export const reminderMentorship = async (
   const htmlMentor = reminderMail({
     mentorName,
     menteeName,
-    date: dateToRemind.toLocaleDateString("es-AR"),
-    time: dateToRemind.toLocaleTimeString("es-AR"),
+    date: date.toLocaleDateString("es-AR"),
+    time: date.toLocaleTimeString("es-AR"),
     forMentor: true,
     cancelLink: `${process.env.BASE_FRONT_URL}/cancel-mentorship?=${token}`,
     confirmationLink: `${process.env.BASE_FRONT_URL}/confirmation-mentorship?=${token}`,
