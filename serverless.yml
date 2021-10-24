@@ -132,8 +132,28 @@ functions:
           method: delete
           cors: true
           private: true
+  mentorshipCreateAPI:
+    handler: index.mentorshipCreate
+    events:
+      - http:
+          path: mentorship
+          method: post
+          cors: true
+          private: true
+  mentorshipCancelAPI:
+    handler: index.mentorshipCancel
+    events:
+      - http:
+          path: mentorship/cancel
+          method: patch
+          cors: true
+          private: true
   mentorshipCreate:
     handler: index.mentorshipCreate
+  mentorshipCancel:
+    handler: index.mentorshipCancel
+  checkCancel:
+    handler: index.checkCancel
   mentorshipReminder:
     handler: index.mentorshipReminder
 
@@ -178,6 +198,31 @@ stepFunctions:
             Type: Wait
             TimestampPath: "$.responseData.dateToRemind"
             Next: MENTORSHIP_REMINDER
+          CHECK_CANCEL_TASK:
+            Type: Task
+            Resource:
+              {
+                "Fn::Join":
+                  [
+                    ":",
+                    [
+                      "arn:aws:lambda:sa-east-1",
+                      { "Ref": "AWS::AccountId" },
+                      "function:${self:service}-${self:provider.stage}-checkCancel",
+                    ],
+                  ],
+              }
+              Next: CHECK_CANCEL_CHOICE
+          CHECK_CANCEL_CHOICE:
+            Type: Choice
+            Choices:
+              - Variable: "$.is_cancel"
+                BooleanEquals: true
+                End: true
+              - Variable: "$.is_cancel"
+                BooleanEquals: false
+                Next: MENTORSHIP_REMINDER
+            Default: MENTORSHIP_REMINDER
           MENTORSHIP_REMINDER:
             Type: Task
             Resource:

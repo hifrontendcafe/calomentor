@@ -38,6 +38,7 @@ export const addTimeSlots = (
     is_cancelled: false,
     mentee_username: "",
     mentee_id: "",
+    tokenForCancel: "",
   };
 
   const timeSlotInfo = {
@@ -77,12 +78,16 @@ export const getTimeSlotsByUserId = (
   dynamoDb.scan(
     event.queryStringParameters?.slot_date ? paramsWithDate : paramsWithoutDate,
     (error, data) => {
+      let dataResponse = data.Items;
       if (error) {
         return throwResponse(callback, "Unable to get Time Slots", 400);
       } else if (data.Items.length < 1) {
         return throwResponse(callback, "Unable to get Time Slots", 400);
       }
-      return throwResponse(callback, "Success", 200, data.Items);
+      if (event.pathParameters.only_occupied) {
+        dataResponse = dataResponse.filter((m) => !m.is_occupied);
+      }
+      return throwResponse(callback, "Success", 200, dataResponse);
     }
   );
 };
