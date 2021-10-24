@@ -18,5 +18,7 @@ export const RESPONSE_CODES = {
   "-104": "Unable to get the mentorship.",
   "-105": "Unable to update the mentorship.",
   "-106": "Unable to get the timezone.",
+  "-107": "Unable to get mentorships.",
+  "-108": "There is no mentorships.",
   "100": "Succesfully mentorship created.",
 };
