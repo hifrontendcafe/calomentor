@@ -417,7 +417,6 @@ export const getMentorships = (
   };
 
   dynamoDb.scan(mentorId ? paramsWithUserId : paramsAll, async (err, data) => {
-    console.log(err);
     if (err) {
       const responseCode = "-107";
       return throwResponse(callback, RESPONSE_CODES[responseCode], 400, {
@@ -433,6 +432,8 @@ export const getMentorships = (
         responseCode,
       });
     }
+
+    console.log(data.Items);
 
     const responseData = await Promise.all(
       data.Items?.map(async (ment) => {

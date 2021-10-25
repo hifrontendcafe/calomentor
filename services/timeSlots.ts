@@ -12,23 +12,14 @@ export const addTimeSlots = (
   context: Context,
   callback: Callback<any>
 ): void => {
-  const { user_id, slot_date, slot_time } = JSON.parse(event.body);
+  const { user_id, slot_date } = JSON.parse(event.body);
 
-  if (!user_id && !slot_date && !slot_time) {
+  if (!user_id && !slot_date) {
     const errorMessage = `Bad Request: user_id, date y slots are required`;
     return throwResponse(callback, errorMessage, 400);
   }
 
-  let date = new Date(slot_date);
-  const time = new Date(slot_time);
-
-  date = new Date(
-    date.getFullYear(),
-    date.getMonth(),
-    date.getDate(),
-    time.getHours(),
-    time.getMinutes()
-  );
+  const date = new Date(slot_date);
 
   const timeSlot = {
     id: uuidv4(),
