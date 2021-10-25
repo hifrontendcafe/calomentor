@@ -57,6 +57,7 @@ export const createMentorship = (
     info,
     status: STATUS.ACTIVE,
     time_slot_id,
+    cancel_cause: "",
   };
 
   let dateToRemind: Date = new Date();
@@ -221,6 +222,7 @@ export const cancelMentorship = (
   context: Context,
   callback: Callback<any>
 ): void => {
+  const { cancelCause } = JSON.parse(event.body);
   const { token } = event.pathParameters;
   const jwtData: any = jwt.verify(token, process.env.JWT_KEY);
 
@@ -268,8 +270,9 @@ export const cancelMentorship = (
       },
       ExpressionAttributeValues: {
         ":status": STATUS.CANCEL,
+        ":cancel_cause": cancelCause,
       },
-      UpdateExpression: "SET status = :status",
+      UpdateExpression: "SET status = :status, cancel_cause = :cancel_cause",
       ReturnValues: "ALL_NEW",
     };
 
