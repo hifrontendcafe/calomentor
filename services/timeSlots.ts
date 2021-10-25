@@ -12,23 +12,14 @@ export const addTimeSlots = (
   context: Context,
   callback: Callback<any>
 ): void => {
-  const { user_id, slot_date, slot_time } = JSON.parse(event.body);
+  const { user_id, slot_date } = JSON.parse(event.body);
 
-  if (!user_id && !slot_date && !slot_time) {
+  if (!user_id && !slot_date) {
     const errorMessage = `Bad Request: user_id, date y slots are required`;
     return throwResponse(callback, errorMessage, 400);
   }
 
-  let date = new Date(slot_date);
-  const time = new Date(slot_time);
-
-  date = new Date(
-    date.getFullYear(),
-    date.getMonth(),
-    date.getDate(),
-    time.getHours(),
-    time.getMinutes()
-  );
+  const date = new Date(slot_date);
 
   const timeSlot = {
     id: uuidv4(),
@@ -69,7 +60,7 @@ export const getTimeSlotsByUserId = (
   };
   const paramsWithDate = {
     TableName: TABLE_NAME_TIME_SLOT,
-    FilterExpression: "slot_date = :slot_date AND user_id = :user_id",
+    FilterExpression: "slot_date = :slot_date, user_id = :user_id",
     ExpressionAttributeValues: {
       ":slot_date": event.queryStringParameters?.slot_date,
       ":user_id": event.pathParameters.id,
@@ -165,10 +156,12 @@ export const updateMenteeToTimeSlot = (
   context: Context,
   callback: Callback<any>
 ): void => {
-  const { id, mentee_username, mentee_id } = JSON.parse(event.body);
+  const { id, mentee_username, mentee_id, tokenForCancel } = JSON.parse(
+    event.body
+  );
 
   if (!id) {
-    const errorMessage = `Bad Request: id y slots are required`;
+    const errorMessage = `Bad Request: id are required`;
     return throwResponse(callback, errorMessage, 400);
   }
 
@@ -180,9 +173,10 @@ export const updateMenteeToTimeSlot = (
     ExpressionAttributeValues: {
       ":mentee_id": mentee_id,
       ":mentee_username": mentee_username,
+      ":tokenForCancel": tokenForCancel,
     },
     UpdateExpression:
-      "SET mentee_id = :mentee_id AND mentee_username = :mentee_username ",
+      "SET mentee_id = :mentee_id, mentee_username = :mentee_username, tokenForCancel = :tokenForCancel",
     ReturnValues: "ALL_NEW",
   };
 

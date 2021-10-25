@@ -5,6 +5,7 @@ export const throwResponse = (callback, message, statusCode, data = null) => {
   if (message) {
     body.message = message;
   }
+  console.log(data);
   if (data) {
     body.data = data;
   }
