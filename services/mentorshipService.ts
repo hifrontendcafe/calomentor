@@ -433,8 +433,6 @@ export const getMentorships = (
       });
     }
 
-    console.log(data.Items);
-
     const responseData = await Promise.all(
       data.Items?.map(async (ment) => {
         const timeSlotInfo = await axios({

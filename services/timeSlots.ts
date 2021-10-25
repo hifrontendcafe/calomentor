@@ -182,7 +182,6 @@ export const updateMenteeToTimeSlot = (
 
   dynamoDb.update(params, (err, result) => {
     if (err) {
-      console.log(err);
       return throwResponse(
         callback,
         `There Was an error trying to update the slot`,
