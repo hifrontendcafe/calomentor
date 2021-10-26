@@ -47,7 +47,7 @@ export const createMentorship = (
   const mentorship = {
     id: uuidv4(),
     mentor_id,
-    mentor_mail: "",
+    mentor_email: "",
     mentor_name: "",
     tokenForCancel: "",
     mentee_id,
@@ -55,7 +55,7 @@ export const createMentorship = (
     mentee_username_discord,
     mentee_email,
     info,
-    status: STATUS.ACTIVE,
+    mentorship_status: STATUS.ACTIVE,
     time_slot_id,
     cancel_cause: "",
   };
@@ -100,7 +100,7 @@ export const createMentorship = (
               responseCode,
             });
           } else {
-            mentorship.mentor_mail = data.Item?.email;
+            mentorship.mentor_email = data.Item?.email;
             mentorship.mentor_name = data.Item?.full_name;
             const token = jwt.sign(
               {
@@ -223,7 +223,7 @@ export const cancelMentorship = (
   callback: Callback<any>
 ): void => {
   const { cancelCause } = JSON.parse(event.body);
-  const { token } = event.pathParameters;
+  const { token } = event.queryStringParameters;
   const jwtData: any = jwt.verify(token, process.env.JWT_KEY);
 
   const paramsGet = {
@@ -234,9 +234,19 @@ export const cancelMentorship = (
   dynamoDb.get(paramsGet, async (err, data) => {
     if (err) {
       const responseCode = "-104";
-      return throwMentorshipResponse(callback, {
+      return throwResponse(callback, RESPONSE_CODES[responseCode], 400, {
         responseMessage: RESPONSE_CODES[responseCode],
         responseCode,
+        error: err,
+      });
+    }
+
+    if (data.Item?.mentorship_status) {
+      const responseCode = "-109";
+      return throwResponse(callback, RESPONSE_CODES[responseCode], 400, {
+        responseMessage: RESPONSE_CODES[responseCode],
+        responseCode,
+        error: err,
       });
     }
 
@@ -265,27 +275,26 @@ export const cancelMentorship = (
     const params = {
       TableName: TABLE_NAME_MENTORSHIP,
       Key: { id: jwtData.mentorshipId },
-      ExpressionAttributeNames: {
-        "#status": "status",
-      },
       ExpressionAttributeValues: {
-        ":status": STATUS.CANCEL,
+        ":mentorship_status": STATUS.CANCEL,
         ":cancel_cause": cancelCause,
       },
-      UpdateExpression: "SET status = :status, cancel_cause = :cancel_cause",
+      UpdateExpression:
+        "SET mentorship_status = :mentorship_status, cancel_cause = :cancel_cause",
       ReturnValues: "ALL_NEW",
     };
 
     dynamoDb.update(params, async (error, resMentorship) => {
       if (error) {
         const responseCode = "-105";
-        return throwMentorshipResponse(callback, {
+        return throwResponse(callback, RESPONSE_CODES[responseCode], 400, {
           responseMessage: RESPONSE_CODES[responseCode],
           responseCode,
+          error,
         });
       }
-      const { mentee_name, mentee_email, mentor_name, mentor_email } =
-        resMentorship.Item;
+      const { mentee_name, mentee_email, mentor_name, mentor_mail } =
+        resMentorship.Attributes;
 
       const dateToRemind = addHours(new Date(jwtData.date), 2);
 
@@ -304,11 +313,12 @@ export const cancelMentorship = (
         time: dateToRemind.toLocaleTimeString("es-AR"),
         forMentor: true,
       });
-      sendEmail(mentor_email, `Hola ${mentor_name} `, htmlMentor);
+      sendEmail(mentor_mail, `Hola ${mentor_name} `, htmlMentor);
       const responseCode = "0";
-      return throwMentorshipResponse(callback, {
+      return throwResponse(callback, RESPONSE_CODES[responseCode], 200, {
         responseMessage: RESPONSE_CODES[responseCode],
         responseCode,
+        data: resMentorship.Attributes,
       });
     });
   });
@@ -349,12 +359,10 @@ export const reminderMentorship = async (
     confirmationLink: `${process.env.BASE_FRONT_URL}/confirmation-mentorship?=${token}`,
   });
   await sendEmail(mentorEmail, `HOLA ${mentorName} `, htmlMentor);
-  callback(null, {
-    statusCode: 200,
-    body: JSON.stringify({
-      code: 200,
-      message: "success",
-    }),
+  const responseCode = "0";
+  return throwMentorshipResponse(callback, {
+    responseMessage: RESPONSE_CODES[responseCode],
+    responseCode,
   });
   //TODO: Send reminder discord dm to the mentor and mentee
 };
@@ -395,7 +403,7 @@ export const checkCancelFunction = (
       });
     }
     return throwMentorshipResponse(callback, {
-      is_cancel: data.Item?.status === STATUS.CANCEL,
+      is_cancel: data.Item?.mentorship_status === STATUS.CANCEL,
     });
   });
 };

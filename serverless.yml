@@ -148,7 +148,7 @@ functions:
     events:
       - http:
           path: mentorship/cancel
-          method: patch
+          method: post
           cors: true
           private: true
   getAllMentorships:
