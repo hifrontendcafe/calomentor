@@ -241,7 +241,9 @@ export const cancelMentorship = (
       });
     }
 
-    if (data.Item?.mentorship_status) {
+    console.log();
+
+    if (data.Item?.mentorship_status === STATUS.CANCEL) {
       const responseCode = "-109";
       return throwResponse(callback, RESPONSE_CODES[responseCode], 400, {
         responseMessage: RESPONSE_CODES[responseCode],
@@ -293,7 +295,7 @@ export const cancelMentorship = (
           error,
         });
       }
-      const { mentee_name, mentee_email, mentor_name, mentor_mail } =
+      const { mentee_name, mentee_email, mentor_name, mentor_email } =
         resMentorship.Attributes;
 
       const dateToRemind = addHours(new Date(jwtData.date), 2);
@@ -313,7 +315,7 @@ export const cancelMentorship = (
         time: dateToRemind.toLocaleTimeString("es-AR"),
         forMentor: true,
       });
-      sendEmail(mentor_mail, `Hola ${mentor_name} `, htmlMentor);
+      sendEmail(mentor_email, `Hola ${mentor_name} `, htmlMentor);
       const responseCode = "0";
       return throwResponse(callback, RESPONSE_CODES[responseCode], 200, {
         responseMessage: RESPONSE_CODES[responseCode],
@@ -414,6 +416,7 @@ export const getMentorships = (
   callback: Callback<any>
 ): void => {
   const mentorId = event.pathParameters?.id;
+  const filter = event.queryStringParameters?.filter;
 
   const paramsWithUserId = {
     TableName: TABLE_NAME_MENTORSHIP,
@@ -444,8 +447,20 @@ export const getMentorships = (
       });
     }
 
+    let mentorshipsData = data.Items;
+
+    if (filter === STATUS.ACTIVE) {
+      mentorshipsData = mentorshipsData.filter(
+        (mt) => mt.mentorship_status === STATUS.ACTIVE
+      );
+    } else if (filter === STATUS.CANCEL) {
+      mentorshipsData = mentorshipsData.filter(
+        (mt) => mt.mentorship_status === STATUS.CANCEL
+      );
+    }
+
     const responseData = await Promise.all(
-      data.Items?.map(async (ment) => {
+      mentorshipsData.map(async (ment) => {
         const timeSlotInfo = await axios({
           method: "GET",
           headers: { "x-api-key": process.env.API_KEY },
