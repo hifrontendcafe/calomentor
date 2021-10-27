@@ -58,6 +58,7 @@ export const createMentorship = (
     mentorship_status: STATUS.ACTIVE,
     time_slot_id,
     cancel_cause: "",
+    who_cancel: "",
   };
 
   let dateToRemind: Date = new Date();
@@ -222,7 +223,7 @@ export const cancelMentorship = (
   context: Context,
   callback: Callback<any>
 ): void => {
-  const { cancelCause } = JSON.parse(event.body);
+  const { cancelCause, whoCancel } = JSON.parse(event.body);
   const { token } = event.queryStringParameters;
   const jwtData: any = jwt.verify(token, process.env.JWT_KEY);
 
@@ -240,8 +241,6 @@ export const cancelMentorship = (
         error: err,
       });
     }
-
-    console.log();
 
     if (data.Item?.mentorship_status === STATUS.CANCEL) {
       const responseCode = "-109";
@@ -280,9 +279,10 @@ export const cancelMentorship = (
       ExpressionAttributeValues: {
         ":mentorship_status": STATUS.CANCEL,
         ":cancel_cause": cancelCause,
+        ":who_cancel": whoCancel,
       },
       UpdateExpression:
-        "SET mentorship_status = :mentorship_status, cancel_cause = :cancel_cause",
+        "SET mentorship_status = :mentorship_status, cancel_cause = :cancel_cause, who_cancel = :who_cancel",
       ReturnValues: "ALL_NEW",
     };
 
@@ -402,10 +402,12 @@ export const checkCancelFunction = (
     if (err) {
       return throwMentorshipResponse(callback, {
         is_cancel: false,
+        responseData: event.responseData,
       });
     }
     return throwMentorshipResponse(callback, {
       is_cancel: data.Item?.mentorship_status === STATUS.CANCEL,
+      responseData: event.responseData,
     });
   });
 };
