@@ -83,30 +83,29 @@ export const getTimeSlotsByUserId = (
   );
 };
 
-export const getTimeSlotsById = (
+export const getTimeSlotsById = async (
   event: any,
   context: Context,
   callback: Callback<any>
-): void => {
+): Promise<void> => {
   let responseMessage = "";
   const params = {
     TableName: TABLE_NAME_TIME_SLOT,
     Key: { id: event.pathParameters.id },
   };
 
-  dynamoDb.get(params, (err, data) => {
-    if (err) {
-      responseMessage = `Unable to get time slot by id. Error: ${err}`;
-      throwResponse(callback, responseMessage, 500);
-    } else {
-      if (Object.keys(data).length === 0) {
-        responseMessage = `Time Slot with id ${event.pathParameters.id} not found`;
-        throwResponse(callback, responseMessage, 404);
-      } else {
-        throwResponse(callback, "", 200, data.Item);
-      }
+  try {
+    const timeSlots = await dynamoDb.get(params).promise();
+    console.log(timeSlots);
+    if (Object.keys(timeSlots).length === 0) {
+      responseMessage = `Time Slot with id ${event.pathParameters.id} not found`;
+      return throwResponse(callback, responseMessage, 404);
     }
-  });
+    return throwResponse(callback, "", 200, timeSlots.Item);
+  } catch (error) {
+    responseMessage = `Unable to get time slot by id. Error: ${error}`;
+    return throwResponse(callback, responseMessage, 400);
+  }
 };
 
 export const updateTimeSlot = (
