@@ -41,6 +41,7 @@ export const createUserService = (
     skills,
     isActive: false,
     timezone: 25,
+    lastActivateBy: "",
   };
 
   const params = {
@@ -213,9 +214,9 @@ export const activateUserService = (
   context: Context,
   callback: Callback<any>
 ): void => {
-  const { isActive, byWho } = JSON.parse(event.body);
+  const { isActive, lastActivateBy } = JSON.parse(event.body);
 
-  if (typeof isActive !== "boolean" && byWho) {
+  if (typeof isActive !== "boolean" && lastActivateBy) {
     responseMessage =
       "Bad Request: isActive property is missing or is not allowable option.";
     return throwResponse(callback, responseMessage, 400);
@@ -228,10 +229,11 @@ export const activateUserService = (
     },
     ExpressionAttributeValues: {
       ":isActive": isActive,
-      ":byWho": byWho,
+      ":lastActivateBy": lastActivateBy,
     },
     ConditionExpression: "attribute_exists(id)",
-    UpdateExpression: "SET isActive = :isActive, byWho = :byWho",
+    UpdateExpression:
+      "SET isActive = :isActive, lastActivateBy = :lastActivateBy",
     ReturnValues: "ALL_NEW",
   };
 
