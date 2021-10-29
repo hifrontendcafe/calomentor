@@ -216,9 +216,7 @@ export const activateUserService = (
 ): void => {
   const { isActive, byWho } = JSON.parse(event.body);
 
-  const check = Object.values(MENTOR_STATUS).find((st) => st === isActive);
-
-  if (!isActive || check.length <= 0) {
+  if (typeof isActive !== "boolean" && byWho) {
     responseMessage =
       "Bad Request: isActive property is missing or is not allowable option.";
     return throwResponse(callback, responseMessage, 400);
