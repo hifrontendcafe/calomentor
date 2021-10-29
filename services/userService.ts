@@ -1,5 +1,5 @@
 import { Callback, Context } from "aws-lambda";
-import { MENTOR_STATUS, TABLE_NAME_USER } from "../constants";
+import { TABLE_NAME_USER } from "../constants";
 import { throwResponse } from "../utils/throwResponse";
 
 const AWS = require("aws-sdk"); // eslint-disable-line import/no-extraneous-dependencies
