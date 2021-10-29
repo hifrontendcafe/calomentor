@@ -1,5 +1,5 @@
 import { Callback, Context } from "aws-lambda";
-import { throwMentorshipResponse, throwResponse } from "../utils/throwResponse";
+import { throwLambdaResponse, throwResponse } from "../utils/throwResponse";
 import {
   RESPONSE_CODES,
   STATUS,
@@ -38,7 +38,7 @@ export const createMentorship = (
 
   if (!mentor_id || !mentee_id || !mentee_email || !time_slot_id) {
     const responseCode = "-100";
-    return throwMentorshipResponse(callback, {
+    return throwLambdaResponse(callback, {
       responseMessage: RESPONSE_CODES[responseCode],
       responseCode,
     });
@@ -77,7 +77,7 @@ export const createMentorship = (
     try {
       if (err) {
         const responseCode = "-103";
-        return throwMentorshipResponse(callback, {
+        return throwLambdaResponse(callback, {
           responseMessage: RESPONSE_CODES[responseCode],
           responseCode,
         });
@@ -89,14 +89,14 @@ export const createMentorship = (
       dynamoDb.get(paramsUserId, (err, data) => {
         if (err) {
           const responseCode = "-101";
-          return throwMentorshipResponse(callback, {
+          return throwLambdaResponse(callback, {
             responseMessage: RESPONSE_CODES[responseCode],
             responseCode,
           });
         } else {
           if (Object.keys(data).length === 0) {
             const responseCode = "-101";
-            return throwMentorshipResponse(callback, {
+            return throwLambdaResponse(callback, {
               responseMessage: RESPONSE_CODES[responseCode],
               responseCode,
             });
@@ -123,7 +123,7 @@ export const createMentorship = (
             dynamoDb.put(params, async (error, resMentorship) => {
               if (error) {
                 const responseCode = "-102";
-                return throwMentorshipResponse(callback, {
+                return throwLambdaResponse(callback, {
                   responseMessage: RESPONSE_CODES[responseCode],
                   responseCode,
                 });
@@ -179,14 +179,14 @@ export const createMentorship = (
                   );
                 } catch (error) {
                   const responseCode = "-1";
-                  return throwMentorshipResponse(callback, {
+                  return throwLambdaResponse(callback, {
                     responseMessage: RESPONSE_CODES[responseCode],
                     responseCode,
                     responseError: error,
                   });
                 }
                 const responseCode = "100";
-                return throwMentorshipResponse(callback, {
+                return throwLambdaResponse(callback, {
                   responseMessage: RESPONSE_CODES[responseCode],
                   responseCode,
                   responseData: {
@@ -209,7 +209,7 @@ export const createMentorship = (
       });
     } catch (error) {
       const responseCode = "-1";
-      return throwMentorshipResponse(callback, {
+      return throwLambdaResponse(callback, {
         responseMessage: RESPONSE_CODES[responseCode],
         responseCode,
       });
@@ -362,7 +362,7 @@ export const reminderMentorship = async (
   });
   await sendEmail(mentorEmail, `HOLA ${mentorName} `, htmlMentor);
   const responseCode = "0";
-  return throwMentorshipResponse(callback, {
+  return throwLambdaResponse(callback, {
     responseMessage: RESPONSE_CODES[responseCode],
     responseCode,
   });
@@ -400,12 +400,12 @@ export const checkCancelFunction = (
 
   dynamoDb.get(paramsGet, async (err, data) => {
     if (err) {
-      return throwMentorshipResponse(callback, {
+      return throwLambdaResponse(callback, {
         is_cancel: false,
         responseData: event.responseData,
       });
     }
-    return throwMentorshipResponse(callback, {
+    return throwLambdaResponse(callback, {
       is_cancel: data.Item?.mentorship_status === STATUS.CANCEL,
       responseData: event.responseData,
     });

@@ -25,6 +25,6 @@ export const throwResponse = (
   callback(null, response);
 };
 
-export const throwMentorshipResponse = (callback, response) => {
+export const throwLambdaResponse = (callback, response) => {
   callback(null, response);
 };
