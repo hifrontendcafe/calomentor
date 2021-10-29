@@ -96,7 +96,6 @@ export const getTimeSlotsById = async (
 
   try {
     const timeSlots = await dynamoDb.get(params).promise();
-    console.log(timeSlots);
     if (Object.keys(timeSlots).length === 0) {
       responseMessage = `Time Slot with id ${event.pathParameters.id} not found`;
       return throwResponse(callback, responseMessage, 404);
