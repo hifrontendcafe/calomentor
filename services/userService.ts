@@ -234,7 +234,7 @@ export const activateUserService = (
       ":byWho": byWho,
     },
     ConditionExpression: "attribute_exists(id)",
-    UpdateExpression: "SET isActive = :isActive AND byWho = :byWho",
+    UpdateExpression: "SET isActive = :isActive, byWho = :byWho",
     ReturnValues: "ALL_NEW",
   };
 
