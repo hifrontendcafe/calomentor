@@ -13,7 +13,7 @@ export const createUserService = (
   callback: Callback<any>
 ): void => {
   const {
-    discord_id,
+    id,
     discord_username,
     full_name,
     about_me,
@@ -24,13 +24,13 @@ export const createUserService = (
     skills,
   } = JSON.parse(event.body);
 
-  if (!discord_id || typeof discord_id !== "string") {
-    responseMessage = "Bad Request: discord_id is required or is not a string.";
+  if (!id || typeof id !== "string") {
+    responseMessage = "Bad Request: id is required or is not a string.";
     return throwResponse(callback, responseMessage, 400);
   }
 
   const user = {
-    id: discord_id,
+    id,
     discord_username,
     full_name,
     about_me,
@@ -40,8 +40,8 @@ export const createUserService = (
     links,
     skills,
     isActive: false,
-    timezone: 25,
     lastActivateBy: "",
+    timezone: "25",
   };
 
   const params = {
@@ -53,7 +53,7 @@ export const createUserService = (
   dynamoDb.put(params, (error, data) => {
     if (error) {
       if (error.code === "ConditionalCheckFailedException") {
-        responseMessage = `Unable to create user. Id ${discord_id} already exists.`;
+        responseMessage = `Unable to create user. Id ${id} already exists.`;
         throwResponse(callback, responseMessage, 400);
       }
       responseMessage = `Unable to create user. Error: ${error}`;
@@ -201,7 +201,7 @@ export const updateUserByIdService = (
         throwResponse(callback, responseMessage, 404);
       }
       responseMessage = `Unable to update user. Error: ${error}`;
-      throwResponse(callback, responseMessage, 500);
+      throwResponse(callback, responseMessage, 400);
     } else {
       responseMessage = `User with id ${event.pathParameters.id} updated succesfully.`;
       throwResponse(callback, responseMessage, 200, data.Attributes);
@@ -244,7 +244,7 @@ export const activateUserService = (
         throwResponse(callback, responseMessage, 404);
       }
       (responseMessage = `Unable to activate user. Error: ${error}`),
-        throwResponse(callback, responseMessage, 500);
+        throwResponse(callback, responseMessage, 400);
     } else {
       responseMessage = `User with id ${event.pathParameters.id} activated succesfully.`;
       throwResponse(callback, responseMessage, 200, data.Attributes);

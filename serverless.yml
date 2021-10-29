@@ -10,6 +10,9 @@ provider:
     CALOMENTOR_MAIL_REFRESH_TOKEN: ${file(./config.dev.json):CALOMENTOR_MAIL_REFRESH_TOKEN}
     CALOMENTOR_MAIL_ACCESS_TOKEN: ${file(./config.dev.json):CALOMENTOR_MAIL_ACCESS_TOKEN}
     BASE_URL: ${file(./config.dev.json):BASE_URL}
+    BASE_FRONT_URL: ${file(./config.dev.json):BASE_FRONT_URL}
+    JWT_KEY: ${file(./config.dev.json):JWT_KEY}
+    API_KEY: ${file(./config.dev.json):API_KEY}
   runtime: nodejs14.x
   lambdaHashingVersion: 20201221
   region: sa-east-1
@@ -132,8 +135,36 @@ functions:
           method: delete
           cors: true
           private: true
+  mentorshipCreateAPI:
+    handler: index.mentorshipCreate
+    events:
+      - http:
+          path: mentorship/create
+          method: post
+          cors: true
+          private: true
+  mentorshipCancelAPI:
+    handler: index.mentorshipCancel
+    events:
+      - http:
+          path: mentorship/cancel
+          method: post
+          cors: true
+          private: true
+  getAllMentorships:
+    handler: index.getAllMentorships
+    events:
+      - http:
+          path: mentorship/{id}
+          method: get
+          cors: true
+          private: true
   mentorshipCreate:
     handler: index.mentorshipCreate
+  mentorshipCancel:
+    handler: index.mentorshipCancel
+  checkCancel:
+    handler: index.checkCancel
   mentorshipReminder:
     handler: index.mentorshipReminder
 
@@ -146,10 +177,17 @@ stepFunctions:
         - http:
             path: sf/mentorship
             method: post
+            cors:
+              origin: "*"
+              headers:
+                - Content-Type
+                - X-Api-Key
+              allowCredentials: true
+            private: true
             response:
               headers:
                 Content-Type: "'application/json'"
-                X-Application-Id: "'calomentor'"
+                Access-Control-Allow-Origin: "'*'"
               template:
                 application/json: |
                   {
@@ -177,7 +215,35 @@ stepFunctions:
           MENTORSHIP_REMINDER_WAIT:
             Type: Wait
             TimestampPath: "$.responseData.dateToRemind"
-            Next: MENTORSHIP_REMINDER
+            Next: CHECK_CANCEL_TASK
+          CHECK_CANCEL_TASK:
+            Type: Task
+            Resource:
+              {
+                "Fn::Join":
+                  [
+                    ":",
+                    [
+                      "arn:aws:lambda:sa-east-1",
+                      { "Ref": "AWS::AccountId" },
+                      "function:${self:service}-${self:provider.stage}-checkCancel",
+                    ],
+                  ],
+              }
+            Next: CHECK_CANCEL_CHOICE
+          CHECK_CANCEL_CHOICE:
+            Type: Choice
+            Choices:
+              - Variable: "$.is_cancel"
+                BooleanEquals: true
+                Next: END_BY_CANCEL
+              - Variable: "$.is_cancel"
+                BooleanEquals: false
+                Next: MENTORSHIP_REMINDER
+            Default: MENTORSHIP_REMINDER
+          END_BY_CANCEL:
+            Type: Fail
+            Cause: "Mentorship cancelled"
           MENTORSHIP_REMINDER:
             Type: Task
             Resource:
@@ -238,3 +304,6 @@ resources:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
         TableName: mentorship
+custom:
+  serverless-offline:
+    httpPort: 3001

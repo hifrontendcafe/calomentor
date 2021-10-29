@@ -1,6 +1,5 @@
 import { Callback, Context } from "aws-lambda";
-import { createAndUpdateUserValidations } from "../utils/validations";
-import { throwMentorshipResponse } from "../utils/throwResponse";
+import { throwLambdaResponse, throwResponse } from "../utils/throwResponse";
 import {
   RESPONSE_CODES,
   STATUS,
@@ -9,11 +8,16 @@ import {
   TABLE_NAME_TIME_SLOT,
 } from "../constants";
 import { v4 as uuidv4 } from "uuid";
+import { addHours, subHours } from "date-fns";
 import { sendEmail } from "../utils/sendEmail";
+const jwt = require("jsonwebtoken");
+import { confirmationMail } from "../mails/confirmation";
+import { cancelMail } from "../mails/cancel";
+import { reminderMail } from "../mails/reminder";
 
 const axios = require("axios");
 
-const AWS = require("aws-sdk"); // eslint-disable-line import/no-extraneous-dependencies
+const AWS = require("aws-sdk");
 
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
@@ -30,18 +34,11 @@ export const createMentorship = (
     mentee_email,
     info,
     time_slot_id,
-    time_slot_time,
   } = event;
 
-  if (
-    !mentor_id ||
-    !mentee_id ||
-    !mentee_email ||
-    !time_slot_id ||
-    !time_slot_time
-  ) {
+  if (!mentor_id || !mentee_id || !mentee_email || !time_slot_id) {
     const responseCode = "-100";
-    return throwMentorshipResponse(callback, {
+    return throwLambdaResponse(callback, {
       responseMessage: RESPONSE_CODES[responseCode],
       responseCode,
     });
@@ -50,14 +47,18 @@ export const createMentorship = (
   const mentorship = {
     id: uuidv4(),
     mentor_id,
+    mentor_email: "",
+    mentor_name: "",
+    tokenForCancel: "",
     mentee_id,
     mentee_name,
     mentee_username_discord,
     mentee_email,
     info,
-    status: STATUS.ACTIVE,
+    mentorship_status: STATUS.ACTIVE,
     time_slot_id,
-    time_slot_time,
+    cancel_cause: "",
+    who_cancel: "",
   };
 
   let dateToRemind: Date = new Date();
@@ -76,82 +77,116 @@ export const createMentorship = (
     try {
       if (err) {
         const responseCode = "-103";
-        return throwMentorshipResponse(callback, {
+        return throwLambdaResponse(callback, {
           responseMessage: RESPONSE_CODES[responseCode],
           responseCode,
         });
       }
       const slot = timeSlotData.Item;
-      const [day, month, year] = slot.slot_date.split("/");
-      const [hours, minutes] = mentorship.time_slot_time.split(":");
-      dateToRemind = new Date(
-        year,
-        month,
-        day,
-        parseInt(hours),
-        parseInt(minutes)
-      );
 
-      dateToRemind.setHours(dateToRemind.getHours() - 2);
-
-      await axios.patch(`${process.env.BASE_URL}/time-slot`, {
-        id: mentorship.time_slot_id,
-        slot: {
-          time: mentorship.time_slot_time,
-          is_occupied: true,
-        },
-      });
-
-      await axios.patch(`${process.env.BASE_URL}/time-slot/mentee`, {
-        id: mentorship.time_slot_id,
-        slot: {
-          mentee_username: mentee_username_discord,
-          mentee_id: mentee_id,
-        },
-      });
+      dateToRemind = subHours(new Date(slot.date), 2);
 
       dynamoDb.get(paramsUserId, (err, data) => {
         if (err) {
           const responseCode = "-101";
-          return throwMentorshipResponse(callback, {
+          return throwLambdaResponse(callback, {
             responseMessage: RESPONSE_CODES[responseCode],
             responseCode,
           });
         } else {
           if (Object.keys(data).length === 0) {
             const responseCode = "-101";
-            return throwMentorshipResponse(callback, {
+            return throwLambdaResponse(callback, {
               responseMessage: RESPONSE_CODES[responseCode],
               responseCode,
             });
           } else {
+            mentorship.mentor_email = data.Item?.email;
+            mentorship.mentor_name = data.Item?.full_name;
+            const token = jwt.sign(
+              {
+                menteeEmail: mentorship.mentee_email,
+                mentorshipId: mentorship.id,
+                date: dateToRemind.getTime(),
+              },
+              process.env.JWT_KEY,
+              {
+                expiresIn: "90d",
+              }
+            );
+            mentorship.tokenForCancel = token;
             const params = {
               TableName: TABLE_NAME_MENTORSHIP,
               Item: mentorship,
             };
+
             dynamoDb.put(params, async (error, resMentorship) => {
               if (error) {
                 const responseCode = "-102";
-                return throwMentorshipResponse(callback, {
+                return throwLambdaResponse(callback, {
                   responseMessage: RESPONSE_CODES[responseCode],
                   responseCode,
                 });
               } else {
+                try {
+                  await axios({
+                    method: "PATCH",
+                    headers: { "x-api-key": process.env.API_KEY },
+                    data: JSON.stringify({
+                      id: mentorship.time_slot_id,
+                      is_occupied: true,
+                    }),
+                    url: `${process.env.BASE_URL}/time-slot`,
+                  });
+
+                  await axios({
+                    method: "PATCH",
+                    headers: { "x-api-key": process.env.API_KEY },
+                    data: JSON.stringify({
+                      id: mentorship.time_slot_id,
+                      mentee_username: mentee_username_discord,
+                      mentee_id: mentee_id,
+                      tokenForCancel: token,
+                    }),
+                    url: `${process.env.BASE_URL}/time-slot/mentee`,
+                  });
+
+                  const htmlMentee = confirmationMail({
+                    mentorName: data.Item?.full_name,
+                    menteeName: mentee_name,
+                    date: dateToRemind.toLocaleDateString("es-AR"),
+                    time: dateToRemind.toLocaleTimeString("es-AR"),
+                    cancelLink: `${process.env.BASE_FRONT_URL}/cancel-mentorship?=${token}`,
+                    forMentor: false,
+                  });
+                  sendEmail(
+                    mentorship.mentee_email,
+                    `Hola Mentee ${mentee_name} `,
+                    htmlMentee
+                  );
+                  const htmlMentor = confirmationMail({
+                    mentorName: data.Item?.full_name,
+                    menteeName: mentee_name,
+                    date: dateToRemind.toLocaleDateString("es-AR"),
+                    time: dateToRemind.toLocaleTimeString("es-AR"),
+                    cancelLink: `${process.env.BASE_FRONT_URL}/cancel-mentorship?=${token}`,
+                    forMentor: true,
+                  });
+                  sendEmail(
+                    data.Item?.email,
+                    `Hola Mentor ${data.Item?.full_name} `,
+                    htmlMentor
+                  );
+                } catch (error) {
+                  const responseCode = "-1";
+                  return throwLambdaResponse(callback, {
+                    responseMessage: RESPONSE_CODES[responseCode],
+                    responseCode,
+                    responseError: error,
+                  });
+                }
                 const responseCode = "100";
-                const htmlMentee = `<div><span>Hola ${mentee_name} Confirmación de mentoria con ${data.Item?.full_name}</span></div>`;
-                const sendMentee = await sendEmail(
-                  mentorship.mentee_email,
-                  `HOLA ${mentee_name} `,
-                  htmlMentee
-                );
-                const htmlMentor = `<div><span>Hola ${data.Item?.full_name} Confirmación de mentoria con ${mentee_name}</span></div>`;
-                const sendMentor = await sendEmail(
-                  data.Item?.email,
-                  `HOLA ${data.Item?.full_name} `,
-                  htmlMentor
-                );
-                console.log("MENT", resMentorship);
-                return throwMentorshipResponse(callback, {
+                return throwLambdaResponse(callback, {
                   responseMessage: RESPONSE_CODES[responseCode],
                   responseCode,
                   responseData: {
@@ -163,7 +198,8 @@ export const createMentorship = (
                       menteeEmail: mentorship.mentee_email,
                       menteeName: mentorship.mentee_name,
                     },
-                    dateToRemind,
+                    dateToRemind: dateToRemind,
+                    token,
                   },
                 });
               }
@@ -173,14 +209,13 @@ export const createMentorship = (
       });
     } catch (error) {
       const responseCode = "-1";
-      return throwMentorshipResponse(callback, {
+      return throwLambdaResponse(callback, {
         responseMessage: RESPONSE_CODES[responseCode],
         responseCode,
       });
     }
   });
   //TODO: Send confirmation discord dm to the mentor and mentee
-  //TODO: Add design to mails
 };
 
 export const cancelMentorship = (
@@ -188,15 +223,108 @@ export const cancelMentorship = (
   context: Context,
   callback: Callback<any>
 ): void => {
-  // await axios.patch(`${process.env.BASE_URL}/time-slot/mentee`, {
-  //   id: time_slot_id,
-  //   slot: {
-  //     mentee_username: "",
-  //     mentee_id: "",
-  //   },
-  // });
-  //TODO: Cancel mentorship
-  //TODO: Send cancel emails to mentor and mentee
+  const { cancelCause, whoCancel } = JSON.parse(event.body);
+  const { token } = event.queryStringParameters;
+  const jwtData: any = jwt.verify(token, process.env.JWT_KEY);
+
+  const paramsGet = {
+    TableName: TABLE_NAME_MENTORSHIP,
+    Key: { id: jwtData.mentorshipId },
+  };
+
+  dynamoDb.get(paramsGet, async (err, data) => {
+    if (err) {
+      const responseCode = "-104";
+      return throwResponse(callback, RESPONSE_CODES[responseCode], 400, {
+        responseMessage: RESPONSE_CODES[responseCode],
+        responseCode,
+        error: err,
+      });
+    }
+
+    if (data.Item?.mentorship_status === STATUS.CANCEL) {
+      const responseCode = "-109";
+      return throwResponse(callback, RESPONSE_CODES[responseCode], 400, {
+        responseMessage: RESPONSE_CODES[responseCode],
+        responseCode,
+        error: err,
+      });
+    }
+
+    await axios({
+      method: "PATCH",
+      headers: { "x-api-key": process.env.API_KEY },
+      data: JSON.stringify({
+        id: data.Item?.time_slot_id,
+        is_occupied: false,
+      }),
+      url: `${process.env.BASE_URL}/time-slot`,
+    });
+
+    await axios({
+      method: "PATCH",
+      headers: { "x-api-key": process.env.API_KEY },
+      data: JSON.stringify({
+        id: data.Item?.time_slot_id,
+        mentee_username: "",
+        mentee_id: "",
+        tokenForCancel: "",
+      }),
+      url: `${process.env.BASE_URL}/time-slot/mentee`,
+    });
+
+    const params = {
+      TableName: TABLE_NAME_MENTORSHIP,
+      Key: { id: jwtData.mentorshipId },
+      ExpressionAttributeValues: {
+        ":mentorship_status": STATUS.CANCEL,
+        ":cancel_cause": cancelCause,
+        ":who_cancel": whoCancel,
+      },
+      UpdateExpression:
+        "SET mentorship_status = :mentorship_status, cancel_cause = :cancel_cause, who_cancel = :who_cancel",
+      ReturnValues: "ALL_NEW",
+    };
+
+    dynamoDb.update(params, async (error, resMentorship) => {
+      if (error) {
+        const responseCode = "-105";
+        return throwResponse(callback, RESPONSE_CODES[responseCode], 400, {
+          responseMessage: RESPONSE_CODES[responseCode],
+          responseCode,
+          error,
+        });
+      }
+      const { mentee_name, mentee_email, mentor_name, mentor_email } =
+        resMentorship.Attributes;
+
+      const dateToRemind = addHours(new Date(jwtData.date), 2);
+
+      const htmlMentee = cancelMail({
+        mentorName: mentor_name,
+        menteeName: mentee_name,
+        date: dateToRemind.toLocaleDateString("es-AR"),
+        time: dateToRemind.toLocaleTimeString("es-AR"),
+        forMentor: false,
+      });
+      sendEmail(mentee_email, `Hola ${mentee_name} `, htmlMentee);
+      const htmlMentor = cancelMail({
+        mentorName: mentor_name,
+        menteeName: mentee_name,
+        date: dateToRemind.toLocaleDateString("es-AR"),
+        time: dateToRemind.toLocaleTimeString("es-AR"),
+        forMentor: true,
+      });
+      sendEmail(mentor_email, `Hola ${mentor_name} `, htmlMentor);
+      const responseCode = "0";
+      return throwResponse(callback, RESPONSE_CODES[responseCode], 200, {
+        responseMessage: RESPONSE_CODES[responseCode],
+        responseCode,
+        data: resMentorship.Attributes,
+      });
+    });
+  });
+
   //TODO: Send cancel discord dm to the mentor and mentee
 };
 
@@ -208,30 +336,37 @@ export const reminderMentorship = async (
   const {
     responseData: {
       mentorship: { mentorEmail, menteeEmail, mentorName, menteeName },
+      token,
+      dateToRemind,
     },
   } = event;
-  const htmlMentee = `<div><span>Hola ${menteeName} Recordatorio de mentoria con ${mentorName}</span></div>`;
-  const sendMentee = await sendEmail(
-    menteeEmail,
-    `HOLA ${menteeName} `,
-    htmlMentee
-  );
-  const htmlMentor = `<div><span>Hola ${mentorName} Recordatorio de mentoria con ${menteeName}</<span></div>`;
-  const sendMentor = await sendEmail(
-    mentorEmail,
-    `HOLA ${mentorName} `,
-    htmlMentor
-  );
-  callback(null, {
-    statusCode: 200,
-    body: JSON.stringify({
-      code: 200,
-      message: "success",
-      data: {},
-    }),
+  const date = addHours(new Date(dateToRemind), 2);
+  const htmlMentee = reminderMail({
+    mentorName,
+    menteeName,
+    date: date.toLocaleDateString("es-AR"),
+    time: date.toLocaleTimeString("es-AR"),
+    forMentor: false,
+    cancelLink: `${process.env.BASE_FRONT_URL}/cancel-mentorship?=${token}`,
+    confirmationLink: `${process.env.BASE_FRONT_URL}/confirmation-mentorship?=${token}`,
+  });
+  sendEmail(menteeEmail, `HOLA ${menteeName} `, htmlMentee);
+  const htmlMentor = reminderMail({
+    mentorName,
+    menteeName,
+    date: date.toLocaleDateString("es-AR"),
+    time: date.toLocaleTimeString("es-AR"),
+    forMentor: true,
+    cancelLink: `${process.env.BASE_FRONT_URL}/cancel-mentorship?=${token}`,
+    confirmationLink: `${process.env.BASE_FRONT_URL}/confirmation-mentorship?=${token}`,
+  });
+  await sendEmail(mentorEmail, `HOLA ${mentorName} `, htmlMentor);
+  const responseCode = "0";
+  return throwLambdaResponse(callback, {
+    responseMessage: RESPONSE_CODES[responseCode],
+    responseCode,
   });
   //TODO: Send reminder discord dm to the mentor and mentee
-  //TODO: Add design to mails
 };
 
 export const updateRoleMentorship = (
@@ -248,4 +383,106 @@ export const feedbackFormMentorship = (
   callback: Callback<any>
 ): void => {
   //TODO: Send feedback form mail to the mentee
+};
+
+export const checkCancelFunction = (
+  event: any,
+  context: Context,
+  callback: Callback<any>
+): void => {
+  const { token } = event.responseData;
+  const jwtData: any = jwt.verify(token, process.env.JWT_KEY);
+
+  const paramsGet = {
+    TableName: TABLE_NAME_MENTORSHIP,
+    Key: { id: jwtData.mentorshipId },
+  };
+
+  dynamoDb.get(paramsGet, async (err, data) => {
+    if (err) {
+      return throwLambdaResponse(callback, {
+        is_cancel: false,
+        responseData: event.responseData,
+      });
+    }
+    return throwLambdaResponse(callback, {
+      is_cancel: data.Item?.mentorship_status === STATUS.CANCEL,
+      responseData: event.responseData,
+    });
+  });
+};
+
+export const getMentorships = (
+  event: any,
+  context: Context,
+  callback: Callback<any>
+): void => {
+  const mentorId = event.pathParameters?.id;
+  const filter = event.queryStringParameters?.filter;
+
+  const paramsWithUserId = {
+    TableName: TABLE_NAME_MENTORSHIP,
+    FilterExpression: "mentor_id = :mentor_id",
+    ExpressionAttributeValues: {
+      ":mentor_id": mentorId,
+    },
+  };
+
+  const paramsAll = {
+    TableName: TABLE_NAME_TIME_SLOT,
+  };
+
+  dynamoDb.scan(mentorId ? paramsWithUserId : paramsAll, async (err, data) => {
+    if (err) {
+      const responseCode = "-107";
+      return throwResponse(callback, RESPONSE_CODES[responseCode], 400, {
+        responseMessage: RESPONSE_CODES[responseCode],
+        responseCode,
+        error: err,
+      });
+    }
+    if (data.Items?.length === 0) {
+      const responseCode = "-108";
+      return throwResponse(callback, RESPONSE_CODES[responseCode], 404, {
+        responseMessage: RESPONSE_CODES[responseCode],
+        responseCode,
+      });
+    }
+
+    let mentorshipsData = data.Items;
+
+    if (filter === STATUS.ACTIVE) {
+      mentorshipsData = mentorshipsData.filter(
+        (mt) => mt.mentorship_status === STATUS.ACTIVE
+      );
+    } else if (filter === STATUS.CANCEL) {
+      mentorshipsData = mentorshipsData.filter(
+        (mt) => mt.mentorship_status === STATUS.CANCEL
+      );
+    }
+
+    const responseData = await Promise.all(
+      mentorshipsData.map(async (ment) => {
+        const timeSlotInfo = await axios({
+          method: "GET",
+          headers: { "x-api-key": process.env.API_KEY },
+          url: `${process.env.BASE_URL}/time-slot/${ment.time_slot_id}`,
+        });
+        ment.time_slot_info = timeSlotInfo?.data?.data;
+        return ment;
+      })
+    );
+
+    const responseCode = "0";
+    return throwResponse(
+      callback,
+      RESPONSE_CODES[responseCode],
+      200,
+      responseData
+    );
+  });
+
+  //TODO: Validate admin
+  //TODO: Solo enviar mentorias futuras
+  //TODO: Eliminar datos duplicados en la respuesta
 };

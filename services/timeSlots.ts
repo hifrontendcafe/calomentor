@@ -12,22 +12,24 @@ export const addTimeSlots = (
   context: Context,
   callback: Callback<any>
 ): void => {
-  const { user_id, slot_date, slot_time } = JSON.parse(event.body);
+  const { user_id, slot_date } = JSON.parse(event.body);
 
-  if (!user_id && !slot_date && !slot_time) {
+  if (!user_id && !slot_date) {
     const errorMessage = `Bad Request: user_id, date y slots are required`;
     return throwResponse(callback, errorMessage, 400);
   }
 
+  const date = new Date(slot_date);
+
   const timeSlot = {
     id: uuidv4(),
     user_id,
-    slot_date,
-    slot_time,
+    date: date.getTime(),
     is_occupied: false,
     is_cancelled: false,
     mentee_username: "",
     mentee_id: "",
+    tokenForCancel: "",
   };
 
   const timeSlotInfo = {
@@ -58,7 +60,7 @@ export const getTimeSlotsByUserId = (
   };
   const paramsWithDate = {
     TableName: TABLE_NAME_TIME_SLOT,
-    FilterExpression: "slot_date = :slot_date AND user_id = :user_id",
+    FilterExpression: "slot_date = :slot_date, user_id = :user_id",
     ExpressionAttributeValues: {
       ":slot_date": event.queryStringParameters?.slot_date,
       ":user_id": event.pathParameters.id,
@@ -67,12 +69,16 @@ export const getTimeSlotsByUserId = (
   dynamoDb.scan(
     event.queryStringParameters?.slot_date ? paramsWithDate : paramsWithoutDate,
     (error, data) => {
+      let dataResponse = data.Items;
       if (error) {
         return throwResponse(callback, "Unable to get Time Slots", 400);
       } else if (data.Items.length < 1) {
         return throwResponse(callback, "Unable to get Time Slots", 400);
       }
-      return throwResponse(callback, "Success", 200, data.Items);
+      if (event.pathParameters.only_occupied) {
+        dataResponse = dataResponse.filter((m) => !m.is_occupied);
+      }
+      return throwResponse(callback, "Success", 200, dataResponse);
     }
   );
 };
@@ -150,10 +156,12 @@ export const updateMenteeToTimeSlot = (
   context: Context,
   callback: Callback<any>
 ): void => {
-  const { id, mentee_username, mentee_id } = JSON.parse(event.body);
+  const { id, mentee_username, mentee_id, tokenForCancel } = JSON.parse(
+    event.body
+  );
 
   if (!id) {
-    const errorMessage = `Bad Request: id y slots are required`;
+    const errorMessage = `Bad Request: id are required`;
     return throwResponse(callback, errorMessage, 400);
   }
 
@@ -165,9 +173,10 @@ export const updateMenteeToTimeSlot = (
     ExpressionAttributeValues: {
       ":mentee_id": mentee_id,
       ":mentee_username": mentee_username,
+      ":tokenForCancel": tokenForCancel,
     },
     UpdateExpression:
-      "SET mentee_id = :mentee_id AND mentee_username = :mentee_username ",
+      "SET mentee_id = :mentee_id, mentee_username = :mentee_username, tokenForCancel = :tokenForCancel",
     ReturnValues: "ALL_NEW",
   };
 
