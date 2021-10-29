@@ -7,12 +7,6 @@ export const STATUS = {
   CANCEL: "CANCEL",
 };
 
-export const MENTOR_STATUS = {
-  ACTIVE: "ACTIVE",
-  DEACTIVE: "DEACTIVE",
-  UNAVAILABLE: "UNAVAILABLE",
-};
-
 export const RESPONSE_CODES = {
   "-1": "Unexpected error.",
   "-100":
