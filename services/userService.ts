@@ -200,7 +200,7 @@ export const updateUserByIdService = (
         throwResponse(callback, responseMessage, 404);
       }
       responseMessage = `Unable to update user. Error: ${error}`;
-      throwResponse(callback, responseMessage, 500);
+      throwResponse(callback, responseMessage, 400);
     } else {
       responseMessage = `User with id ${event.pathParameters.id} updated succesfully.`;
       throwResponse(callback, responseMessage, 200, data.Attributes);
@@ -241,7 +241,7 @@ export const activateUserService = (
         throwResponse(callback, responseMessage, 404);
       }
       (responseMessage = `Unable to activate user. Error: ${error}`),
-        throwResponse(callback, responseMessage, 500);
+        throwResponse(callback, responseMessage, 400);
     } else {
       responseMessage = `User with id ${event.pathParameters.id} activated succesfully.`;
       throwResponse(callback, responseMessage, 200, data.Attributes);

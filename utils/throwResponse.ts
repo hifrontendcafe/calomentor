@@ -1,11 +1,16 @@
+import { Callback } from "aws-lambda";
 import { GlobalResponse } from "../types/globalTypes";
 
-export const throwResponse = (callback, message, statusCode, data = null) => {
+export const throwResponse = (
+  callback: Callback<any>,
+  message: string,
+  statusCode: number,
+  data: any = null
+) => {
   const body: { message?: string; data?: any } = {};
   if (message) {
     body.message = message;
   }
-  console.log(data);
   if (data) {
     body.data = data;
   }
@@ -20,6 +25,6 @@ export const throwResponse = (callback, message, statusCode, data = null) => {
   callback(null, response);
 };
 
-export const throwMentorshipResponse = (callback, response) => {
+export const throwLambdaResponse = (callback, response) => {
   callback(null, response);
 };
