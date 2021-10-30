@@ -59,6 +59,8 @@ export const createMentorship = (
     time_slot_id,
     cancel_cause: "",
     who_cancel: "",
+    feedback_mentee: "",
+    feedback_mentor: "",
   };
 
   let dateToRemind: Date = new Date();
@@ -377,12 +379,73 @@ export const updateRoleMentorship = (
   //TODO: Add or delete discord role to the mentee
 };
 
-export const feedbackFormMentorship = (
+export const sendFeedbackFormMentorship = (
   event: any,
   context: Context,
   callback: Callback<any>
 ): void => {
   //TODO: Send feedback form mail to the mentee
+};
+
+export const feedbackFormMentorship = async (
+  event: any,
+  context: Context,
+  callback: Callback<any>
+): Promise<void> => {
+  const { token, fromMentee, feedback } = JSON.parse(event.body);
+  const jwtData: any = jwt.verify(token, process.env.JWT_KEY);
+
+  const paramsGet = {
+    TableName: TABLE_NAME_MENTORSHIP,
+    Key: { id: jwtData.mentorshipId },
+  };
+
+  try {
+    const mentorship = await dynamoDb.get(paramsGet).promise();
+
+    if (mentorship.Item?.mentorship_status !== STATUS.CONFIRMED) {
+      const responseCode = "-111";
+      return throwResponse(callback, RESPONSE_CODES[responseCode], 400, {
+        responseMessage: RESPONSE_CODES[responseCode],
+        responseCode,
+      });
+    }
+
+    const menteeFeedback = fromMentee
+      ? feedback
+      : mentorship.Item?.feedback_mentee;
+    const mentorFeedback = !fromMentee
+      ? feedback
+      : mentorship.Item?.feedback_mentor;
+
+    const paramsUpdate = {
+      TableName: TABLE_NAME_MENTORSHIP,
+      Key: { id: jwtData.mentorshipId },
+      ExpressionAttributeValues: {
+        ":feedback_mentee": menteeFeedback,
+        ":feedback_mentor": mentorFeedback,
+      },
+      UpdateExpression:
+        "SET feedback_mentee = :feedback_mentee, feedback_mentor = :feedback_mentor",
+      ReturnValues: "ALL_NEW",
+    };
+
+    const updateMentorship = await dynamoDb.update(paramsUpdate).promise();
+
+    const responseCode = "102";
+    return throwResponse(callback, RESPONSE_CODES[responseCode], 400, {
+      responseMessage: RESPONSE_CODES[responseCode],
+      responseCode,
+      responseData: updateMentorship.Attributes,
+    });
+  } catch (error) {
+    const responseCode = "-110";
+    return throwResponse(callback, RESPONSE_CODES[responseCode], 400, {
+      responseMessage: RESPONSE_CODES[responseCode],
+      responseCode,
+      error,
+    });
+  }
 };
 
 export const checkCancelFunction = (
@@ -485,4 +548,59 @@ export const getMentorships = (
   //TODO: Validate admin
   //TODO: Solo enviar mentorias futuras
   //TODO: Eliminar datos duplicados en la respuesta
+};
+
+export const confirmationMentorship = async (
+  event: any,
+  context: Context,
+  callback: Callback<any>
+): Promise<void> => {
+  const { token } = JSON.parse(event.body);
+  const jwtData: any = jwt.verify(token, process.env.JWT_KEY);
+
+  const paramsGet = {
+    TableName: TABLE_NAME_MENTORSHIP,
+    Key: { id: jwtData.mentorshipId },
+  };
+
+  try {
+    const mentorship = await dynamoDb.get(paramsGet).promise();
+
+    if (mentorship.Item?.mentorship_status === STATUS.CANCEL) {
+      const responseCode = "-109";
+      return throwResponse(callback, RESPONSE_CODES[responseCode], 400, {
+        responseMessage: RESPONSE_CODES[responseCode],
+        responseCode,
+      });
+    }
+
+    const paramsUpdate = {
+      TableName: TABLE_NAME_MENTORSHIP,
+      Key: { id: jwtData.mentorshipId },
+      ExpressionAttributeValues: {
+        ":mentorship_status": STATUS.CONFIRMED,
+      },
+      UpdateExpression: "SET mentorship_status = :mentorship_status",
+      ReturnValues: "ALL_NEW",
+    };
+
+    const updateMentorship = await dynamoDb.update(paramsUpdate).promise();
+
+    const responseCode = "101";
+    return throwResponse(callback, RESPONSE_CODES[responseCode], 400, {
+      responseMessage: RESPONSE_CODES[responseCode],
+      responseCode,
+      responseData: updateMentorship.Attributes,
+    });
+  } catch (error) {
+    const responseCode = "-110";
+    return throwResponse(callback, RESPONSE_CODES[responseCode], 400, {
+      responseMessage: RESPONSE_CODES[responseCode],
+      responseCode,
+      error,
+    });
+  }
+
+  //TODO: Enviar dm al mentor confirmando la mentoria
+  //TODO: Enviar mail al mentor confirmando la mentoria
 };

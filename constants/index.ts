@@ -5,6 +5,7 @@ export const TABLE_NAME_MENTORSHIP: string = "mentorship";
 export const STATUS = {
   ACTIVE: "ACTIVE",
   CANCEL: "CANCEL",
+  CONFIRMED: "CONFIRMED",
 };
 
 export const RESPONSE_CODES = {
@@ -21,6 +22,8 @@ export const RESPONSE_CODES = {
   "-107": "Unable to get mentorships.",
   "-108": "There is no mentorships.",
   "-109": "Mentorship already cancelled.",
+  "-110": "There was a problem with the confirmation",
+  "-111": "The mentorship is not confirmed",
   "-200": "Unable to create user. User already exists.",
   "-201": "Unable to create user.",
   "-202": "There is no mentors",
@@ -28,6 +31,8 @@ export const RESPONSE_CODES = {
   "-204": "User not found",
   "-205": "Unable to get user by id",
   "100": "Succesfully mentorship created.",
+  "101": "Mentorship confirmed",
+  "102": "Update feedback succesfully",
   "200": "User created succesfully",
   "201": "User ",
 };

@@ -23,6 +23,7 @@ import {
   updateRoleMentorship,
   checkCancelFunction,
   getMentorships,
+  confirmationMentorship,
 } from "./services/mentorshipService";
 
 // User functions handlers
@@ -100,6 +101,12 @@ export const mentorshipFeedbackForm: Handler = (
   context: Context,
   callback: Callback<any>
 ) => feedbackFormMentorship(event, context, callback);
+
+export const mentorshipConfirmation: Handler = (
+  event: any,
+  context: Context,
+  callback: Callback<any>
+) => confirmationMentorship(event, context, callback);
 
 export const getAllMentorships: Handler = (
   event: any,
