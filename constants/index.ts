@@ -21,5 +21,13 @@ export const RESPONSE_CODES = {
   "-107": "Unable to get mentorships.",
   "-108": "There is no mentorships.",
   "-109": "Mentorship already cancelled.",
+  "-200": "Unable to create user. User already exists.",
+  "-201": "Unable to create user.",
+  "-202": "There is no mentors",
+  "-203": "Unable to get all mentors.",
+  "-204": "User not found",
+  "-205": "Unable to get user by id",
   "100": "Succesfully mentorship created.",
+  "200": "User created succesfully",
+  "201": "User ",
 };
