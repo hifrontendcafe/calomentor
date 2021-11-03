@@ -6,9 +6,10 @@ import {
   TABLE_NAME_MENTORSHIP,
   TABLE_NAME_USER,
   TABLE_NAME_TIME_SLOT,
+  FILTERDATES,
 } from "../constants";
 import { v4 as uuidv4 } from "uuid";
-import { addHours, subHours } from "date-fns";
+import { addHours, isFuture, isPast, subHours } from "date-fns";
 import { sendEmail } from "../utils/sendEmail";
 const jwt = require("jsonwebtoken");
 import { confirmationMail } from "../mails/confirmation";
@@ -433,7 +434,7 @@ export const feedbackFormMentorship = async (
     const updateMentorship = await dynamoDb.update(paramsUpdate).promise();
 
     const responseCode = "102";
-    return throwResponse(callback, RESPONSE_CODES[responseCode], 400, {
+    return throwResponse(callback, RESPONSE_CODES[responseCode], 200, {
       responseMessage: RESPONSE_CODES[responseCode],
       responseCode,
       responseData: updateMentorship.Attributes,
@@ -482,6 +483,7 @@ export const getMentorships = (
 ): void => {
   const mentorId = event.pathParameters?.id;
   const filter = event.queryStringParameters?.filter;
+  const filterDates = event.queryStringParameters?.filterDates;
 
   const paramsWithUserId = {
     TableName: TABLE_NAME_MENTORSHIP,
@@ -522,26 +524,48 @@ export const getMentorships = (
       mentorshipsData = mentorshipsData.filter(
         (mt) => mt.mentorship_status === STATUS.CANCEL
       );
+    } else if (filter === STATUS.CONFIRMED) {
+      mentorshipsData = mentorshipsData.filter(
+        (mt) => mt.mentorship_status === STATUS.CONFIRMED
+      );
     }
 
     const responseData = await Promise.all(
       mentorshipsData.map(async (ment) => {
-        const timeSlotInfo = await axios({
-          method: "GET",
-          headers: { "x-api-key": process.env.API_KEY },
-          url: `${process.env.BASE_URL}/time-slot/${ment.time_slot_id}`,
-        });
-        ment.time_slot_info = timeSlotInfo?.data?.data;
-        return ment;
+        const timeSlotInfo = await dynamoDb
+          .get({
+            TableName: TABLE_NAME_TIME_SLOT,
+            Key: { id: ment.time_slot_id },
+          })
+          .promise();
+
+        if (
+          filterDates === FILTERDATES.PAST &&
+          isPast(new Date(timeSlotInfo.Item?.date))
+        ) {
+          ment.time_slot_info = timeSlotInfo?.Item;
+          return ment;
+        } else if (
+          filterDates === FILTERDATES.FUTURE &&
+          !isPast(new Date(timeSlotInfo.Item?.date))
+        ) {
+          ment.time_slot_info = timeSlotInfo?.Item;
+          return ment;
+        } else if (!filterDates) {
+          ment.time_slot_info = timeSlotInfo?.Item;
+          return ment;
+        }
       })
     );
+
+    // const responseData = mentorshipsData.filter((m) => m);
 
     const responseCode = "0";
     return throwResponse(
       callback,
       RESPONSE_CODES[responseCode],
       200,
-      responseData
+      responseData.filter((m) => m)
     );
   });
 
@@ -566,7 +590,7 @@ export const confirmationMentorship = async (
   try {
     const mentorship = await dynamoDb.get(paramsGet).promise();
 
-    if (mentorship.Item?.mentorship_status === STATUS.CANCEL) {
+    if (mentorship.Item?.mentorship_status !== STATUS.ACTIVE) {
       const responseCode = "-109";
       return throwResponse(callback, RESPONSE_CODES[responseCode], 400, {
         responseMessage: RESPONSE_CODES[responseCode],
@@ -587,7 +611,7 @@ export const confirmationMentorship = async (
     const updateMentorship = await dynamoDb.update(paramsUpdate).promise();
 
     const responseCode = "101";
-    return throwResponse(callback, RESPONSE_CODES[responseCode], 400, {
+    return throwResponse(callback, RESPONSE_CODES[responseCode], 200, {
       responseMessage: RESPONSE_CODES[responseCode],
       responseCode,
       responseData: updateMentorship.Attributes,

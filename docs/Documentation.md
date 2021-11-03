@@ -199,3 +199,31 @@ fetch("http://localhost:3000/dev/sf/mentorship", {
   }),
 }).then("// Manejo de Respuesta");
 ```
+
+### GET "{{URL}}/mentorship/{{id}}"
+
+Descripción: Busca mentorships por user id
+
+**Parámetros:**
+
+Enviados por URL como query param
+
+- filter: ACTIVE | CANCEL | CONFIRMED | undefined (trae todas)
+- filterDates: PAST | FUTURE | undefined (trae todas)
+
+**Respuesta:**
+
+```bash
+{
+  message: string,
+  data: array de las mentorships encontradas
+}
+```
+
+**Ejemplo:**
+
+```js
+fetch("http://localhost:3000/dev/mentorship/121437193309782017", {
+  method: "GET",
+}).then("// Manejo de Respuesta");
+```

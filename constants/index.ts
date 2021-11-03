@@ -8,6 +8,12 @@ export const STATUS = {
   CONFIRMED: "CONFIRMED",
 };
 
+export const FILTERDATES = {
+  PAST: "PAST",
+  FUTURE: "FUTURE",
+  ALL: "ALL",
+};
+
 export const RESPONSE_CODES = {
   "0": "OK.",
   "-1": "Unexpected error.",
@@ -21,7 +27,7 @@ export const RESPONSE_CODES = {
   "-106": "Unable to get the timezone.",
   "-107": "Unable to get mentorships.",
   "-108": "There is no mentorships.",
-  "-109": "Mentorship already cancelled.",
+  "-109": "The Mentorship is confirmed or cancelled.",
   "-110": "There was a problem with the confirmation",
   "-111": "The mentorship is not confirmed",
   "-200": "Unable to create user. User already exists.",
