@@ -61,7 +61,8 @@ export const createMentorship = (
     cancel_cause: "",
     who_cancel: "",
     feedback_mentee: "",
-    feedback_mentor: "",
+    feedback_stars: 0,
+    feedback_mentee_private: "",
   };
 
   let dateToRemind: Date = new Date();
@@ -393,7 +394,9 @@ export const feedbackFormMentorship = async (
   context: Context,
   callback: Callback<any>
 ): Promise<void> => {
-  const { token, fromMentee, feedback } = JSON.parse(event.body);
+  const { token, feedback, privateFeedback, starsFeedback } = JSON.parse(
+    event.body
+  );
   const jwtData: any = jwt.verify(token, process.env.JWT_KEY);
 
   const paramsGet = {
@@ -412,22 +415,16 @@ export const feedbackFormMentorship = async (
       });
     }
 
-    const menteeFeedback = fromMentee
-      ? feedback
-      : mentorship.Item?.feedback_mentee;
-    const mentorFeedback = !fromMentee
-      ? feedback
-      : mentorship.Item?.feedback_mentor;
-
     const paramsUpdate = {
       TableName: TABLE_NAME_MENTORSHIP,
       Key: { id: jwtData.mentorshipId },
       ExpressionAttributeValues: {
-        ":feedback_mentee": menteeFeedback,
-        ":feedback_mentor": mentorFeedback,
+        ":feedback_mentee": feedback,
+        ":feedback_mentee_private": privateFeedback,
+        ":feedback_stars": starsFeedback,
       },
       UpdateExpression:
-        "SET feedback_mentee = :feedback_mentee, feedback_mentor = :feedback_mentor",
+        "SET feedback_mentee = :feedback_mentee, feedback_mentee_private = :feedback_mentee_private, feedback_stars = :feedback_stars",
       ReturnValues: "ALL_NEW",
     };
 
@@ -539,26 +536,39 @@ export const getMentorships = (
           })
           .promise();
 
+        if (!timeSlotInfo) {
+          return ment;
+        }
+
+        let mentorshipInfo = ment;
+
         if (
           filterDates === FILTERDATES.PAST &&
           isPast(new Date(timeSlotInfo.Item?.date))
         ) {
           ment.time_slot_info = timeSlotInfo?.Item;
-          return ment;
+          mentorshipInfo = ment;
         } else if (
           filterDates === FILTERDATES.FUTURE &&
           !isPast(new Date(timeSlotInfo.Item?.date))
         ) {
           ment.time_slot_info = timeSlotInfo?.Item;
-          return ment;
+          mentorshipInfo = ment;
         } else if (!filterDates) {
           ment.time_slot_info = timeSlotInfo?.Item;
-          return ment;
+          mentorshipInfo = ment;
         }
+
+        delete mentorshipInfo?.time_slot_id;
+        delete mentorshipInfo?.feedback_mentee_private;
+        delete mentorshipInfo?.time_slot_info?.user_id;
+        delete mentorshipInfo?.time_slot_info?.tokenForCancel;
+        delete mentorshipInfo?.time_slot_info?.mentee_id;
+        delete mentorshipInfo?.time_slot_info?.mentee_username;
+
+        return mentorshipInfo;
       })
     );
-
-    // const responseData = mentorshipsData.filter((m) => m);
 
     const responseCode = "0";
     return throwResponse(
@@ -570,8 +580,6 @@ export const getMentorships = (
   });
 
   //TODO: Validate admin
-  //TODO: Solo enviar mentorias futuras
-  //TODO: Eliminar datos duplicados en la respuesta
 };
 
 export const confirmationMentorship = async (
