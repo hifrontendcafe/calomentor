@@ -24,7 +24,14 @@ import {
   checkCancelFunction,
   getMentorships,
   confirmationMentorship,
+  sendFeedbackFormMentorship,
 } from "./services/mentorshipService";
+import {
+  addWarning,
+  deleteWarning,
+  getAllWarnings,
+  getWarnings,
+} from "./services/warningsService";
 
 // User functions handlers
 
@@ -102,6 +109,12 @@ export const mentorshipFeedbackForm: Handler = (
   callback: Callback<any>
 ) => feedbackFormMentorship(event, context, callback);
 
+export const mentorshipFeedbackSend: Handler = (
+  event: any,
+  context: Context,
+  callback: Callback<any>
+) => sendFeedbackFormMentorship(event, context, callback);
+
 export const mentorshipConfirmation: Handler = (
   event: any,
   context: Context,
@@ -151,3 +164,29 @@ export const deleteSlot: Handler = (
   context: Context,
   callback: Callback<any>
 ) => deleteTimeSlot(event, context, callback);
+
+// Warnings functions handlers
+
+export const addWarningMentorship: Handler = (
+  event: any,
+  context: Context,
+  callback: Callback<any>
+) => addWarning(event, context, callback);
+
+export const getWarningsMentorship: Handler = (
+  event: any,
+  context: Context,
+  callback: Callback<any>
+) => getAllWarnings(event, context, callback);
+
+export const getWarningsMentorshipByMentee: Handler = (
+  event: any,
+  context: Context,
+  callback: Callback<any>
+) => getWarnings(event, context, callback);
+
+export const deleteWarningMentorship: Handler = (
+  event: any,
+  context: Context,
+  callback: Callback<any>
+) => deleteWarning(event, context, callback);

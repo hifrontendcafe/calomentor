@@ -26,7 +26,6 @@ export const addTimeSlots = (
     user_id,
     date: date.getTime(),
     is_occupied: false,
-    is_cancelled: false,
     mentee_username: "",
     mentee_id: "",
     tokenForCancel: "",

@@ -9,18 +9,22 @@ import {
   FILTERDATES,
 } from "../constants";
 import { v4 as uuidv4 } from "uuid";
-import { addHours, isFuture, isPast, subHours } from "date-fns";
+import { isPast, subDays } from "date-fns";
+import { format } from "date-fns-tz";
 import { sendEmail } from "../utils/sendEmail";
 const jwt = require("jsonwebtoken");
 import { confirmationMail } from "../mails/confirmation";
 import { cancelMail } from "../mails/cancel";
 import { reminderMail } from "../mails/reminder";
+import { feedbackMail } from "../mails/feedback";
 
 const axios = require("axios");
 
 const AWS = require("aws-sdk");
 
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
+
+const timeZone: string = "America/Buenos_Aires";
 
 export const createMentorship = (
   event: any,
@@ -88,7 +92,8 @@ export const createMentorship = (
       }
       const slot = timeSlotData.Item;
 
-      dateToRemind = subHours(new Date(slot.date), 2);
+      const mentorshipDate = new Date(slot.date);
+      dateToRemind = subDays(mentorshipDate, 1);
 
       dynamoDb.get(paramsUserId, (err, data) => {
         if (err) {
@@ -111,7 +116,7 @@ export const createMentorship = (
               {
                 menteeEmail: mentorship.mentee_email,
                 mentorshipId: mentorship.id,
-                date: dateToRemind.getTime(),
+                date: mentorshipDate.getTime(),
               },
               process.env.JWT_KEY,
               {
@@ -158,27 +163,33 @@ export const createMentorship = (
                   const htmlMentee = confirmationMail({
                     mentorName: data.Item?.full_name,
                     menteeName: mentee_name,
-                    date: dateToRemind.toLocaleDateString("es-AR"),
-                    time: dateToRemind.toLocaleTimeString("es-AR"),
-                    cancelLink: `${process.env.BASE_FRONT_URL}/cancel-mentorship?=${token}`,
+                    date: mentorshipDate.toLocaleDateString("es-AR"),
+                    time: mentorshipDate.toLocaleTimeString("es-AR", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    }),
+                    cancelLink: `${process.env.BASE_FRONT_URL}/cancel?token=${token}`,
                     forMentor: false,
                   });
                   sendEmail(
                     mentorship.mentee_email,
-                    `Hola Mentee ${mentee_name} `,
+                    `Hola ${mentee_name}!`,
                     htmlMentee
                   );
                   const htmlMentor = confirmationMail({
                     mentorName: data.Item?.full_name,
                     menteeName: mentee_name,
-                    date: dateToRemind.toLocaleDateString("es-AR"),
-                    time: dateToRemind.toLocaleTimeString("es-AR"),
-                    cancelLink: `${process.env.BASE_FRONT_URL}/cancel-mentorship?=${token}`,
+                    date: mentorshipDate.toLocaleDateString("es-AR"),
+                    time: mentorshipDate.toLocaleTimeString("es-AR", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    }),
+                    cancelLink: `${process.env.BASE_FRONT_URL}/cancel?token=${token}`,
                     forMentor: true,
                   });
                   sendEmail(
                     data.Item?.email,
-                    `Hola Mentor ${data.Item?.full_name} `,
+                    `Hola ${data.Item?.full_name}!`,
                     htmlMentor
                   );
                 } catch (error) {
@@ -202,7 +213,8 @@ export const createMentorship = (
                       menteeEmail: mentorship.mentee_email,
                       menteeName: mentorship.mentee_name,
                     },
-                    dateToRemind: dateToRemind,
+                    dateToRemind,
+                    mentorshipDate,
                     token,
                   },
                 });
@@ -222,11 +234,11 @@ export const createMentorship = (
   //TODO: Send confirmation discord dm to the mentor and mentee
 };
 
-export const cancelMentorship = (
+export const cancelMentorship = async (
   event: any,
   context: Context,
   callback: Callback<any>
-): void => {
+): Promise<void> => {
   const { cancelCause, whoCancel } = JSON.parse(event.body);
   const { token } = event.queryStringParameters;
   const jwtData: any = jwt.verify(token, process.env.JWT_KEY);
@@ -236,98 +248,104 @@ export const cancelMentorship = (
     Key: { id: jwtData.mentorshipId },
   };
 
-  dynamoDb.get(paramsGet, async (err, data) => {
-    if (err) {
-      const responseCode = "-104";
-      return throwResponse(callback, RESPONSE_CODES[responseCode], 400, {
-        responseMessage: RESPONSE_CODES[responseCode],
-        responseCode,
-        error: err,
-      });
-    }
+  try {
+    const mentorship = await dynamoDb.get(paramsGet).promise();
 
-    if (data.Item?.mentorship_status === STATUS.CANCEL) {
+    if (mentorship.Item?.mentorship_status === STATUS.CANCEL) {
       const responseCode = "-109";
       return throwResponse(callback, RESPONSE_CODES[responseCode], 400, {
         responseMessage: RESPONSE_CODES[responseCode],
         responseCode,
-        error: err,
       });
     }
 
-    await axios({
-      method: "PATCH",
-      headers: { "x-api-key": process.env.API_KEY },
-      data: JSON.stringify({
-        id: data.Item?.time_slot_id,
-        is_occupied: false,
+    await dynamoDb
+      .update({
+        TableName: TABLE_NAME_TIME_SLOT,
+        Key: {
+          id: mentorship.Item?.time_slot_id,
+        },
+        ExpressionAttributeValues: {
+          ":is_occupied": false,
+        },
+        UpdateExpression: "SET is_occupied = :is_occupied",
+        ReturnValues: "ALL_NEW",
+      })
+      .promise();
+
+    await dynamoDb
+      .update({
+        TableName: TABLE_NAME_TIME_SLOT,
+        Key: {
+          id: mentorship.Item?.time_slot_id,
+        },
+        ExpressionAttributeValues: {
+          ":mentee_id": "",
+          ":mentee_username": "",
+          ":tokenForCancel": "",
+        },
+        UpdateExpression:
+          "SET mentee_id = :mentee_id, mentee_username = :mentee_username, tokenForCancel = :tokenForCancel",
+        ReturnValues: "ALL_NEW",
+      })
+      .promise();
+
+    const mentorshipUpdated = await dynamoDb
+      .update({
+        TableName: TABLE_NAME_MENTORSHIP,
+        Key: { id: jwtData.mentorshipId },
+        ExpressionAttributeValues: {
+          ":mentorship_status": STATUS.CANCEL,
+          ":cancel_cause": cancelCause,
+          ":who_cancel": whoCancel,
+        },
+        UpdateExpression:
+          "SET mentorship_status = :mentorship_status, cancel_cause = :cancel_cause, who_cancel = :who_cancel",
+        ReturnValues: "ALL_NEW",
+      })
+      .promise();
+
+    const { mentee_name, mentee_email, mentor_name, mentor_email } =
+      mentorshipUpdated.Attributes;
+
+    const mentorshipDate = new Date(jwtData.date);
+
+    const htmlMentee = cancelMail({
+      mentorName: mentor_name,
+      menteeName: mentee_name,
+      date: mentorshipDate.toLocaleDateString("es-AR"),
+      time: mentorshipDate.toLocaleTimeString("es-AR", {
+        hour: "2-digit",
+        minute: "2-digit",
       }),
-      url: `${process.env.BASE_URL}/time-slot`,
+      forMentor: false,
     });
-
-    await axios({
-      method: "PATCH",
-      headers: { "x-api-key": process.env.API_KEY },
-      data: JSON.stringify({
-        id: data.Item?.time_slot_id,
-        mentee_username: "",
-        mentee_id: "",
-        tokenForCancel: "",
+    sendEmail(mentee_email, `Hola ${mentee_name}!`, htmlMentee);
+    const htmlMentor = cancelMail({
+      mentorName: mentor_name,
+      menteeName: mentee_name,
+      date: mentorshipDate.toLocaleDateString("es-AR"),
+      time: mentorshipDate.toLocaleTimeString("es-AR", {
+        hour: "2-digit",
+        minute: "2-digit",
       }),
-      url: `${process.env.BASE_URL}/time-slot/mentee`,
+      forMentor: true,
     });
-
-    const params = {
-      TableName: TABLE_NAME_MENTORSHIP,
-      Key: { id: jwtData.mentorshipId },
-      ExpressionAttributeValues: {
-        ":mentorship_status": STATUS.CANCEL,
-        ":cancel_cause": cancelCause,
-        ":who_cancel": whoCancel,
-      },
-      UpdateExpression:
-        "SET mentorship_status = :mentorship_status, cancel_cause = :cancel_cause, who_cancel = :who_cancel",
-      ReturnValues: "ALL_NEW",
-    };
-
-    dynamoDb.update(params, async (error, resMentorship) => {
-      if (error) {
-        const responseCode = "-105";
-        return throwResponse(callback, RESPONSE_CODES[responseCode], 400, {
-          responseMessage: RESPONSE_CODES[responseCode],
-          responseCode,
-          error,
-        });
-      }
-      const { mentee_name, mentee_email, mentor_name, mentor_email } =
-        resMentorship.Attributes;
-
-      const dateToRemind = addHours(new Date(jwtData.date), 2);
-
-      const htmlMentee = cancelMail({
-        mentorName: mentor_name,
-        menteeName: mentee_name,
-        date: dateToRemind.toLocaleDateString("es-AR"),
-        time: dateToRemind.toLocaleTimeString("es-AR"),
-        forMentor: false,
-      });
-      sendEmail(mentee_email, `Hola ${mentee_name} `, htmlMentee);
-      const htmlMentor = cancelMail({
-        mentorName: mentor_name,
-        menteeName: mentee_name,
-        date: dateToRemind.toLocaleDateString("es-AR"),
-        time: dateToRemind.toLocaleTimeString("es-AR"),
-        forMentor: true,
-      });
-      sendEmail(mentor_email, `Hola ${mentor_name} `, htmlMentor);
-      const responseCode = "0";
-      return throwResponse(callback, RESPONSE_CODES[responseCode], 200, {
-        responseMessage: RESPONSE_CODES[responseCode],
-        responseCode,
-        data: resMentorship.Attributes,
-      });
+    sendEmail(mentor_email, `Hola ${mentor_name}!`, htmlMentor);
+    const responseCode = "0";
+    return throwResponse(callback, RESPONSE_CODES[responseCode], 200, {
+      responseMessage: RESPONSE_CODES[responseCode],
+      responseCode,
+      data: mentorshipUpdated.Attributes,
     });
-  });
+  } catch (error) {
+    const responseCode = "-104";
+    return throwResponse(callback, RESPONSE_CODES[responseCode], 400, {
+      responseMessage: RESPONSE_CODES[responseCode],
+      responseCode,
+      error: error,
+    });
+  }
 
   //TODO: Send cancel discord dm to the mentor and mentee
 };
@@ -341,30 +359,36 @@ export const reminderMentorship = async (
     responseData: {
       mentorship: { mentorEmail, menteeEmail, mentorName, menteeName },
       token,
-      dateToRemind,
+      mentorshipDate,
     },
   } = event;
-  const date = addHours(new Date(dateToRemind), 2);
+  const date = new Date(mentorshipDate);
   const htmlMentee = reminderMail({
     mentorName,
     menteeName,
     date: date.toLocaleDateString("es-AR"),
-    time: date.toLocaleTimeString("es-AR"),
+    time: date.toLocaleTimeString("es-AR", {
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
     forMentor: false,
-    cancelLink: `${process.env.BASE_FRONT_URL}/cancel-mentorship?=${token}`,
-    confirmationLink: `${process.env.BASE_FRONT_URL}/confirmation-mentorship?=${token}`,
+    cancelLink: `${process.env.BASE_FRONT_URL}/cancel?token=${token}`,
+    confirmationLink: `${process.env.BASE_FRONT_URL}/confirmation?token=${token}`,
   });
-  sendEmail(menteeEmail, `HOLA ${menteeName} `, htmlMentee);
+  sendEmail(menteeEmail, `Hola ${menteeName}!`, htmlMentee);
   const htmlMentor = reminderMail({
     mentorName,
     menteeName,
     date: date.toLocaleDateString("es-AR"),
-    time: date.toLocaleTimeString("es-AR"),
+    time: date.toLocaleTimeString("es-AR", {
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
     forMentor: true,
-    cancelLink: `${process.env.BASE_FRONT_URL}/cancel-mentorship?=${token}`,
-    confirmationLink: `${process.env.BASE_FRONT_URL}/confirmation-mentorship?=${token}`,
+    cancelLink: `${process.env.BASE_FRONT_URL}/cancel?token=${token}`,
+    confirmationLink: `${process.env.BASE_FRONT_URL}/confirmation?token=${token}`,
   });
-  await sendEmail(mentorEmail, `HOLA ${mentorName} `, htmlMentor);
+  await sendEmail(mentorEmail, `Hola ${mentorName}!`, htmlMentor);
   const responseCode = "0";
   return throwLambdaResponse(callback, {
     responseMessage: RESPONSE_CODES[responseCode],
@@ -386,7 +410,27 @@ export const sendFeedbackFormMentorship = (
   context: Context,
   callback: Callback<any>
 ): void => {
-  //TODO: Send feedback form mail to the mentee
+  const {
+    responseData: {
+      mentorship: { menteeEmail, mentorName, menteeName },
+      token,
+    },
+  } = event;
+
+  const htmlMentee = feedbackMail({
+    mentorName,
+    menteeName,
+    feedbackLink: `${process.env.BASE_FRONT_URL}/feedback?token=${token}`,
+  });
+  sendEmail(menteeEmail, `Hola ${menteeName}!`, htmlMentee);
+  const responseCode = "0";
+  return throwLambdaResponse(callback, {
+    responseMessage: RESPONSE_CODES[responseCode],
+    responseCode,
+    responseData: event.responseData,
+  });
+
+  //TODO: Send feedback form dm to the mentee
 };
 
 export const feedbackFormMentorship = async (
@@ -409,6 +453,17 @@ export const feedbackFormMentorship = async (
 
     if (mentorship.Item?.mentorship_status !== STATUS.CONFIRMED) {
       const responseCode = "-111";
+      return throwResponse(callback, RESPONSE_CODES[responseCode], 400, {
+        responseMessage: RESPONSE_CODES[responseCode],
+        responseCode,
+      });
+    }
+
+    if (
+      mentorship.Item?.feedback_stars > 0 &&
+      mentorship.Item?.feedback_mentee !== ""
+    ) {
+      const responseCode = "-112";
       return throwResponse(callback, RESPONSE_CODES[responseCode], 400, {
         responseMessage: RESPONSE_CODES[responseCode],
         responseCode,

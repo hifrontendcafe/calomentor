@@ -1,6 +1,7 @@
 export const TABLE_NAME_USER: string = "user";
 export const TABLE_NAME_TIME_SLOT: string = "time-slots";
 export const TABLE_NAME_MENTORSHIP: string = "mentorship";
+export const TABLE_NAME_WARNINGS: string = "warnings";
 
 export const STATUS = {
   ACTIVE: "ACTIVE",
@@ -30,15 +31,26 @@ export const RESPONSE_CODES = {
   "-109": "The Mentorship is confirmed or cancelled.",
   "-110": "There was a problem with the confirmation",
   "-111": "The mentorship is not confirmed",
+  "-112": "The mentorship already has a feedback",
   "-200": "Unable to create user. User already exists.",
   "-201": "Unable to create user.",
   "-202": "There is no mentors",
   "-203": "Unable to get all mentors.",
   "-204": "User not found",
   "-205": "Unable to get user by id",
+  "-300": "Unable to add a warning",
+  "-301": "The mentee id and email is required",
+  "-302": "The mentee has warnings",
+  "-303": "Unable to get warnings",
+  "-304": "The mentee id is required",
+  "-305": "Unable to delete the warning",
   "100": "Succesfully mentorship created.",
   "101": "Mentorship confirmed",
   "102": "Update feedback succesfully",
   "200": "User created succesfully",
-  "201": "User ",
+  "201": "User",
+  "300": "Warning added",
+  "301": "There is no warnings for this mentee",
+  "302": "Warnings",
+  "303": "Warning deleted",
 };
