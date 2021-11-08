@@ -1,13 +1,13 @@
 import { Context } from "aws-lambda";
-import { isPast } from "date-fns";
-import { scan, get } from "../../utils/dynamoDb";
-
+import { isPast, isFuture } from "date-fns";
+import { getMentorshipsByMentorId } from "../../repository/mentorship";
+import { getTimeSlotById } from "../../repository/timeSlot";
 import {
-  RESPONSE_CODES,
-  TABLE_NAME_MENTORSHIP,
-  TABLE_NAME_TIME_SLOT,
-  FILTERDATES,
-} from "../../constants";
+  makeErrorResponse,
+  makeSuccessResponse,
+} from "../../utils/makeResponses";
+
+import { RESPONSE_CODES, FILTERDATES } from "../../constants";
 
 const getMentorships = async (event: any, _context: Context) => {
   const { pathParameters, queryStringParameters } = event;
@@ -16,53 +16,16 @@ const getMentorships = async (event: any, _context: Context) => {
   const filter = queryStringParameters?.filter;
   const filterDates = queryStringParameters?.filterDates;
 
-  const paramsWithUserId = {
-    TableName: TABLE_NAME_MENTORSHIP,
-    FilterExpression: "mentor_id = :mentor_id",
-    ExpressionAttributeValues: {
-      ":mentor_id": id,
-    },
-  };
-
   let data;
 
   try {
-    data = await scan(paramsWithUserId);
+    data = await getMentorshipsByMentorId(id);
   } catch (err) {
-    const body = JSON.stringify({
-      message: RESPONSE_CODES["-107"],
-      data: {
-        error: err,
-      },
-    });
-
-    return {
-      statusCode: 400,
-      body,
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-      },
-    };
+    return makeErrorResponse(400, RESPONSE_CODES["-107"], err);
   }
 
   if (data.Items.length === 0) {
-    const responseCode = "-108";
-
-    const body = JSON.stringify({
-      message: RESPONSE_CODES[responseCode],
-      data: {
-        responseMessage: RESPONSE_CODES[responseCode],
-        responseCode,
-      },
-    });
-
-    return {
-      statusCode: 404,
-      body,
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-      },
-    };
+    return makeErrorResponse(404, RESPONSE_CODES["-108"]);
   }
 
   /* only filter when filter exists */
@@ -70,61 +33,33 @@ const getMentorships = async (event: any, _context: Context) => {
     ? data.Items.filter((mt) => mt.mentorship_status === filter)
     : data.Items;
 
-  const responseData = await Promise.all(
-    mentorshipsData.map(async (ment) => {
-      const timeSlotInfo = await get({
-        TableName: TABLE_NAME_TIME_SLOT,
-        Key: { id: ment.time_slot_id },
-      });
+  const mentorshipsToReturn = [];
 
-      if (!timeSlotInfo) {
-        return ment;
-      }
+  for (const mentorship of mentorshipsData) {
+    const timeSlotInfo = await getTimeSlotById(mentorship.time_slot_id);
 
-      let mentorshipInfo = ment;
+    if (!timeSlotInfo || !timeSlotInfo.Item) {
+      throw new Error(RESPONSE_CODES["-103"]);
+    }
 
-      if (
-        filterDates === FILTERDATES.PAST &&
-        isPast(new Date(timeSlotInfo.Item?.date))
-      ) {
-        ment.time_slot_info = timeSlotInfo?.Item;
-        mentorshipInfo = ment;
-      } else if (
-        filterDates === FILTERDATES.FUTURE &&
-        !isPast(new Date(timeSlotInfo.Item?.date))
-      ) {
-        ment.time_slot_info = timeSlotInfo?.Item;
-        mentorshipInfo = ment;
-      } else if (!filterDates) {
-        ment.time_slot_info = timeSlotInfo?.Item;
-        mentorshipInfo = ment;
-      }
+    const date = new Date(timeSlotInfo.Item.date);
+    const checkDateFilter =
+      (filterDates === FILTERDATES.PAST && isPast(date)) ||
+      (filterDates === FILTERDATES.FUTURE && isFuture(date)) ||
+      !filterDates;
 
-      delete mentorshipInfo?.time_slot_id;
-      delete mentorshipInfo?.feedback_mentee_private;
-      delete mentorshipInfo?.time_slot_info?.user_id;
-      delete mentorshipInfo?.time_slot_info?.tokenForCancel;
-      delete mentorshipInfo?.time_slot_info?.mentee_id;
-      delete mentorshipInfo?.time_slot_info?.mentee_username;
+    if (!checkDateFilter) {
+      continue;
+    }
 
-      return mentorshipInfo;
-    })
-  );
+    delete mentorship?.feedback_mentee_private;
+    delete mentorship?.time_slot_id;
 
-  const responseCode = "0";
+    mentorship.time_slot_info = timeSlotInfo?.Item;
+    mentorshipsToReturn.push(mentorship);
+  }
 
-  const body = JSON.stringify({
-    message: RESPONSE_CODES[responseCode],
-    data: responseData.filter((m) => m),
-  });
-
-  return {
-    statusCode: 200,
-    body,
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-    },
-  };
+  return makeSuccessResponse({ data: mentorshipsToReturn });
   //TODO: Validate admin
 };
 
