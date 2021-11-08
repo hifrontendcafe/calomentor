@@ -22,7 +22,6 @@ import {
   reminderMentorship,
   updateRoleMentorship,
   checkCancelFunction,
-  getMentorships,
   confirmationMentorship,
   sendFeedbackFormMentorship,
 } from "./services/mentorshipService";
@@ -32,6 +31,8 @@ import {
   getAllWarnings,
   getWarnings,
 } from "./services/warningsService";
+
+import { getMentorships } from "./services/mentorship";
 
 // User functions handlers
 
@@ -121,11 +122,8 @@ export const mentorshipConfirmation: Handler = (
   callback: Callback<any>
 ) => confirmationMentorship(event, context, callback);
 
-export const getAllMentorships: Handler = (
-  event: any,
-  context: Context,
-  callback: Callback<any>
-) => getMentorships(event, context, callback);
+export const getAllMentorships: Handler = (event: any, context: Context) =>
+  getMentorships(event, context);
 
 // Time slots functions handlers
 
