@@ -59,7 +59,7 @@ const getMentorships = async (event: any, _context: Context) => {
     mentorshipsToReturn.push(mentorship);
   }
 
-  return makeSuccessResponse({ data: mentorshipsToReturn });
+  return makeSuccessResponse(mentorshipsToReturn);
   //TODO: Validate admin
 };
 
