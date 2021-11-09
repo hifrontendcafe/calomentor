@@ -10,21 +10,20 @@ import {
 } from "../constants";
 import { v4 as uuidv4 } from "uuid";
 import { isPast, subDays } from "date-fns";
-import { format } from "date-fns-tz";
+import { format, zonedTimeToUtc } from "date-fns-tz";
 import { sendEmail } from "../utils/sendEmail";
 const jwt = require("jsonwebtoken");
 import { confirmationMail } from "../mails/confirmation";
 import { cancelMail } from "../mails/cancel";
 import { reminderMail } from "../mails/reminder";
 import { feedbackMail } from "../mails/feedback";
+import { toDateString, toTimeString } from "../utils/dates";
 
 const axios = require("axios");
 
 const AWS = require("aws-sdk");
 
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
-
-const timeZone: string = "America/Buenos_Aires";
 
 export const createMentorship = (
   event: any,
@@ -160,14 +159,42 @@ export const createMentorship = (
                     url: `${process.env.BASE_URL}/time-slot/mentee`,
                   });
 
+                  await dynamoDb
+                    .update({
+                      TableName: TABLE_NAME_TIME_SLOT,
+                      Key: {
+                        id: mentorship.time_slot_id,
+                      },
+                      ExpressionAttributeValues: {
+                        ":is_occupied": true,
+                      },
+                      UpdateExpression: "SET is_occupied = :is_occupied",
+                      ReturnValues: "ALL_NEW",
+                    })
+                    .promise();
+
+                  await dynamoDb
+                    .update({
+                      TableName: TABLE_NAME_TIME_SLOT,
+                      Key: {
+                        id: mentorship.time_slot_id,
+                      },
+                      ExpressionAttributeValues: {
+                        ":mentee_id": mentee_username_discord,
+                        ":mentee_username": mentee_id,
+                        ":tokenForCancel": token,
+                      },
+                      UpdateExpression:
+                        "SET mentee_id = :mentee_id, mentee_username = :mentee_username, tokenForCancel = :tokenForCancel",
+                      ReturnValues: "ALL_NEW",
+                    })
+                    .promise();
+
                   const htmlMentee = confirmationMail({
                     mentorName: data.Item?.full_name,
                     menteeName: mentee_name,
-                    date: mentorshipDate.toLocaleDateString("es-AR"),
-                    time: mentorshipDate.toLocaleTimeString("es-AR", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    }),
+                    date: toDateString(mentorshipDate),
+                    time: toTimeString(mentorshipDate),
                     cancelLink: `${process.env.BASE_FRONT_URL}/cancel?token=${token}`,
                     forMentor: false,
                   });
@@ -179,11 +206,8 @@ export const createMentorship = (
                   const htmlMentor = confirmationMail({
                     mentorName: data.Item?.full_name,
                     menteeName: mentee_name,
-                    date: mentorshipDate.toLocaleDateString("es-AR"),
-                    time: mentorshipDate.toLocaleTimeString("es-AR", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    }),
+                    date: toDateString(mentorshipDate),
+                    time: toTimeString(mentorshipDate),
                     cancelLink: `${process.env.BASE_FRONT_URL}/cancel?token=${token}`,
                     forMentor: true,
                   });
@@ -313,22 +337,16 @@ export const cancelMentorship = async (
     const htmlMentee = cancelMail({
       mentorName: mentor_name,
       menteeName: mentee_name,
-      date: mentorshipDate.toLocaleDateString("es-AR"),
-      time: mentorshipDate.toLocaleTimeString("es-AR", {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
+      date: toDateString(mentorshipDate),
+      time: toTimeString(mentorshipDate),
       forMentor: false,
     });
     sendEmail(mentee_email, `Hola ${mentee_name}!`, htmlMentee);
     const htmlMentor = cancelMail({
       mentorName: mentor_name,
       menteeName: mentee_name,
-      date: mentorshipDate.toLocaleDateString("es-AR"),
-      time: mentorshipDate.toLocaleTimeString("es-AR", {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
+      date: toDateString(mentorshipDate),
+      time: toTimeString(mentorshipDate),
       forMentor: true,
     });
     sendEmail(mentor_email, `Hola ${mentor_name}!`, htmlMentor);
@@ -366,11 +384,8 @@ export const reminderMentorship = async (
   const htmlMentee = reminderMail({
     mentorName,
     menteeName,
-    date: date.toLocaleDateString("es-AR"),
-    time: date.toLocaleTimeString("es-AR", {
-      hour: "2-digit",
-      minute: "2-digit",
-    }),
+    date: toDateString(mentorshipDate),
+    time: toTimeString(mentorshipDate),
     forMentor: false,
     cancelLink: `${process.env.BASE_FRONT_URL}/cancel?token=${token}`,
     confirmationLink: `${process.env.BASE_FRONT_URL}/confirmation?token=${token}`,
@@ -379,11 +394,8 @@ export const reminderMentorship = async (
   const htmlMentor = reminderMail({
     mentorName,
     menteeName,
-    date: date.toLocaleDateString("es-AR"),
-    time: date.toLocaleTimeString("es-AR", {
-      hour: "2-digit",
-      minute: "2-digit",
-    }),
+    date: toDateString(mentorshipDate),
+    time: toTimeString(mentorshipDate),
     forMentor: true,
     cancelLink: `${process.env.BASE_FRONT_URL}/cancel?token=${token}`,
     confirmationLink: `${process.env.BASE_FRONT_URL}/confirmation?token=${token}`,
