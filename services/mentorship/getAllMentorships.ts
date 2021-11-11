@@ -16,7 +16,7 @@ const getMentorships = async (event: any, _context: Context) => {
   const filter = queryStringParameters?.filter;
   const filterDates = queryStringParameters?.filterDates;
 
-  let data;
+  let data: Awaited<ReturnType<typeof getMentorshipsByMentorId>>;
 
   try {
     data = await getMentorshipsByMentorId(id);

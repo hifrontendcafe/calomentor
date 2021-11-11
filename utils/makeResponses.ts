@@ -1,10 +1,10 @@
 import { RESPONSE_CODES } from "../constants";
 
-export function makeSuccessResponse(data: any) {
+export function makeSuccessResponse(data: any, responseCode: string = "0") {
   return {
     statusCode: 200,
     body: JSON.stringify({
-      message: RESPONSE_CODES["0"],
+      message: RESPONSE_CODES[responseCode],
       data,
     }),
     headers: {

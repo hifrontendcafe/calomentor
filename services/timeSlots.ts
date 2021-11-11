@@ -2,26 +2,24 @@ import { Callback, Context } from "aws-lambda";
 import { TABLE_NAME_TIME_SLOT } from "../constants";
 import { v4 as uuidv4 } from "uuid";
 import { throwResponse } from "../utils/throwResponse";
+import { makeErrorResponse, makeSuccessResponse } from "../utils/makeResponses";
+import { TimeSlot } from "../types";
+import { createTimeSlot } from "../repository/timeSlot";
 
 const AWS = require("aws-sdk"); // eslint-disable-line import/no-extraneous-dependencies
 
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
-export const addTimeSlots = (
-  event: any,
-  context: Context,
-  callback: Callback<any>
-): void => {
+export const addTimeSlot = async (event: any) => {
   const { user_id, slot_date } = JSON.parse(event.body);
 
   if (!user_id && !slot_date) {
-    const errorMessage = `Bad Request: user_id, date y slots are required`;
-    return throwResponse(callback, errorMessage, 400);
+    return makeErrorResponse(400, "-113");
   }
 
   const date = new Date(slot_date);
 
-  const timeSlot = {
+  const timeSlot: TimeSlot = {
     id: uuidv4(),
     user_id,
     date: date.getTime(),
@@ -31,18 +29,13 @@ export const addTimeSlots = (
     tokenForCancel: "",
   };
 
-  const timeSlotInfo = {
-    TableName: TABLE_NAME_TIME_SLOT,
-    Item: timeSlot,
-  };
+  try {
+    await createTimeSlot(timeSlot);
+  } catch (error) {
+    return makeErrorResponse(400, "-306", error);
+  }
 
-  dynamoDb.put(timeSlotInfo, (err, result) => {
-    if (err) {
-      return throwResponse(callback, "Unable to add a Time Slot", 400);
-    } else {
-      return throwResponse(callback, "Time Slot added", 200);
-    }
-  });
+  return makeSuccessResponse(timeSlot, "103");
 };
 
 export const getTimeSlotsByUserId = (
