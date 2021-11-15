@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 import { throwResponse } from "../utils/throwResponse";
 import { makeErrorResponse, makeSuccessResponse } from "../utils/makeResponses";
 import { TimeSlot } from "../types";
-import { createTimeSlot } from "../repository/timeSlot";
+import { createTimeSlot, getTimeSlotsByUserId } from "../repository/timeSlot";
 
 const AWS = require("aws-sdk"); // eslint-disable-line import/no-extraneous-dependencies
 
@@ -38,41 +38,25 @@ export const addTimeSlot = async (event: any) => {
   return makeSuccessResponse(timeSlot, "103");
 };
 
-export const getTimeSlotsByUserId = (
+export const getTimeSlots = async (
   event: any,
   context: Context,
   callback: Callback<any>
-): void => {
-  const paramsWithoutDate = {
-    TableName: TABLE_NAME_TIME_SLOT,
-    FilterExpression: "user_id = :user_id",
-    ExpressionAttributeValues: {
-      ":user_id": event.pathParameters.id,
-    },
-  };
-  const paramsWithDate = {
-    TableName: TABLE_NAME_TIME_SLOT,
-    FilterExpression: "slot_date = :slot_date, user_id = :user_id",
-    ExpressionAttributeValues: {
-      ":slot_date": event.queryStringParameters?.slot_date,
-      ":user_id": event.pathParameters.id,
-    },
-  };
-  dynamoDb.scan(
-    event.queryStringParameters?.slot_date ? paramsWithDate : paramsWithoutDate,
-    (error, data) => {
-      let dataResponse = data.Items;
-      if (error) {
-        return throwResponse(callback, "Unable to get Time Slots", 400);
-      } else if (data.Items.length < 1) {
-        return throwResponse(callback, "Unable to get Time Slots", 400);
-      }
-      if (event.pathParameters.only_occupied) {
-        dataResponse = dataResponse.filter((m) => !m.is_occupied);
-      }
-      return throwResponse(callback, "Success", 200, dataResponse);
-    }
-  );
+) => {
+  const { queryStringParameters, pathParameters } = event;
+
+  let timeSlotsData: Awaited<ReturnType<typeof getTimeSlotsByUserId>>;
+
+  try {
+    timeSlotsData = await getTimeSlotsByUserId(pathParameters.id, {
+      slotDate: queryStringParameters?.slot_date,
+      onlyFree: queryStringParameters?.only_free,
+    });
+  } catch (error) {
+    return makeErrorResponse(400, "-307", error);
+  }
+
+  return makeSuccessResponse(timeSlotsData.Items, "0");
 };
 
 export const getTimeSlotsById = async (

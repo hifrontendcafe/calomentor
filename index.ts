@@ -4,7 +4,7 @@ export { addTimeSlot } from "./services/timeSlots";
 
 import {
   updateTimeSlot,
-  getTimeSlotsByUserId,
+  getTimeSlots,
   deleteTimeSlot,
   getTimeSlotsById,
   updateMenteeToTimeSlot,
@@ -136,7 +136,7 @@ export const getTimeSlotsByUser: Handler = (
   event: any,
   context: Context,
   callback: Callback<any>
-) => getTimeSlotsByUserId(event, context, callback);
+) => getTimeSlots(event, context, callback);
 
 export const getTimeSlot: Handler = (
   event: any,

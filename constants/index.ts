@@ -46,6 +46,7 @@ export const RESPONSE_CODES = {
   "-304": "The mentee id is required",
   "-305": "Unable to delete the warning",
   "-306": "Unable to add a Time Slot",
+  "-307": "Unable to get Time Slots",
   "100": "Succesfully mentorship created.",
   "101": "Mentorship confirmed",
   "102": "Update feedback succesfully",
