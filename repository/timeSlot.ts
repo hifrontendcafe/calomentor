@@ -1,13 +1,13 @@
 import { TABLE_NAME_TIME_SLOT } from "../constants";
-import { get, put, scan, ScanInput } from "../utils/dynamoDb";
+import { get, put, scan, ScanInput, PutItemResult, ScanResult, GetItemResult } from "../utils/dynamoDb";
 import { TimeSlot } from "../types";
 import { toInt } from "../utils/toInt";
 
-export function getTimeSlotById(id: number) {
+export function getTimeSlotById(id: string) {
   return get<TimeSlot>({
     TableName: TABLE_NAME_TIME_SLOT,
     Key: { id },
-  });
+  }) as Promise<GetItemResult<TimeSlot>>;
 }
 
 interface TimeSlotFilters {
@@ -42,12 +42,12 @@ export function getTimeSlotsByUserId(
     query.ExpressionAttributeValues[":is_occupied"] = false;
   }
 
-  return scan<TimeSlot[]>(query);
+  return scan<TimeSlot[]>(query) as Promise<ScanResult<TimeSlot>>;
 }
 
 export function createTimeSlot(timeSlotInfo: TimeSlot) {
   return put<TimeSlot>({
     TableName: TABLE_NAME_TIME_SLOT,
     Item: timeSlotInfo,
-  });
+  }) as Promise<PutItemResult<TimeSlot>>;
 }

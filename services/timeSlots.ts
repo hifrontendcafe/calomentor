@@ -56,7 +56,7 @@ export const getTimeSlots = async (
     return makeErrorResponse(400, "-307", error);
   }
 
-  return makeSuccessResponse(timeSlotsData.Items, "0");
+  return makeSuccessResponse(timeSlotsData.Items);
 };
 
 export const getTimeSlotsById = async (

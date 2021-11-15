@@ -10,15 +10,13 @@ export type UpdateItemOutput = DynamoDB.DocumentClient.UpdateItemOutput;
 export type ScanInput = DynamoDB.DocumentClient.ScanInput;
 export type ScanOutput = DynamoDB.DocumentClient.ScanOutput;
 
-interface GetItemResult<T> extends GetItemOutput {
-  Attributes?: T;
+export interface GetItemResult<T extends AttributeMap> extends GetItemOutput {
+  Item?: T;
 }
 
-type Get = <T extends AttributeMap>(
-  params: GetItemInput
-) => Promise<GetItemResult<T | AttributeMap>>;
+type Get = <T>(params: GetItemInput) => Promise<GetItemResult<T | AttributeMap>>;
 
-interface ScanResult<T extends AttributeMap> extends ScanOutput {
+export interface ScanResult<T extends AttributeMap> extends ScanOutput {
   Items?: T[];
 }
 
@@ -26,7 +24,7 @@ type Scan = <T extends AttributeMap>(
   params: ScanInput
 ) => Promise<ScanResult<T | AttributeMap>>;
 
-interface PutItemResult<T> extends PutItemOutput {
+export interface PutItemResult<T> extends PutItemOutput {
   Attributes?: T;
 }
 

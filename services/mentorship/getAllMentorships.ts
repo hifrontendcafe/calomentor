@@ -6,6 +6,7 @@ import {
   makeErrorResponse,
   makeSuccessResponse,
 } from "../../utils/makeResponses";
+import { Mentorship } from "../../types";
 
 import { RESPONSE_CODES, FILTERDATES } from "../../constants";
 
@@ -33,16 +34,18 @@ const getMentorships = async (event: any, _context: Context) => {
     ? data.Items.filter((mt) => mt.mentorship_status === filter)
     : data.Items;
 
-  const mentorshipsToReturn = [];
+  const mentorshipsToReturn: Mentorship[] = [];
 
   for (const mentorship of mentorshipsData) {
-    const timeSlotInfo = await getTimeSlotById(mentorship.time_slot_id);
-
-    if (!timeSlotInfo || !timeSlotInfo.Item) {
+    const timeSlotResult = await getTimeSlotById(mentorship.time_slot_id);
+    
+    if (!timeSlotResult || !timeSlotResult.Item) {
       throw new Error(RESPONSE_CODES["-103"]);
     }
 
-    const date = new Date(timeSlotInfo.Item.date);
+    const timeSlot = timeSlotResult.Item;
+
+    const date = new Date(timeSlotResult.Item.date);
     const checkDateFilter =
       (filterDates === FILTERDATES.PAST && isPast(date)) ||
       (filterDates === FILTERDATES.FUTURE && isFuture(date)) ||
@@ -55,7 +58,7 @@ const getMentorships = async (event: any, _context: Context) => {
     delete mentorship?.feedback_mentee_private;
     delete mentorship?.time_slot_id;
 
-    mentorship.time_slot_info = timeSlotInfo?.Item;
+    mentorship.time_slot_info = timeSlot;
     mentorshipsToReturn.push(mentorship);
   }
 
