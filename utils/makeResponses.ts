@@ -13,10 +13,12 @@ export function makeSuccessResponse(data: any, responseCode: string = "0") {
   };
 }
 
-export function makeErrorResponse(statusCode: number, responseCode: string, error?: any) {
-  const data = {
-    message: RESPONSE_CODES[responseCode],
-  };
+export function makeErrorResponse(
+  statusCode: number,
+  responseCode: string,
+  error?: any
+) {
+  const data = {};
 
   if (error) {
     data["error"] = error;
