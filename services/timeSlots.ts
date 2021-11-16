@@ -4,7 +4,11 @@ import { v4 as uuidv4 } from "uuid";
 import { throwResponse } from "../utils/throwResponse";
 import { makeErrorResponse, makeSuccessResponse } from "../utils/makeResponses";
 import { TimeSlot } from "../types";
-import { createTimeSlot, getTimeSlotsByUserId } from "../repository/timeSlot";
+import {
+  createTimeSlot,
+  getTimeSlotsByUserId,
+  getTimeSlotById,
+} from "../repository/timeSlot";
 
 const AWS = require("aws-sdk"); // eslint-disable-line import/no-extraneous-dependencies
 
@@ -38,11 +42,7 @@ export const addTimeSlot = async (event: any) => {
   return makeSuccessResponse(timeSlot, "103");
 };
 
-export const getTimeSlots = async (
-  event: any,
-  context: Context,
-  callback: Callback<any>
-) => {
+export const getTimeSlots = async (event: any) => {
   const { queryStringParameters, pathParameters } = event;
 
   let timeSlotsData: Awaited<ReturnType<typeof getTimeSlotsByUserId>>;
@@ -59,28 +59,22 @@ export const getTimeSlots = async (
   return makeSuccessResponse(timeSlotsData.Items);
 };
 
-export const getTimeSlotsById = async (
-  event: any,
-  context: Context,
-  callback: Callback<any>
-): Promise<void> => {
-  let responseMessage = "";
-  const params = {
-    TableName: TABLE_NAME_TIME_SLOT,
-    Key: { id: event.pathParameters.id },
-  };
+export const getTimeSlotsById = async (event: any) => {
+  const { pathParameters } = event;
+
+  let timeSlotData: Awaited<ReturnType<typeof getTimeSlotById>>;
 
   try {
-    const timeSlots = await dynamoDb.get(params).promise();
-    if (Object.keys(timeSlots).length === 0) {
-      responseMessage = `Time Slot with id ${event.pathParameters.id} not found`;
-      return throwResponse(callback, responseMessage, 404);
-    }
-    return throwResponse(callback, "", 200, timeSlots.Item);
+    timeSlotData = await getTimeSlotById(pathParameters?.id);
   } catch (error) {
-    responseMessage = `Unable to get time slot by id. Error: ${error}`;
-    return throwResponse(callback, responseMessage, 400);
+    return makeErrorResponse(400, "-103", error);
   }
+
+  if (!timeSlotData?.Item) {
+    return makeErrorResponse(404, "-308");
+  }
+
+  return makeSuccessResponse(timeSlotData.Item);
 };
 
 export const updateTimeSlot = (

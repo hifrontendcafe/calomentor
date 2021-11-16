@@ -47,6 +47,7 @@ export const RESPONSE_CODES = {
   "-305": "Unable to delete the warning",
   "-306": "Unable to add a Time Slot",
   "-307": "Unable to get Time Slots",
+  "-308": "Time slot not found",
   "100": "Succesfully mentorship created.",
   "101": "Mentorship confirmed",
   "102": "Update feedback succesfully",
