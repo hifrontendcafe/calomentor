@@ -160,20 +160,6 @@ export const createMentorship = (
                         id: mentorship.time_slot_id,
                       },
                       ExpressionAttributeValues: {
-                        ":is_occupied": true,
-                      },
-                      UpdateExpression: "SET is_occupied = :is_occupied",
-                      ReturnValues: "ALL_NEW",
-                    })
-                    .promise();
-
-                  await dynamoDb
-                    .update({
-                      TableName: TABLE_NAME_TIME_SLOT,
-                      Key: {
-                        id: mentorship.time_slot_id,
-                      },
-                      ExpressionAttributeValues: {
                         ":mentee_id": mentee_username_discord,
                         ":mentee_username": mentee_id,
                         ":tokenForCancel": token,
