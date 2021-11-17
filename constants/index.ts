@@ -1,10 +1,18 @@
 export const TABLE_NAME_USER: string = "user";
 export const TABLE_NAME_TIME_SLOT: string = "time-slots";
 export const TABLE_NAME_MENTORSHIP: string = "mentorship";
+export const TABLE_NAME_WARNINGS: string = "warnings";
 
 export const STATUS = {
   ACTIVE: "ACTIVE",
   CANCEL: "CANCEL",
+  CONFIRMED: "CONFIRMED",
+};
+
+export const FILTERDATES = {
+  PAST: "PAST",
+  FUTURE: "FUTURE",
+  ALL: "ALL",
 };
 
 export const RESPONSE_CODES = {
@@ -20,6 +28,38 @@ export const RESPONSE_CODES = {
   "-106": "Unable to get the timezone.",
   "-107": "Unable to get mentorships.",
   "-108": "There is no mentorships.",
-  "-109": "Mentorship already cancelled.",
+  "-109": "The Mentorship is confirmed or cancelled.",
+  "-110": "There was a problem with the confirmation",
+  "-111": "The mentorship is not confirmed",
+  "-112": "The mentorship already has a feedback",
+  "-113": "Bad Request: user_id, date y slots are required",
+  "-200": "Unable to create user. User already exists.",
+  "-201": "Unable to create user.",
+  "-202": "There is no mentors",
+  "-203": "Unable to get all mentors.",
+  "-204": "User not found",
+  "-205": "Unable to get user by id",
+  "-300": "Unable to add a warning",
+  "-301": "The mentee id and email is required",
+  "-302": "The mentee has warnings",
+  "-303": "Unable to get warnings",
+  "-304": "The mentee id is required",
+  "-305": "Unable to delete the warning",
+  "-306": "Unable to add a Time Slot",
+  "-307": "Unable to get Time Slots",
+  "-308": "Time slot not found",
+  "-309": "There was an error trying to update the time slot",
+  "-310":
+    "Bad Request: Missing params. The required params are id and slot",
   "100": "Succesfully mentorship created.",
+  "101": "Mentorship confirmed",
+  "102": "Update feedback succesfully",
+  "103": "Time slot added",
+  "104": "Time slot updated",
+  "200": "User created succesfully",
+  "201": "User",
+  "300": "Warning added",
+  "301": "There is no warnings for this mentee",
+  "302": "Warnings",
+  "303": "Warning deleted",
 };

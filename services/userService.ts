@@ -1,5 +1,6 @@
 import { Callback, Context } from "aws-lambda";
-import { TABLE_NAME_USER } from "../constants";
+import { RESPONSE_CODES, TABLE_NAME_USER } from "../constants";
+import { User } from "../types/userTypes";
 import { throwResponse } from "../utils/throwResponse";
 
 const AWS = require("aws-sdk"); // eslint-disable-line import/no-extraneous-dependencies
@@ -7,11 +8,11 @@ const AWS = require("aws-sdk"); // eslint-disable-line import/no-extraneous-depe
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 let responseMessage = "";
 
-export const createUserService = (
+export const createUserService = async (
   event: any,
   context: Context,
   callback: Callback<any>
-): void => {
+): Promise<void> => {
   const {
     id,
     discord_username,
@@ -29,7 +30,7 @@ export const createUserService = (
     return throwResponse(callback, responseMessage, 400);
   }
 
-  const user = {
+  const user: User = {
     id,
     discord_username,
     full_name,
@@ -50,26 +51,37 @@ export const createUserService = (
     ConditionExpression: "attribute_not_exists(id)",
   };
 
-  dynamoDb.put(params, (error, data) => {
-    if (error) {
-      if (error.code === "ConditionalCheckFailedException") {
-        responseMessage = `Unable to create user. Id ${id} already exists.`;
-        throwResponse(callback, responseMessage, 400);
-      }
-      responseMessage = `Unable to create user. Error: ${error}`;
-      throwResponse(callback, responseMessage, 500);
-    } else {
-      responseMessage = `User created succesfully`;
-      throwResponse(callback, responseMessage, 200);
+  try {
+    const createUser = await dynamoDb.put(params).promise();
+
+    if (createUser.code === "ConditionalCheckFailedException") {
+      const responseCode = "-200";
+      return throwResponse(callback, RESPONSE_CODES[responseCode], 400, {
+        responseMessage: RESPONSE_CODES[responseCode],
+        responseCode,
+      });
     }
-  });
+
+    const responseCode = "200";
+    return throwResponse(callback, RESPONSE_CODES[responseCode], 200, {
+      responseMessage: RESPONSE_CODES[responseCode],
+      responseCode,
+    });
+  } catch (error) {
+    const responseCode = "-201";
+    return throwResponse(callback, RESPONSE_CODES[responseCode], 400, {
+      responseMessage: RESPONSE_CODES[responseCode],
+      responseCode,
+      error,
+    });
+  }
 };
 
-export const getUsersService = (
+export const getUsersService = async (
   event: any,
   context: Context,
   callback: Callback<any>
-): void => {
+): Promise<void> => {
   const params = {
     TableName: TABLE_NAME_USER,
     ExpressionAttributeNames: {
@@ -79,39 +91,60 @@ export const getUsersService = (
       "id, discord_username, full_name, about_me, email, url_photo, #role, links, skills, isActive",
   };
 
-  dynamoDb.scan(params, (err, data) => {
-    if (err) {
-      responseMessage = `Unable to get all Users. Error: ${err}`;
-      throwResponse(callback, responseMessage, 500);
-    } else {
-      throwResponse(callback, "", 200, data.Items);
+  try {
+    let mentors = await dynamoDb.scan(params).promise();
+
+    mentors = mentors.Items?.filter((m) => {
+      return m.role?.includes("mentor");
+    });
+
+    if (mentors.length === 0) {
+      const responseCode = "-202";
+      return throwResponse(callback, RESPONSE_CODES[responseCode], 404, {
+        responseMessage: RESPONSE_CODES[responseCode],
+        responseCode,
+      });
     }
-  });
+
+    return throwResponse(callback, "", 200, mentors);
+  } catch (error) {
+    const responseCode = "-203";
+    return throwResponse(callback, RESPONSE_CODES[responseCode], 404, {
+      responseMessage: RESPONSE_CODES[responseCode],
+      responseCode,
+      error,
+    });
+  }
 };
 
-export const getUserByIdService = (
+export const getUserByIdService = async (
   event: any,
   context: Context,
   callback: Callback<any>
-): void => {
+): Promise<void> => {
   const params = {
     TableName: TABLE_NAME_USER,
     Key: { id: event.pathParameters.id },
   };
+  try {
+    const user = await dynamoDb.get(params).promise();
 
-  dynamoDb.get(params, (err, data) => {
-    if (err) {
-      responseMessage = `Unable to get user by id. Error: ${err}`;
-      throwResponse(callback, responseMessage, 500);
-    } else {
-      if (Object.keys(data).length === 0) {
-        responseMessage = `User with id ${event.pathParameters.id} not found`;
-        throwResponse(callback, responseMessage, 404);
-      } else {
-        throwResponse(callback, "", 200, data.Item);
-      }
+    if (Object.keys(user).length === 0) {
+      const responseCode = "-204";
+      return throwResponse(callback, RESPONSE_CODES[responseCode], 404, {
+        responseMessage: RESPONSE_CODES[responseCode],
+        responseCode,
+      });
     }
-  });
+    return throwResponse(callback, "", 200, user.Item);
+  } catch (error) {
+    const responseCode = "-205";
+    return throwResponse(callback, RESPONSE_CODES[responseCode], 400, {
+      responseMessage: RESPONSE_CODES[responseCode],
+      responseCode,
+      error,
+    });
+  }
 };
 
 export const deleteUserByIdService = (

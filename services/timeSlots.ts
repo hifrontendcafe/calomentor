@@ -2,153 +2,109 @@ import { Callback, Context } from "aws-lambda";
 import { TABLE_NAME_TIME_SLOT } from "../constants";
 import { v4 as uuidv4 } from "uuid";
 import { throwResponse } from "../utils/throwResponse";
+import { makeErrorResponse, makeSuccessResponse } from "../utils/makeResponses";
+import { TimeSlot } from "../types";
+import {
+  createTimeSlot,
+  getTimeSlotsByUserId,
+  getTimeSlotById,
+  fillTimeSlot,
+  freeTimeSlot
+} from "../repository/timeSlot";
 
 const AWS = require("aws-sdk"); // eslint-disable-line import/no-extraneous-dependencies
 
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
-export const addTimeSlots = (
-  event: any,
-  context: Context,
-  callback: Callback<any>
-): void => {
+export const addTimeSlot = async (event: any) => {
   const { user_id, slot_date } = JSON.parse(event.body);
 
   if (!user_id && !slot_date) {
-    const errorMessage = `Bad Request: user_id, date y slots are required`;
-    return throwResponse(callback, errorMessage, 400);
+    return makeErrorResponse(400, "-113");
   }
 
   const date = new Date(slot_date);
 
-  const timeSlot = {
+  const timeSlot: TimeSlot = {
     id: uuidv4(),
     user_id,
     date: date.getTime(),
     is_occupied: false,
-    is_cancelled: false,
     mentee_username: "",
     mentee_id: "",
     tokenForCancel: "",
   };
 
-  const timeSlotInfo = {
-    TableName: TABLE_NAME_TIME_SLOT,
-    Item: timeSlot,
-  };
-
-  dynamoDb.put(timeSlotInfo, (err, result) => {
-    if (err) {
-      return throwResponse(callback, "Unable to add a Time Slot", 400);
-    } else {
-      return throwResponse(callback, "Time Slot added", 200);
-    }
-  });
-};
-
-export const getTimeSlotsByUserId = (
-  event: any,
-  context: Context,
-  callback: Callback<any>
-): void => {
-  const paramsWithoutDate = {
-    TableName: TABLE_NAME_TIME_SLOT,
-    FilterExpression: "user_id = :user_id",
-    ExpressionAttributeValues: {
-      ":user_id": event.pathParameters.id,
-    },
-  };
-  const paramsWithDate = {
-    TableName: TABLE_NAME_TIME_SLOT,
-    FilterExpression: "slot_date = :slot_date, user_id = :user_id",
-    ExpressionAttributeValues: {
-      ":slot_date": event.queryStringParameters?.slot_date,
-      ":user_id": event.pathParameters.id,
-    },
-  };
-  dynamoDb.scan(
-    event.queryStringParameters?.slot_date ? paramsWithDate : paramsWithoutDate,
-    (error, data) => {
-      let dataResponse = data.Items;
-      if (error) {
-        return throwResponse(callback, "Unable to get Time Slots", 400);
-      } else if (data.Items.length < 1) {
-        return throwResponse(callback, "Unable to get Time Slots", 400);
-      }
-      if (event.pathParameters.only_occupied) {
-        dataResponse = dataResponse.filter((m) => !m.is_occupied);
-      }
-      return throwResponse(callback, "Success", 200, dataResponse);
-    }
-  );
-};
-
-export const getTimeSlotsById = (
-  event: any,
-  context: Context,
-  callback: Callback<any>
-): void => {
-  let responseMessage = "";
-  const params = {
-    TableName: TABLE_NAME_TIME_SLOT,
-    Key: { id: event.pathParameters.id },
-  };
-
-  dynamoDb.get(params, (err, data) => {
-    if (err) {
-      responseMessage = `Unable to get time slot by id. Error: ${err}`;
-      throwResponse(callback, responseMessage, 500);
-    } else {
-      if (Object.keys(data).length === 0) {
-        responseMessage = `Time Slot with id ${event.pathParameters.id} not found`;
-        throwResponse(callback, responseMessage, 404);
-      } else {
-        throwResponse(callback, "", 200, data.Item);
-      }
-    }
-  });
-};
-
-export const updateTimeSlot = (
-  event: any,
-  context: Context,
-  callback: Callback<any>
-): void => {
-  const { id, is_occupied } = JSON.parse(event.body);
-
-  if (!id) {
-    const errorMessage = `Bad Request: id y slots are required`;
-    return throwResponse(callback, errorMessage, 400);
+  try {
+    await createTimeSlot(timeSlot);
+  } catch (error) {
+    return makeErrorResponse(400, "-306", error);
   }
 
-  const params = {
-    TableName: TABLE_NAME_TIME_SLOT,
-    Key: {
-      id: id,
-    },
-    ExpressionAttributeValues: {
-      ":is_occupied": is_occupied,
-    },
-    UpdateExpression: "SET is_occupied = :is_occupied",
-    ReturnValues: "ALL_NEW",
-  };
+  return makeSuccessResponse(timeSlot, "103");
+};
 
-  dynamoDb.update(params, (err, result) => {
-    if (err) {
-      return throwResponse(
-        callback,
-        `There Was an error trying to update the slot`,
-        400
-      );
+export const getTimeSlots = async (event: any) => {
+  const { queryStringParameters, pathParameters } = event;
+
+  let timeSlotsData: Awaited<ReturnType<typeof getTimeSlotsByUserId>>;
+
+  try {
+    timeSlotsData = await getTimeSlotsByUserId(pathParameters.id, {
+      slotDate: queryStringParameters?.slot_date,
+      onlyFree: queryStringParameters?.only_free,
+    });
+  } catch (error) {
+    return makeErrorResponse(400, "-307", error);
+  }
+
+  return makeSuccessResponse(timeSlotsData.Items);
+};
+
+export const getTimeSlotsById = async (event: any) => {
+  const { pathParameters } = event;
+
+  let timeSlotData: Awaited<ReturnType<typeof getTimeSlotById>>;
+
+  try {
+    timeSlotData = await getTimeSlotById(pathParameters?.id);
+  } catch (error) {
+    return makeErrorResponse(400, "-103", error);
+  }
+
+  if (!timeSlotData?.Item) {
+    return makeErrorResponse(404, "-308");
+  }
+
+  return makeSuccessResponse(timeSlotData.Item);
+};
+
+export const updateTimeSlotState = async (event: any) => {
+  const { pathParameters } = event;
+  const id = pathParameters.id;
+
+  const { is_occupied } = JSON.parse(event.body);
+
+  if (!id) {
+    return makeErrorResponse(400, "-310");
+  }
+
+  let timeSlotData: Awaited<ReturnType<typeof fillTimeSlot>>;
+  let timeSlot: TimeSlot;
+
+  try {
+    if (is_occupied) {
+      timeSlotData = await fillTimeSlot(id);
     } else {
-      return throwResponse(
-        callback,
-        `The slot was succesfully updated`,
-        200,
-        result.Attributes
-      );
+      timeSlotData = await freeTimeSlot(id);
     }
-  });
+
+    timeSlot = timeSlotData.Attributes;
+  } catch (err) {
+    return makeErrorResponse(400, "-309", err);
+  }
+
+  return makeSuccessResponse(timeSlot, "104");
 };
 
 export const updateMenteeToTimeSlot = (

@@ -1,12 +1,14 @@
 import { Handler, Context, Callback } from "aws-lambda";
+
+export { addTimeSlot, updateTimeSlotState } from "./services/timeSlots";
+
 import {
-  addTimeSlots,
-  updateTimeSlot,
-  getTimeSlotsByUserId,
+  getTimeSlots,
   deleteTimeSlot,
   getTimeSlotsById,
   updateMenteeToTimeSlot,
 } from "./services/timeSlots";
+
 import {
   createUserService,
   activateUserService,
@@ -15,6 +17,7 @@ import {
   deleteUserByIdService,
   updateUserByIdService,
 } from "./services/userService";
+
 import {
   cancelMentorship,
   createMentorship,
@@ -22,8 +25,18 @@ import {
   reminderMentorship,
   updateRoleMentorship,
   checkCancelFunction,
-  getMentorships,
+  confirmationMentorship,
+  sendFeedbackFormMentorship,
 } from "./services/mentorshipService";
+
+import {
+  addWarning,
+  deleteWarning,
+  getAllWarnings,
+  getWarnings,
+} from "./services/warningsService";
+
+import { getMentorships } from "./services/mentorship";
 
 // User functions handlers
 
@@ -101,37 +114,26 @@ export const mentorshipFeedbackForm: Handler = (
   callback: Callback<any>
 ) => feedbackFormMentorship(event, context, callback);
 
-export const getAllMentorships: Handler = (
+export const mentorshipFeedbackSend: Handler = (
   event: any,
   context: Context,
   callback: Callback<any>
-) => getMentorships(event, context, callback);
+) => sendFeedbackFormMentorship(event, context, callback);
+
+export const mentorshipConfirmation: Handler = (
+  event: any,
+  context: Context,
+  callback: Callback<any>
+) => confirmationMentorship(event, context, callback);
+
+export const getAllMentorships: Handler = (event: any, context: Context) =>
+  getMentorships(event, context);
 
 // Time slots functions handlers
 
-export const addTimeSlot: Handler = (
-  event: any,
-  context: Context,
-  callback: Callback<any>
-) => addTimeSlots(event, context, callback);
+export const getTimeSlotsByUser: Handler = (event: any) => getTimeSlots(event);
 
-export const getTimeSlotsByUser: Handler = (
-  event: any,
-  context: Context,
-  callback: Callback<any>
-) => getTimeSlotsByUserId(event, context, callback);
-
-export const getTimeSlot: Handler = (
-  event: any,
-  context: Context,
-  callback: Callback<any>
-) => getTimeSlotsById(event, context, callback);
-
-export const updateSlot: Handler = (
-  event: any,
-  context: Context,
-  callback: Callback<any>
-) => updateTimeSlot(event, context, callback);
+export const getTimeSlot: Handler = (event: any) => getTimeSlotsById(event);
 
 export const updateMenteeSlot: Handler = (
   event: any,
@@ -144,3 +146,29 @@ export const deleteSlot: Handler = (
   context: Context,
   callback: Callback<any>
 ) => deleteTimeSlot(event, context, callback);
+
+// Warnings functions handlers
+
+export const addWarningMentorship: Handler = (
+  event: any,
+  context: Context,
+  callback: Callback<any>
+) => addWarning(event, context, callback);
+
+export const getWarningsMentorship: Handler = (
+  event: any,
+  context: Context,
+  callback: Callback<any>
+) => getAllWarnings(event, context, callback);
+
+export const getWarningsMentorshipByMentee: Handler = (
+  event: any,
+  context: Context,
+  callback: Callback<any>
+) => getWarnings(event, context, callback);
+
+export const deleteWarningMentorship: Handler = (
+  event: any,
+  context: Context,
+  callback: Callback<any>
+) => deleteWarning(event, context, callback);

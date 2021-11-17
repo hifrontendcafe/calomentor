@@ -111,11 +111,11 @@ functions:
           method: get
           cors: true
           private: true
-  updateTimeSlot:
-    handler: index.updateSlot
+  updateTimeSlotState:
+    handler: index.updateTimeSlotState
     events:
       - http:
-          path: time-slot
+          path: time-slot/{id}
           method: patch
           cors: true
           private: true
@@ -132,6 +132,38 @@ functions:
     events:
       - http:
           path: time-slot/{id}
+          method: delete
+          cors: true
+          private: true
+  addWarningMentorship:
+    handler: index.addWarningMentorship
+    events:
+      - http:
+          path: warning
+          method: post
+          cors: true
+          private: true
+  getWarningsMentorship:
+    handler: index.getWarningsMentorship
+    events:
+      - http:
+          path: warning
+          method: get
+          cors: true
+          private: true
+  getWarningsMentorshipByMentee:
+    handler: index.getWarningsMentorshipByMentee
+    events:
+      - http:
+          path: warning/{id}
+          method: get
+          cors: true
+          private: true
+  deleteWarningMentorship:
+    handler: index.deleteWarningMentorship
+    events:
+      - http:
+          path: warning/{id}
           method: delete
           cors: true
           private: true
@@ -159,6 +191,22 @@ functions:
           method: get
           cors: true
           private: true
+  mentorshipConfirmation:
+    handler: index.mentorshipConfirmation
+    events:
+      - http:
+          path: mentorship/confirmation
+          method: patch
+          cors: true
+          private: true
+  mentorshipFeedback:
+    handler: index.mentorshipFeedbackForm
+    events:
+      - http:
+          path: mentorship/feedback
+          method: patch
+          cors: true
+          private: true
   mentorshipCreate:
     handler: index.mentorshipCreate
   mentorshipCancel:
@@ -167,6 +215,8 @@ functions:
     handler: index.checkCancel
   mentorshipReminder:
     handler: index.mentorshipReminder
+  mentorshipFeedbackSend:
+    handler: index.mentorshipFeedbackSend
 
 stepFunctions:
   stateMachines:
@@ -258,6 +308,25 @@ stepFunctions:
                     ],
                   ],
               }
+            Next: MENTORSHIP_FEEDBACK_WAIT
+          MENTORSHIP_FEEDBACK_WAIT:
+            Type: Wait
+            TimestampPath: "$.responseData.mentorshipDate"
+            Next: SEND_FEEDBACK
+          SEND_FEEDBACK:
+            Type: Task
+            Resource:
+              {
+                "Fn::Join":
+                  [
+                    ":",
+                    [
+                      "arn:aws:lambda:sa-east-1",
+                      { "Ref": "AWS::AccountId" },
+                      "function:${self:service}-${self:provider.stage}-mentorshipFeedbackSend",
+                    ],
+                  ],
+              }
             End: true
 
 resources:
@@ -304,6 +373,20 @@ resources:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
         TableName: mentorship
+    CalomentorWarningsDynamoDB:
+      Type: "AWS::DynamoDB::Table"
+      DeletionPolicy: Retain
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: warnings
 custom:
   serverless-offline:
     httpPort: 3001

@@ -22,7 +22,7 @@
     "serverless-plugin-typescript": "^2.0.0",
     "serverless-pseudo-parameters": "^2.6.0",
     "serverless-step-functions": "^3.0.0",
-    "typescript": "^4.3.5"
+    "typescript": "^4.4.4"
   },
   "dependencies": {
     "axios": "^0.24.0",
