@@ -1,5 +1,15 @@
 import { TABLE_NAME_TIME_SLOT } from "../constants";
-import { get, put, scan, ScanInput, PutItemResult, ScanResult, GetItemResult } from "../utils/dynamoDb";
+import {
+  get,
+  put,
+  scan,
+  update,
+  ScanInput,
+  PutItemResult,
+  ScanResult,
+  GetItemResult,
+  UpdateItemResult
+} from "../utils/dynamoDb";
 import { TimeSlot } from "../types";
 import { toInt } from "../utils/toInt";
 
@@ -50,4 +60,28 @@ export function createTimeSlot(timeSlotInfo: TimeSlot) {
     TableName: TABLE_NAME_TIME_SLOT,
     Item: timeSlotInfo,
   }) as Promise<PutItemResult<TimeSlot>>;
+}
+
+interface UpdateParams {
+  isOccupied: boolean;
+}
+
+function updateTimeSlot(id: number, { isOccupied }: UpdateParams) {
+  return update<TimeSlot>({
+    TableName: TABLE_NAME_TIME_SLOT,
+    Key: { id },
+    ExpressionAttributeValues: {
+      ":is_occupied": isOccupied,
+    },
+    UpdateExpression: "SET is_occupied = :is_occupied",
+    ReturnValues: "ALL_NEW",
+  }) as Promise<UpdateItemResult<TimeSlot>>;
+}
+
+export function fillTimeSlot(id) {
+  return updateTimeSlot(id, { isOccupied: true });
+}
+
+export function freeTimeSlot(id) {
+  return updateTimeSlot(id, { isOccupied: false });
 }

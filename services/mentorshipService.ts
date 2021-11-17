@@ -8,6 +8,8 @@ import {
   TABLE_NAME_TIME_SLOT,
   FILTERDATES,
 } from "../constants";
+
+import { fillTimeSlot, freeTimeSlot } from "../repository/timeSlot";
 import { v4 as uuidv4 } from "uuid";
 import { isPast, subDays } from "date-fns";
 import { format, zonedTimeToUtc } from "date-fns-tz";
@@ -137,15 +139,7 @@ export const createMentorship = (
                 });
               } else {
                 try {
-                  await axios({
-                    method: "PATCH",
-                    headers: { "x-api-key": process.env.API_KEY },
-                    data: JSON.stringify({
-                      id: mentorship.time_slot_id,
-                      is_occupied: true,
-                    }),
-                    url: `${process.env.BASE_URL}/time-slot`,
-                  });
+                  await fillTimeSlot(mentorship.time_slot_id);
 
                   await axios({
                     method: "PATCH",
@@ -283,19 +277,7 @@ export const cancelMentorship = async (
       });
     }
 
-    await dynamoDb
-      .update({
-        TableName: TABLE_NAME_TIME_SLOT,
-        Key: {
-          id: mentorship.Item?.time_slot_id,
-        },
-        ExpressionAttributeValues: {
-          ":is_occupied": false,
-        },
-        UpdateExpression: "SET is_occupied = :is_occupied",
-        ReturnValues: "ALL_NEW",
-      })
-      .promise();
+    await freeTimeSlot(mentorship.Item?.time_slot_id);
 
     await dynamoDb
       .update({

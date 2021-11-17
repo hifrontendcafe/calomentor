@@ -8,6 +8,8 @@ import {
   createTimeSlot,
   getTimeSlotsByUserId,
   getTimeSlotById,
+  fillTimeSlot,
+  freeTimeSlot
 } from "../repository/timeSlot";
 
 const AWS = require("aws-sdk"); // eslint-disable-line import/no-extraneous-dependencies
@@ -77,46 +79,32 @@ export const getTimeSlotsById = async (event: any) => {
   return makeSuccessResponse(timeSlotData.Item);
 };
 
-export const updateTimeSlot = (
-  event: any,
-  context: Context,
-  callback: Callback<any>
-): void => {
-  const { id, is_occupied } = JSON.parse(event.body);
+export const updateTimeSlotState = async (event: any) => {
+  const { pathParameters } = event;
+  const id = pathParameters.id;
+
+  const { is_occupied } = JSON.parse(event.body);
 
   if (!id) {
-    const errorMessage = `Bad Request: id y slots are required`;
-    return throwResponse(callback, errorMessage, 400);
+    return makeErrorResponse(400, "-310");
   }
 
-  const params = {
-    TableName: TABLE_NAME_TIME_SLOT,
-    Key: {
-      id: id,
-    },
-    ExpressionAttributeValues: {
-      ":is_occupied": is_occupied,
-    },
-    UpdateExpression: "SET is_occupied = :is_occupied",
-    ReturnValues: "ALL_NEW",
-  };
+  let timeSlotData: Awaited<ReturnType<typeof fillTimeSlot>>;
+  let timeSlot: TimeSlot;
 
-  dynamoDb.update(params, (err, result) => {
-    if (err) {
-      return throwResponse(
-        callback,
-        `There Was an error trying to update the slot`,
-        400
-      );
+  try {
+    if (is_occupied) {
+      timeSlotData = await fillTimeSlot(id);
     } else {
-      return throwResponse(
-        callback,
-        `The slot was succesfully updated`,
-        200,
-        result.Attributes
-      );
+      timeSlotData = await freeTimeSlot(id);
     }
-  });
+
+    timeSlot = timeSlotData.Attributes;
+  } catch (err) {
+    return makeErrorResponse(400, "-309", err);
+  }
+
+  return makeSuccessResponse(timeSlot, "104");
 };
 
 export const updateMenteeToTimeSlot = (

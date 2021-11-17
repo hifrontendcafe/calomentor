@@ -32,7 +32,7 @@ type Put = <T extends AttributeMap>(
   params: PutItemInput
 ) => Promise<PutItemResult<T | AttributeMap>>;
 
-interface UpdateItemResult<T> extends UpdateItemOutput {
+export interface UpdateItemResult<T> extends UpdateItemOutput {
   Attributes?: T;
 }
 

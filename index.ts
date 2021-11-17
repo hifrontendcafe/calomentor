@@ -1,9 +1,8 @@
 import { Handler, Context, Callback } from "aws-lambda";
 
-export { addTimeSlot } from "./services/timeSlots";
+export { addTimeSlot, updateTimeSlotState } from "./services/timeSlots";
 
 import {
-  updateTimeSlot,
   getTimeSlots,
   deleteTimeSlot,
   getTimeSlotsById,
@@ -132,23 +131,9 @@ export const getAllMentorships: Handler = (event: any, context: Context) =>
 
 // Time slots functions handlers
 
-export const getTimeSlotsByUser: Handler = (
-  event: any,
-  context: Context,
-  callback: Callback<any>
-) => getTimeSlots(event, context, callback);
+export const getTimeSlotsByUser: Handler = (event: any) => getTimeSlots(event);
 
-export const getTimeSlot: Handler = (
-  event: any,
-  context: Context,
-  callback: Callback<any>
-) => getTimeSlotsById(event, context, callback);
-
-export const updateSlot: Handler = (
-  event: any,
-  context: Context,
-  callback: Callback<any>
-) => updateTimeSlot(event, context, callback);
+export const getTimeSlot: Handler = (event: any) => getTimeSlotsById(event);
 
 export const updateMenteeSlot: Handler = (
   event: any,

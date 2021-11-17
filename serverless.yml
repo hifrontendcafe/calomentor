@@ -111,11 +111,11 @@ functions:
           method: get
           cors: true
           private: true
-  updateTimeSlot:
-    handler: index.updateSlot
+  updateTimeSlotState:
+    handler: index.updateTimeSlotState
     events:
       - http:
-          path: time-slot
+          path: time-slot/{id}
           method: patch
           cors: true
           private: true
