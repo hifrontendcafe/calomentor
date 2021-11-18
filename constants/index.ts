@@ -15,6 +15,13 @@ export const FILTERDATES = {
   ALL: "ALL",
 };
 
+export const WARNSTATE = {
+  ACTIVE: "ACTIVE",
+  FORGIVE: "FORGIVE",
+};
+
+export const WARNTYPE = ["NO_ASSIST", "COC_WARN"];
+
 export const RESPONSE_CODES = {
   "0": "OK.",
   "-1": "Unexpected error.",
@@ -49,8 +56,7 @@ export const RESPONSE_CODES = {
   "-307": "Unable to get Time Slots",
   "-308": "Time slot not found",
   "-309": "There was an error trying to update the time slot",
-  "-310":
-    "Bad Request: Missing params. The required params are id and slot",
+  "-310": "Bad Request: Missing params. The required params are id and slot",
   "100": "Succesfully mentorship created.",
   "101": "Mentorship confirmed",
   "102": "Update feedback succesfully",
