@@ -31,7 +31,7 @@ import {
 
 import {
   addWarning,
-  deleteWarning,
+  forgiveWarning,
   getAllWarnings,
   getWarnings,
 } from "./services/warningsService";
@@ -167,8 +167,8 @@ export const getWarningsMentorshipByMentee: Handler = (
   callback: Callback<any>
 ) => getWarnings(event, context, callback);
 
-export const deleteWarningMentorship: Handler = (
+export const forgiveWarningMentorship: Handler = (
   event: any,
   context: Context,
   callback: Callback<any>
-) => deleteWarning(event, context, callback);
+) => forgiveWarning(event, context, callback);

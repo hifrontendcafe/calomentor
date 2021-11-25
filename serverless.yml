@@ -159,12 +159,12 @@ functions:
           method: get
           cors: true
           private: true
-  deleteWarningMentorship:
-    handler: index.deleteWarningMentorship
+  forgiveWarningMentorship:
+    handler: index.forgiveWarningMentorship
     events:
       - http:
           path: warning/{id}
-          method: delete
+          method: patch
           cors: true
           private: true
   mentorshipCreateAPI:

@@ -1,5 +1,10 @@
 import { Callback, Context } from "aws-lambda";
-import { RESPONSE_CODES, TABLE_NAME_WARNINGS } from "../constants";
+import {
+  RESPONSE_CODES,
+  TABLE_NAME_WARNINGS,
+  WARNSTATE,
+  WARNTYPE,
+} from "../constants";
 import { v4 as uuidv4 } from "uuid";
 import { throwResponse } from "../utils/throwResponse";
 
@@ -12,9 +17,16 @@ export const addWarning = async (
   context: Context,
   callback: Callback<any>
 ): Promise<void> => {
-  const { mentee_id, mentee_mail } = JSON.parse(event.body);
+  const { mentee_id, warn_type, warn_cause, mentorship_id } = JSON.parse(
+    event.body
+  );
 
-  if (!mentee_id && !mentee_mail) {
+  if (
+    !mentee_id &&
+    !WARNTYPE.includes(warn_type) &&
+    !warn_cause &&
+    !mentorship_id
+  ) {
     const responseCode = "-301";
     return throwResponse(callback, RESPONSE_CODES[responseCode], 400, {
       responseMessage: RESPONSE_CODES[responseCode],
@@ -24,8 +36,13 @@ export const addWarning = async (
 
   const warning = {
     id: uuidv4(),
+    date: Date.now(),
     mentee_id,
-    mentee_mail,
+    warn_type,
+    warn_cause,
+    mentorship_id,
+    status: WARNSTATE.ACTIVE,
+    forgive_cause: "",
   };
 
   const warningInfo = {
@@ -97,7 +114,8 @@ export const getAllWarnings = async (
 ): Promise<void> => {
   const params = {
     TableName: TABLE_NAME_WARNINGS,
-    ProjectionExpression: "id, mentee_id, mentee_mail",
+    ProjectionExpression:
+      "id, mentee_id, warn_type, warn_cause, mentorship_id, date, forgive_cause",
   };
 
   try {
@@ -119,11 +137,12 @@ export const getAllWarnings = async (
   }
 };
 
-export const deleteWarning = async (
+export const forgiveWarning = async (
   event: any,
   context: Context,
   callback: Callback<any>
 ): Promise<void> => {
+  const { forgive_cause } = JSON.parse(event.body);
   if (!event.pathParameters.id) {
     const responseCode = "-304";
     return throwResponse(callback, RESPONSE_CODES[responseCode], 400, {
@@ -134,14 +153,17 @@ export const deleteWarning = async (
 
   const params = {
     TableName: TABLE_NAME_WARNINGS,
-    Key: {
-      id: event.pathParameters.id,
+    Key: { id: event.pathParameters.id },
+    ExpressionAttributeValues: {
+      ":status": WARNSTATE.FORGIVE,
+      ":forgive_cause": forgive_cause,
     },
-    ReturnValues: "ALL_OLD",
+    UpdateExpression: "SET forgive_cause = :forgive_cause, status = :status",
+    ReturnValues: "ALL_NEW",
   };
 
   try {
-    await dynamoDb.delete(params).promise();
+    await dynamoDb.update(params).promise();
     const responseCode = "303";
     return throwResponse(callback, RESPONSE_CODES[responseCode], 200, {
       responseMessage: RESPONSE_CODES[responseCode],
