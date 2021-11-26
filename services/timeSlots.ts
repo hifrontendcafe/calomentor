@@ -9,7 +9,8 @@ import {
   getTimeSlotsByUserId,
   getTimeSlotById,
   fillTimeSlot,
-  freeTimeSlot
+  freeTimeSlot,
+  addMentee,
 } from "../repository/timeSlot";
 
 const AWS = require("aws-sdk"); // eslint-disable-line import/no-extraneous-dependencies
@@ -83,16 +84,17 @@ export const updateTimeSlotState = async (event: any) => {
   const { pathParameters } = event;
   const id = pathParameters.id;
 
-  const { is_occupied } = JSON.parse(event.body);
-
   if (!id) {
-    return makeErrorResponse(400, "-310");
+    return makeErrorResponse(400, "-311");
   }
 
-  let timeSlotData: Awaited<ReturnType<typeof fillTimeSlot>>;
+  const { is_occupied } = JSON.parse(event.body);
+
   let timeSlot: TimeSlot;
 
   try {
+    let timeSlotData: Awaited<ReturnType<typeof fillTimeSlot>>;
+
     if (is_occupied) {
       timeSlotData = await fillTimeSlot(id);
     } else {
@@ -107,51 +109,31 @@ export const updateTimeSlotState = async (event: any) => {
   return makeSuccessResponse(timeSlot, "104");
 };
 
-export const updateMenteeToTimeSlot = (
-  event: any,
-  context: Context,
-  callback: Callback<any>
-): void => {
-  const { id, mentee_username, mentee_id, tokenForCancel } = JSON.parse(
-    event.body
-  );
+export const updateMenteeToTimeSlot = async (event: any) => {
+  const { pathParameters } = event;
+  const id = pathParameters.id;
 
   if (!id) {
-    const errorMessage = `Bad Request: id are required`;
-    return throwResponse(callback, errorMessage, 400);
+    return makeErrorResponse(400, "-311");
   }
 
-  const params = {
-    TableName: TABLE_NAME_TIME_SLOT,
-    Key: {
-      id: id,
-    },
-    ExpressionAttributeValues: {
-      ":mentee_id": mentee_id,
-      ":mentee_username": mentee_username,
-      ":tokenForCancel": tokenForCancel,
-    },
-    UpdateExpression:
-      "SET mentee_id = :mentee_id, mentee_username = :mentee_username, tokenForCancel = :tokenForCancel",
-    ReturnValues: "ALL_NEW",
-  };
+  const { mentee_username, mentee_id, tokenForCancel } = JSON.parse(event.body);
 
-  dynamoDb.update(params, (err, result) => {
-    if (err) {
-      return throwResponse(
-        callback,
-        `There Was an error trying to update the slot`,
-        400
-      );
-    } else {
-      return throwResponse(
-        callback,
-        `The slot was succesfully updated`,
-        200,
-        result.Attributes
-      );
-    }
-  });
+  let timeSlot: TimeSlot;
+
+  try {
+    const timeSlotData = await addMentee(id, {
+      id: mentee_id,
+      username: mentee_username,
+      tokenForCancel,
+    });
+
+    timeSlot = timeSlotData.Attributes;
+  } catch (err) {
+    return makeErrorResponse(400, "-309", err);
+  }
+
+  return makeSuccessResponse(timeSlot, "104");
 };
 
 export const deleteTimeSlot = (

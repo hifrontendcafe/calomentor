@@ -58,6 +58,7 @@ export const RESPONSE_CODES = {
   "-308": "Time slot not found",
   "-309": "There was an error trying to update the time slot",
   "-310": "Bad Request: Missing params. The required params are id and slot",
+  "-311": "Bad Request: Missing params. id is required",
   "100": "Succesfully mentorship created.",
   "101": "Mentorship confirmed",
   "102": "Update feedback succesfully",
