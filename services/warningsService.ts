@@ -1,6 +1,8 @@
 import { Callback, Context } from "aws-lambda";
 import {
   RESPONSE_CODES,
+  STATUS,
+  TABLE_NAME_MENTORSHIP,
   TABLE_NAME_WARNINGS,
   WARNSTATE,
   WARNTYPE,
@@ -34,7 +36,7 @@ export const addWarning = async (
     });
   }
 
-  const warning = {
+  const warningData = {
     id: uuidv4(),
     date: Date.now(),
     mentee_id,
@@ -47,16 +49,27 @@ export const addWarning = async (
 
   const warningInfo = {
     TableName: TABLE_NAME_WARNINGS,
-    Item: warning,
+    Item: warningData,
+  };
+
+  const paramsUpdate = {
+    TableName: TABLE_NAME_MENTORSHIP,
+    Key: { id: mentorship_id },
+    ExpressionAttributeValues: {
+      ":mentorship_status": STATUS.WITHWARNING,
+    },
+    UpdateExpression: "SET mentorship_status = :mentorship_status",
+    ReturnValues: "ALL_NEW",
   };
 
   try {
-    const warning = await dynamoDb.put(warningInfo).promise();
+    await dynamoDb.put(warningInfo).promise();
+    await dynamoDb.update(paramsUpdate).promise();
     const responseCode = "300";
     return throwResponse(callback, RESPONSE_CODES[responseCode], 200, {
       responseMessage: RESPONSE_CODES[responseCode],
       responseCode,
-      warning,
+      warning: warningData,
     });
   } catch (error) {
     const responseCode = "-300";

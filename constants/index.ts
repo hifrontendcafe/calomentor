@@ -7,6 +7,7 @@ export const STATUS = {
   ACTIVE: "ACTIVE",
   CANCEL: "CANCEL",
   CONFIRMED: "CONFIRMED",
+  WITHWARNING: "WITHWARNING",
 };
 
 export const FILTERDATES = {
