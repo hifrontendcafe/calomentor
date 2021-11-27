@@ -119,6 +119,10 @@ export const updateMenteeToTimeSlot = async (event: any) => {
 
   const { mentee_username, mentee_id, tokenForCancel } = JSON.parse(event.body);
 
+  if (!mentee_username || !mentee_id || !tokenForCancel) {
+    return makeErrorResponse(400, "-311");
+  }
+
   let timeSlot: TimeSlot;
 
   try {
