@@ -61,11 +61,14 @@ export const RESPONSE_CODES = {
   "-311": "Bad Request: Missing params. id is required",
   "-312":
     "Bad Request: Missing params. The required params are mentee_username, mentee_id and tokenForCancel",
+  "-313":
+    "There Was an error trying to delete the slot or the slot doesn't exist",
   "100": "Succesfully mentorship created.",
   "101": "Mentorship confirmed",
   "102": "Update feedback succesfully",
   "103": "Time slot added",
   "104": "Time slot updated",
+  "105": "Time slot successfully deleted",
   "200": "User created succesfully",
   "201": "User",
   "300": "Warning added",

@@ -9,6 +9,7 @@ import {
   ScanResult,
   GetItemResult,
   UpdateItemResult,
+  deleteItem,
 } from "../utils/dynamoDb";
 import { TimeSlot } from "../types";
 import { toInt } from "../utils/toInt";
@@ -115,6 +116,14 @@ function updateTimeSlot(id: string, payload: UpdateParams) {
   return update<TimeSlot>(params) as Promise<UpdateItemResult<TimeSlot>>;
 }
 
+export function deleteTimeSlot(id: string) {
+  return deleteItem<TimeSlot>({
+    TableName: TABLE_NAME_TIME_SLOT,
+    Key: { id },
+    ReturnValues: "ALL_OLD",
+  });
+}
+
 export function fillTimeSlot(id: string) {
   return updateTimeSlot(id, {
     type: "CHANGE_OCCUPIED_STATE",
@@ -129,6 +138,6 @@ export function freeTimeSlot(id: string) {
   });
 }
 
-export function addMentee(id: string, mentee: Mentee) {
+export function addMenteeToTimeSlot(id: string, mentee: Mentee) {
   return updateTimeSlot(id, { type: "ADD_MENTEE", mentee });
 }
