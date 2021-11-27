@@ -4,10 +4,10 @@ import { TimeSlot } from "../types";
 import {
   createTimeSlot,
   getTimeSlotsByUserId,
-  getTimeSlotById,
+  getTimeSlotById as repositoryGetTimeSlotById,
   fillTimeSlot,
   freeTimeSlot,
-  addMenteeToTimeSlot,
+  addMenteeToTimeSlot as repositoryAddMenteeToTimeSlot,
   deleteTimeSlot as repositoryDeleteTimeSlot,
 } from "../repository/timeSlot";
 
@@ -39,7 +39,7 @@ export const addTimeSlot = async (event: any) => {
   return makeSuccessResponse(timeSlot, "103");
 };
 
-export const getTimeSlots = async (event: any) => {
+export const getTimeSlotsByUser = async (event: any) => {
   const { queryStringParameters, pathParameters } = event;
 
   let timeSlotsData: Awaited<ReturnType<typeof getTimeSlotsByUserId>>;
@@ -56,13 +56,13 @@ export const getTimeSlots = async (event: any) => {
   return makeSuccessResponse(timeSlotsData.Items);
 };
 
-export const getTimeSlotsById = async (event: any) => {
+export const getTimeSlotById = async (event: any) => {
   const { pathParameters } = event;
 
-  let timeSlotData: Awaited<ReturnType<typeof getTimeSlotById>>;
+  let timeSlotData: Awaited<ReturnType<typeof repositoryGetTimeSlotById>>;
 
   try {
-    timeSlotData = await getTimeSlotById(pathParameters?.id);
+    timeSlotData = await repositoryGetTimeSlotById(pathParameters?.id);
   } catch (error) {
     return makeErrorResponse(400, "-103", error);
   }
@@ -103,7 +103,7 @@ export const updateTimeSlotState = async (event: any) => {
   return makeSuccessResponse(timeSlot, "104");
 };
 
-export const updateMenteeToTimeSlot = async (event: any) => {
+export const addMenteeToTimeSlot = async (event: any) => {
   const { pathParameters } = event;
   const id = pathParameters.id;
 
@@ -120,7 +120,7 @@ export const updateMenteeToTimeSlot = async (event: any) => {
   let timeSlot: TimeSlot;
 
   try {
-    const timeSlotData = await addMenteeToTimeSlot(id, {
+    const timeSlotData = await repositoryAddMenteeToTimeSlot(id, {
       id: mentee_id,
       username: mentee_username,
       tokenForCancel,
