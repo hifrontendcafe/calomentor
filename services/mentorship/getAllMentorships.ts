@@ -8,7 +8,7 @@ import {
 } from "../../utils/makeResponses";
 import { Mentorship } from "../../types";
 
-import { RESPONSE_CODES, FILTERDATES } from "../../constants";
+import { FILTERDATES } from "../../constants";
 
 const getMentorships = async (event: any, _context: Context) => {
   const { pathParameters, queryStringParameters } = event;
@@ -22,11 +22,11 @@ const getMentorships = async (event: any, _context: Context) => {
   try {
     data = await getMentorshipsByMentorId(id);
   } catch (err) {
-    return makeErrorResponse(400, RESPONSE_CODES["-107"], err);
+    return makeErrorResponse(400, "-107", err);
   }
 
   if (data.Items.length === 0) {
-    return makeErrorResponse(404, RESPONSE_CODES["-108"]);
+    return makeErrorResponse(404, "-108");
   }
 
   /* only filter when filter exists */
@@ -38,9 +38,9 @@ const getMentorships = async (event: any, _context: Context) => {
 
   for (const mentorship of mentorshipsData) {
     const timeSlotResult = await getTimeSlotById(mentorship.time_slot_id);
-    
+
     if (!timeSlotResult || !timeSlotResult.Item) {
-      throw new Error(RESPONSE_CODES["-103"]);
+      return makeErrorResponse(500, "-103");
     }
 
     const timeSlot = timeSlotResult.Item;

@@ -29,7 +29,7 @@ export const addWarning = async (
     !warn_cause &&
     !mentorship_id
   ) {
-    const responseCode = "-301";
+    const responseCode: keyof typeof RESPONSE_CODES = "-301";
     return throwResponse(callback, RESPONSE_CODES[responseCode], 400, {
       responseMessage: RESPONSE_CODES[responseCode],
       responseCode,
@@ -65,14 +65,14 @@ export const addWarning = async (
   try {
     await dynamoDb.put(warningInfo).promise();
     await dynamoDb.update(paramsUpdate).promise();
-    const responseCode = "300";
+    const responseCode: keyof typeof RESPONSE_CODES = "300";
     return throwResponse(callback, RESPONSE_CODES[responseCode], 200, {
       responseMessage: RESPONSE_CODES[responseCode],
       responseCode,
       warning: warningData,
     });
   } catch (error) {
-    const responseCode = "-300";
+    const responseCode: keyof typeof RESPONSE_CODES = "-300";
     return throwResponse(callback, RESPONSE_CODES[responseCode], 400, {
       responseMessage: RESPONSE_CODES[responseCode],
       responseCode,
@@ -98,20 +98,20 @@ export const getWarnings = async (
     const warnings = await dynamoDb.scan(params).promise();
     console.log(warnings);
     if (warnings.Items?.length === 0) {
-      const responseCode = "301";
+      const responseCode: keyof typeof RESPONSE_CODES = "301";
       return throwResponse(callback, RESPONSE_CODES[responseCode], 200, {
         responseMessage: RESPONSE_CODES[responseCode],
         responseCode,
       });
     }
-    const responseCode = "-302";
+    const responseCode: keyof typeof RESPONSE_CODES = "-302";
     return throwResponse(callback, RESPONSE_CODES[responseCode], 400, {
       responseMessage: RESPONSE_CODES[responseCode],
       responseCode,
       warnings: warnings.Items,
     });
   } catch (error) {
-    const responseCode = "-303";
+    const responseCode: keyof typeof RESPONSE_CODES = "-303";
     return throwResponse(callback, RESPONSE_CODES[responseCode], 400, {
       responseMessage: RESPONSE_CODES[responseCode],
       responseCode,
@@ -134,14 +134,14 @@ export const getAllWarnings = async (
   try {
     const warnings = await dynamoDb.scan(params).promise();
 
-    const responseCode = "302";
+    const responseCode: keyof typeof RESPONSE_CODES = "302";
     return throwResponse(callback, RESPONSE_CODES[responseCode], 200, {
       responseMessage: RESPONSE_CODES[responseCode],
       responseCode,
       warnings: warnings.Items,
     });
   } catch (error) {
-    const responseCode = "-303";
+    const responseCode: keyof typeof RESPONSE_CODES = "-303";
     return throwResponse(callback, RESPONSE_CODES[responseCode], 400, {
       responseMessage: RESPONSE_CODES[responseCode],
       responseCode,
@@ -157,7 +157,7 @@ export const forgiveWarning = async (
 ): Promise<void> => {
   const { forgive_cause } = JSON.parse(event.body);
   if (!event.pathParameters.id) {
-    const responseCode = "-304";
+    const responseCode: keyof typeof RESPONSE_CODES = "-304";
     return throwResponse(callback, RESPONSE_CODES[responseCode], 400, {
       responseMessage: RESPONSE_CODES[responseCode],
       responseCode,
@@ -177,13 +177,13 @@ export const forgiveWarning = async (
 
   try {
     await dynamoDb.update(params).promise();
-    const responseCode = "303";
+    const responseCode: keyof typeof RESPONSE_CODES = "303";
     return throwResponse(callback, RESPONSE_CODES[responseCode], 200, {
       responseMessage: RESPONSE_CODES[responseCode],
       responseCode,
     });
   } catch (error) {
-    const responseCode = "-305";
+    const responseCode: keyof typeof RESPONSE_CODES = "-305";
     return throwResponse(callback, RESPONSE_CODES[responseCode], 400, {
       responseMessage: RESPONSE_CODES[responseCode],
       responseCode,
