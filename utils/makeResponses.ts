@@ -1,9 +1,18 @@
+import type { OutgoingHttpHeaders } from "http";
 import { RESPONSE_CODES } from "../constants";
+
+interface Headers extends OutgoingHttpHeaders {}
+
+export interface Response {
+  statusCode: number;
+  body: any;
+  headers: Headers;
+}
 
 export function makeSuccessResponse(
   data: any,
   responseCode: keyof typeof RESPONSE_CODES = "0"
-) {
+): Response {
   return {
     statusCode: 200,
     body: JSON.stringify({
