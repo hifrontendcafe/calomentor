@@ -117,7 +117,7 @@ export const addMenteeToTimeSlot = async (event: any) => {
     return makeErrorResponse(400, "-311");
   }
 
-  let timeSlot: TimeSlot;
+  let timeSlot: TimeSlot | undefined;
 
   try {
     const timeSlotData = await repositoryAddMenteeToTimeSlot(id, {
@@ -139,14 +139,21 @@ export const deleteTimeSlot = async (event: any) => {
     return makeErrorResponse(400, "-310");
   }
 
-  let deletedResponseData;
+  let deletedTimeSlot: TimeSlot | undefined;
+
   try {
-    deletedResponseData = await repositoryDeleteTimeSlot(
+    const deletedResponseData = await repositoryDeleteTimeSlot(
       event.pathParameters.id
     );
+
+    deletedTimeSlot = deletedResponseData.Attributes;
   } catch (err) {
     return makeErrorResponse(400, "-313", err);
   }
 
-  return makeSuccessResponse(deletedResponseData, "105");
+  if (deletedTimeSlot === undefined) {
+    return makeErrorResponse(400, "-314");
+  }
+
+  return makeSuccessResponse(deletedTimeSlot, "105");
 };

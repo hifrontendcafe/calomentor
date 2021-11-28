@@ -10,6 +10,7 @@ import {
   GetItemResult,
   UpdateItemResult,
   deleteItem,
+  DeleteItemResult,
 } from "../utils/dynamoDb";
 import { TimeSlot } from "../types";
 import { toInt } from "../utils/toInt";
@@ -121,7 +122,7 @@ export function deleteTimeSlot(id: string) {
     TableName: TABLE_NAME_TIME_SLOT,
     Key: { id },
     ReturnValues: "ALL_OLD",
-  });
+  }) as Promise<DeleteItemResult<TimeSlot>>;
 }
 
 export function fillTimeSlot(id: string) {
