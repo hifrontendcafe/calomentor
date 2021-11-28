@@ -1,25 +1,26 @@
 import { TABLE_NAME_TIME_SLOT } from "../constants";
-import {
-  get,
-  put,
-  scan,
-  update,
+
+import { get, put, scan, update, deleteItem } from "../utils/dynamoDb";
+
+import type {
   ScanInput,
   PutItemResult,
   ScanResult,
   GetItemResult,
   UpdateItemResult,
-  deleteItem,
   DeleteItemResult,
 } from "../utils/dynamoDb";
-import { TimeSlot } from "../types";
+
+import type { TimeSlot } from "../types";
 import { toInt } from "../utils/toInt";
+import type { AWSError } from "aws-sdk";
+import type { PromiseResult } from "aws-sdk/lib/request";
 
 export function getTimeSlotById(id: string) {
   return get<TimeSlot>({
     TableName: TABLE_NAME_TIME_SLOT,
     Key: { id },
-  }) as Promise<GetItemResult<TimeSlot>>;
+  }) as Promise<PromiseResult<GetItemResult<TimeSlot>, AWSError>>;
 }
 
 interface TimeSlotFilters {
@@ -54,14 +55,16 @@ export function getTimeSlotsByUserId(
     query.ExpressionAttributeValues[":is_occupied"] = false;
   }
 
-  return scan<TimeSlot[]>(query) as Promise<ScanResult<TimeSlot>>;
+  return scan<TimeSlot[]>(query) as Promise<
+    PromiseResult<ScanResult<TimeSlot>, AWSError>
+  >;
 }
 
 export function createTimeSlot(timeSlotInfo: TimeSlot) {
   return put<TimeSlot>({
     TableName: TABLE_NAME_TIME_SLOT,
     Item: timeSlotInfo,
-  }) as Promise<PutItemResult<TimeSlot>>;
+  }) as Promise<PromiseResult<PutItemResult<TimeSlot>, AWSError>>;
 }
 
 interface UpdateIsOccupiedParams {
@@ -114,7 +117,9 @@ function updateTimeSlot(id: string, payload: UpdateParams) {
       throw new Error("Invalid update operation");
   }
 
-  return update<TimeSlot>(params) as Promise<UpdateItemResult<TimeSlot>>;
+  return update<TimeSlot>(params) as Promise<
+    PromiseResult<UpdateItemResult<TimeSlot>, AWSError>
+  >;
 }
 
 export function deleteTimeSlot(id: string) {
@@ -122,7 +127,7 @@ export function deleteTimeSlot(id: string) {
     TableName: TABLE_NAME_TIME_SLOT,
     Key: { id },
     ReturnValues: "ALL_OLD",
-  }) as Promise<DeleteItemResult<TimeSlot>>;
+  }) as Promise<PromiseResult<DeleteItemResult<TimeSlot>, AWSError>>;
 }
 
 export function fillTimeSlot(id: string) {

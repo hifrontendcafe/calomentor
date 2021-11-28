@@ -1,4 +1,6 @@
 import { DynamoDB } from "aws-sdk";
+import type { AWSError } from "aws-sdk";
+import type { PromiseResult } from "aws-sdk/lib/request";
 
 export type AttributeMap = DynamoDB.DocumentClient.AttributeMap;
 export type GetItemInput = DynamoDB.DocumentClient.GetItemInput;
@@ -18,7 +20,7 @@ export interface GetItemResult<T extends AttributeMap> extends GetItemOutput {
 
 type Get = <T>(
   params: GetItemInput
-) => Promise<GetItemResult<T | AttributeMap>>;
+) => Promise<PromiseResult<GetItemResult<T | AttributeMap>, AWSError>>;
 
 export interface ScanResult<T extends AttributeMap> extends ScanOutput {
   Items?: T[];
@@ -26,7 +28,7 @@ export interface ScanResult<T extends AttributeMap> extends ScanOutput {
 
 type Scan = <T extends AttributeMap>(
   params: ScanInput
-) => Promise<ScanResult<T | AttributeMap>>;
+) => Promise<PromiseResult<ScanResult<T | AttributeMap>, AWSError>>;
 
 export interface PutItemResult<T> extends PutItemOutput {
   Attributes?: T;
@@ -34,14 +36,14 @@ export interface PutItemResult<T> extends PutItemOutput {
 
 type Put = <T extends AttributeMap>(
   params: PutItemInput
-) => Promise<PutItemResult<T | AttributeMap>>;
+) => Promise<PromiseResult<PutItemResult<T | AttributeMap>, AWSError>>;
 export interface UpdateItemResult<T> extends UpdateItemOutput {
   Attributes?: T;
 }
 
 type Update = <T extends AttributeMap>(
   params: UpdateItemInput
-) => Promise<UpdateItemResult<T | AttributeMap>>;
+) => Promise<PromiseResult<UpdateItemResult<T | AttributeMap>, AWSError>>;
 
 export interface DeleteItemResult<T> extends DeleteItemOutput {
   Attributes?: T;
@@ -49,7 +51,7 @@ export interface DeleteItemResult<T> extends DeleteItemOutput {
 
 type Delete = <T>(
   params: DeleteItemInput
-) => Promise<DeleteItemResult<T | AttributeMap>>;
+) => Promise<PromiseResult<DeleteItemResult<T | AttributeMap>, AWSError>>;
 
 const dynamoDb = new DynamoDB.DocumentClient();
 
