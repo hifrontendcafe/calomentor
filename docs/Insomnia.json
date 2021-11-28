@@ -1,23 +1,30 @@
 {
   "_type": "export",
   "__export_format": 4,
-  "__export_date": "2021-11-17T00:35:37.421Z",
+  "__export_date": "2021-11-26T04:04:30.243Z",
   "__export_source": "insomnia.desktop.app:v2021.6.0",
   "resources": [
     {
       "_id": "req_wrk_205ca41958af42c8b5a46f6f851475211d08e47a",
       "parentId": "fld_wrk_205ca41958af42c8b5a46f6f851475210cc10335",
-      "modified": 1637109308600,
+      "modified": 1637899442110,
       "created": 1637108967690,
       "url": "{{ base_url }}/time-slot/ccb98c48-c03e-4091-acce-fa719f08bd4b",
-      "name": "Actualiza el time slot con el id correspondiente",
+      "name": "Ocupa el time slot con el id correspondiente",
       "description": "",
       "method": "PATCH",
       "body": {
         "mimeType": "application/json",
-        "text": "{\n  \"is_occupied\": false\n}"
+        "text": "{\n  \"is_occupied\": true\n}"
       },
-      "parameters": [],
+      "parameters": [
+        {
+          "id": "pair_9f5437b56888450091489a318042af11",
+          "name": "",
+          "value": "",
+          "description": ""
+        }
+      ],
       "headers": [
         {
           "name": "X-API-KEY",
@@ -65,11 +72,101 @@
       "_type": "workspace"
     },
     {
+      "_id": "req_660e27410f744e41bd41226aa966cf34",
+      "parentId": "fld_wrk_205ca41958af42c8b5a46f6f851475210cc10335",
+      "modified": 1637899436451,
+      "created": 1637896231796,
+      "url": "{{ base_url }}/time-slot/ccb98c48-c03e-4091-acce-fa719f08bd4b",
+      "name": "Desocupa el time slot con el id correspondiente",
+      "description": "",
+      "method": "PATCH",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"is_occupied\": false\n}"
+      },
+      "parameters": [
+        {
+          "id": "pair_9f5437b56888450091489a318042af11",
+          "name": "",
+          "value": "",
+          "description": ""
+        }
+      ],
+      "headers": [
+        {
+          "name": "X-API-KEY",
+          "disabled": false,
+          "value": "{{ _.api_key }}",
+          "id": "pair_092f4771e62a4b66b6a788f3eac46480"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json",
+          "id": "pair_865fe0f59e6f41c588befc99645dc428"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1637066324148,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_e833b5b453114deda52314e3a1a5bbde",
+      "parentId": "fld_wrk_205ca41958af42c8b5a46f6f851475210cc10335",
+      "modified": 1637899433127,
+      "created": 1637896312592,
+      "url": "{{ base_url }}/time-slot/ccb98c48-c03e-4091-acce-fa719f08bd4b/mentee",
+      "name": "Añade o actualiza el mentee correspondiente a un time slot",
+      "description": "",
+      "method": "PATCH",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"mentee_id\": \"364256538056982528\",\n\t\"mentee_username\": \"Santiago Santana#2098\",\n\t\"tokenForCancel\": \"{% uuid 'v4' %}\"\n}"
+      },
+      "parameters": [
+        {
+          "id": "pair_9f5437b56888450091489a318042af11",
+          "name": "",
+          "value": "",
+          "description": ""
+        }
+      ],
+      "headers": [
+        {
+          "name": "X-API-KEY",
+          "disabled": false,
+          "value": "{{ _.api_key }}",
+          "id": "pair_092f4771e62a4b66b6a788f3eac46480"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json",
+          "id": "pair_865fe0f59e6f41c588befc99645dc428"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1637045002377,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
       "_id": "req_wrk_205ca41958af42c8b5a46f6f8514752184fa8491",
       "parentId": "fld_wrk_205ca41958af42c8b5a46f6f851475210cc10335",
-      "modified": 1637109303265,
+      "modified": 1637892808517,
       "created": 1637023680605,
-      "url": "{{ base_url }}/time-slot/ccb98c48-c03e-4091-acce-fa719f08bd4b",
+      "url": "{{ base_url }}/time-slot/{{ id }}",
       "name": "Obtiene un time slot por id",
       "description": "",
       "method": "GET",
@@ -97,7 +194,7 @@
     {
       "_id": "req_wrk_205ca41958af42c8b5a46f6f851475217fde02c4",
       "parentId": "fld_wrk_205ca41958af42c8b5a46f6f851475210cc10335",
-      "modified": 1637109253695,
+      "modified": 1637895662104,
       "created": 1636425243995,
       "url": "{{ base_url }}/time-slot",
       "name": "Crea nuevo time slot",
@@ -135,7 +232,7 @@
     {
       "_id": "req_wrk_205ca41958af42c8b5a46f6f851475216bad66ca",
       "parentId": "fld_wrk_205ca41958af42c8b5a46f6f851475210cc10335",
-      "modified": 1637109312528,
+      "modified": 1637896628104,
       "created": 1636313067600,
       "url": "{{ base_url }}/time-slot/user/{{ id }}",
       "name": "Obtiene todos los time slots de un user",
@@ -191,10 +288,10 @@
     {
       "_id": "req_6ffc29e86420400e92c0f6b8edebeb19",
       "parentId": "fld_wrk_205ca41958af42c8b5a46f6f851475210cc10335",
-      "modified": 1637108966696,
+      "modified": 1637892847722,
       "created": 1636994338094,
       "url": "{{ base_url }}/time-slot/user/{{ id }}",
-      "name": "Obtiene todos los time slots de un user para un date especifico",
+      "name": "Obtiene todos los time slots de un user para una fecha especifica",
       "description": "",
       "method": "GET",
       "body": {},
@@ -247,7 +344,7 @@
     {
       "_id": "req_wrk_205ca41958af42c8b5a46f6f85147521e3966aff",
       "parentId": "fld_wrk_205ca41958af42c8b5a46f6f85147521da30b47c",
-      "modified": 1636994311766,
+      "modified": 1637896624172,
       "created": 1636162148993,
       "url": "{{ base_url }}/mentorship/{{ id }}",
       "name": "Obtiene todas las mentorías de un user",
@@ -359,11 +456,11 @@
     {
       "_id": "env_4ae456d7fd6c8f87b3bc429346564a97fd2e7cfd",
       "parentId": "wrk_205ca41958af42c8b5a46f6f85147521",
-      "modified": 1635907787471,
+      "modified": 1637891712367,
       "created": 1635907787471,
       "name": "Base Environment",
       "data": { "base_url": "{{ scheme }}://{{ host }}{{ base_path }}" },
-      "dataPropertyOrder": null,
+      "dataPropertyOrder": { "&": ["base_url"] },
       "color": null,
       "isPrivate": false,
       "metaSortKey": 1635907787471,
@@ -381,10 +478,10 @@
     {
       "_id": "spc_2841c2dd275e4f08b4b96aee4492d5e6",
       "parentId": "wrk_205ca41958af42c8b5a46f6f85147521",
-      "modified": 1637109195664,
+      "modified": 1637899393909,
       "created": 1635907787449,
       "fileName": "Calomentor",
-      "contents": "openapi: 3.0.0\ninfo:\n  description: \"Meh\"\n  version: 0.0.1\n  title: Calomentor\n  contact:\n    email: frontendcafe@gmail.com\nservers:\n  - url: https://gnoqe5kho1.execute-api.sa-east-1.amazonaws.com/dev\n  - url: http://localhost:3001/dev\nsecurity:\n  - ApiKeyAuth: []\nexternalDocs:\n  description: Datos sobre el proyecto\n  url: \"https://github.com/hifrontendcafe/calomentor\"\ntags:\n  - name: Mentorship\n    description: Mentoría\n  - name: TimeSlot\n    description: Turnos que tiene disponibles un mentor\n\npaths:\n  /sf/mentorship:\n    post:\n      tags:\n        - Mentorship\n      summary: Crea una mentoria\n      description: \"Crea una mentoria y dispara los eventos de confirmacion y recordatorios 2 hs antes de la mentoria\"\n      operationId: addMentorship\n      requestBody:\n        $ref: \"#/components/requestBodies/Mentorship\"\n      responses:\n        \"200\":\n          description: Mentoría creada\n          content:\n            application/json:\n              schema:\n                type: object\n                properties:\n                  status:\n                    type: number\n                    enum:\n                      - 200\n                  info:\n                    type: string\n                    enum:\n                      - \"OK\"\n        \"403\":\n          $ref: '#/components/responses/Forbidden'\n  /mentorship/{id}:\n    get:\n      tags:\n        - Mentorship\n      summary: Obtiene todas las mentorías de un user\n      operationId: getMentorshipsByUser\n      parameters:\n        - name: id\n          in: path\n          description: Id del user\n          required: true\n          schema:\n            type: number\n            example: 364256538056982528\n        - name: filter\n          in: query\n          required: false\n          schema:\n            type: string\n            enum:\n              - \"ACTIVE\"\n              - \"CANCEL\"\n              - \"CONFIRMED\"\n        - name: filterDates\n          in: query\n          required: false\n          schema:\n            type: string\n            enum:\n              - \"PAST\"\n              - \"FUTURE\"\n      responses:\n        \"200\":\n          $ref: \"#/components/responses/MentorshipList\"\n        \"400\":\n          description: Invalid status value\n        \"403\":\n          $ref: \"#/components/responses/Forbidden\"\n  /time-slot/user/{id}:\n    get:\n      tags:\n        - TimeSlot\n      summary: Obtiene todos los time slots de un user\n      operationId: getTimeSlotsByUser\n      parameters:\n        - name: id\n          in: path\n          description: Id del user\n          required: true\n          schema:\n            type: number\n            example: 364256538056982528\n        - name: \"slot_date\"\n          description: Fecha a buscar (Opcional, por defecto null, trae todos los slots para el user_id ), ECMAScript date\n          in: query\n          required: false\n          schema:\n            type: string\n            format: date\n        - name: \"only_free\"\n          description: Trae las mentorías no ocupadas\n          in: query\n          required: false\n          schema:\n            type: boolean\n      responses:\n        \"200\":\n          $ref: \"#/components/responses/TimeSlotList\"\n        \"400\":\n          description: Invalid status value\n        \"403\":\n          $ref: \"#/components/responses/Forbidden\"\n  /time-slot/{id}:\n    get:\n      tags:\n        - TimeSlot\n      summary: Obtiene un time slot por id\n      operationId: getTimeSlot\n      parameters:\n        - name: id\n          in: path\n          description: Id del time slot\n          required: true\n          schema:\n            type: string\n            example: \"ccb98c48-c03e-4091-acce-fa719f08bd4b\"\n      responses:\n        \"200\":\n          $ref: \"#/components/responses/TimeSlot\"\n    patch:\n      tags:\n        - TimeSlot\n      summary: Actualiza el time slot con el id correspondiente\n      operationId: updateTimeSlot\n      parameters:\n        - name: id\n          in: path\n          description: Id del time slot\n          required: true\n          schema:\n            type: string\n            example: \"ccb98c48-c03e-4091-acce-fa719f08bd4b\"\n      requestBody:\n        $ref: \"#/components/requestBodies/UpdateTimeSlot\"\n      responses:\n        \"200\":\n          $ref: \"#/components/responses/TimeSlot\"\n  /time-slot:\n    post:\n      tags:\n        - TimeSlot\n      summary: Crea nuevo time slot\n      operationId: addTimeSlot\n      requestBody:\n        $ref: \"#/components/requestBodies/TimeSlot\"\n      responses:\n        \"200\":\n          $ref: \"#/components/responses/TimeSlot\"\n      \ncomponents:\n  securitySchemes:\n    ApiKeyAuth:\n      type: apiKey\n      in: header\n      name: X-API-KEY\n  responses:\n    MentorshipList:\n      description: Retorna las mentorías del mentor\n      content:\n        application/json:\n          schema:\n            $ref: \"#/components/schemas/MentorshipListResponse\"\n    TimeSlotList:\n      description: Retorna los time slots del mentor\n      content:\n        application/json:\n          schema:\n            $ref: \"#/components/schemas/TimeSlotListResponse\"\n    TimeSlot:\n      description: Time slot\n    Forbidden:\n      description: Forbidden\n      content:\n        application/json:\n          schema:\n            type: object\n            properties:\n              message:\n                type: string\n                enum:\n                  - Forbidden\n  requestBodies:\n    UpdateTimeSlot:\n      content:\n        application/json:\n          schema:\n            $ref: \"#/components/schemas/UpdateTimeSlotRequest\"\n    TimeSlot:\n      content:\n        application/json:\n          schema:\n            $ref: \"#/components/schemas/TimeSlotRequest\"\n    Mentorship:\n      content:\n        application/json:\n          schema:\n            $ref: \"#/components/schemas/MentorshipRequest\"\n  schemas:\n    BasicTimeSlot:\n      type: object\n      properties:\n        is_occupied:\n          type: boolean\n        date:\n          type: number\n        is_cancelled:\n          type: boolean\n        id:\n          type: string\n          format: uuid\n    BasicMentorship:\n      type: object\n      required:\n        - mentor_id\n        - mentee_id\n        - mentee_name\n        - mentee_username_discord\n        - mentee_email\n      properties:\n        mentor_id:\n          type: string\n          example: \"706602792005140532\"\n          description: discord id\n        mentee_id:\n          type: string\n          example: \"706602792005140532\"\n          description: discord id\n        mentee_name:\n          type: string\n          example: \"Santiago Santana\"\n        mentee_username_discord:\n          type: string\n          example: \"Santiago Santana#2098\"\n        mentee_email:\n          type: string\n          example: \"example@example.com\"\n        info:\n          type: string\n          description: información adicional (opcional)\n          example: \"Taba aburrido y me anoté\"\n    MentorshipResponse:\n      allOf:\n        - $ref: '#/components/schemas/BasicMentorship'\n        - type: object\n          properties:\n            id:\n              type: string\n              format: uuid\n              example: \"af8cf24c-6cfe-4483-92d9-16873578f6d2\"\n            mentorship_status:\n              type: string\n              enum:\n                - CANCEL\n                - ACTIVE\n                - CONFIRMED\n              example: CANCEL\n            mentor_email:\n              type: string\n              example: \"example@example.com\"\n            mentor_name:\n              type: string\n              example: \"Santiago Santana\"\n            feedback_mentor:\n              type: string\n            feedback_mentee:\n              type: string\n            feedback_stars:\n              type: number\n            cancel_cause:\n              type: string\n            tokenForCancel:\n              type: string\n            who_cancel:\n              type: string\n              enum:\n                - MENTOR\n                - MENTEE\n            time_slot_info:\n              $ref: '#/components/schemas/BasicTimeSlot'\n    TimeSlotResponse:\n      allOf:\n        - $ref: '#/components/schemas/BasicTimeSlot'\n        - type: object\n          properties:\n            tokenForCancel:\n              type: string\n            user_id:\n              type: string\n              example: \"706602792005140532\"\n              description: discord mentor id\n            mentee_id:\n              type: string\n              example: \"706602792005140532\"\n              description: discord mentee id\n            mentee_username_discord:\n              type: string\n              example: \"Santiago Santana#2098\"\n    MentorshipListResponse:\n      type: object\n      properties:\n        message:\n          type: string\n          example: \"OK.\"\n        data:\n          type: array\n          items:\n            $ref: '#/components/schemas/MentorshipResponse'\n    TimeSlotListResponse:\n      type: object\n      properties:\n        message:\n          type: string\n          example: \"Success\"\n        data:\n          type: array\n          items:\n            $ref: '#/components/schemas/TimeSlotResponse'\n    TimeSlotRequest:\n      type: object\n      required:\n        - user_id\n        - slot_date\n      properties:\n        user_id:\n          type: number\n        slot_date:\n          description: ECMAScript epoch https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date#the_ecmascript_epoch_and_timestamps\n          type: number\n    MentorshipRequest:\n      allOf:\n        - $ref: '#/components/schemas/BasicMentorship'\n        - type: object\n          required:\n            - time_slot_id\n            - time_slot_time\n          properties:\n            time_slot_id:\n              type: string\n              format: uuid\n            time_slot_time:\n              type: number\n              description: Hora en utc-0\n    UpdateTimeSlotRequest:\n      type: object\n      required:\n        - is_occupied\n      properties:\n        is_occupied:\n          type: boolean\n",
+      "contents": "openapi: 3.0.0\ninfo:\n  description: \"Meh\"\n  version: 0.0.1\n  title: Calomentor\n  contact:\n    email: frontendcafe@gmail.com\nservers:\n  - url: https://gnoqe5kho1.execute-api.sa-east-1.amazonaws.com/dev\n  - url: http://localhost:3001/dev\nsecurity:\n  - ApiKeyAuth: []\nexternalDocs:\n  description: Datos sobre el proyecto\n  url: \"https://github.com/hifrontendcafe/calomentor\"\ntags:\n  - name: Mentorship\n    description: Mentoría\n  - name: TimeSlot\n    description: Turnos que tiene disponibles un mentor\n\npaths:\n  /sf/mentorship:\n    post:\n      tags:\n        - Mentorship\n      summary: Crea una mentoria\n      description: \"Crea una mentoria y dispara los eventos de confirmacion y recordatorios 2 hs antes de la mentoria\"\n      operationId: addMentorship\n      requestBody:\n        $ref: \"#/components/requestBodies/Mentorship\"\n      responses:\n        \"200\":\n          description: Mentoría creada\n          content:\n            application/json:\n              schema:\n                type: object\n                properties:\n                  status:\n                    type: number\n                    enum:\n                      - 200\n                  info:\n                    type: string\n                    enum:\n                      - \"OK\"\n        \"403\":\n          $ref: '#/components/responses/Forbidden'\n  /mentorship/{id}:\n    get:\n      tags:\n        - Mentorship\n      summary: Obtiene todas las mentorías de un user\n      operationId: getMentorshipsByUser\n      parameters:\n        - name: id\n          in: path\n          description: Id del user\n          required: true\n          schema:\n            type: number\n            example: 364256538056982528\n        - name: filter\n          in: query\n          required: false\n          schema:\n            type: string\n            enum:\n              - \"ACTIVE\"\n              - \"CANCEL\"\n              - \"CONFIRMED\"\n        - name: filterDates\n          in: query\n          required: false\n          schema:\n            type: string\n            enum:\n              - \"PAST\"\n              - \"FUTURE\"\n      responses:\n        \"200\":\n          $ref: \"#/components/responses/MentorshipList\"\n        \"400\":\n          description: Invalid status value\n        \"403\":\n          $ref: \"#/components/responses/Forbidden\"\n  /time-slot/user/{id}:\n    get:\n      tags:\n        - TimeSlot\n      summary: Obtiene todos los time slots de un user\n      operationId: getTimeSlotsByUser\n      parameters:\n        - name: id\n          in: path\n          description: Id del user\n          required: true\n          schema:\n            type: number\n            example: 364256538056982528\n        - name: \"slot_date\"\n          description: Fecha a buscar (Opcional, por defecto null, trae todos los slots para el user_id ), ECMAScript date\n          in: query\n          required: false\n          schema:\n            type: string\n            format: date\n        - name: \"only_free\"\n          description: Trae las mentorías no ocupadas\n          in: query\n          required: false\n          schema:\n            type: boolean\n      responses:\n        \"200\":\n          $ref: \"#/components/responses/TimeSlotList\"\n        \"400\":\n          description: Invalid status value\n        \"403\":\n          $ref: \"#/components/responses/Forbidden\"\n  /time-slot/{id}:\n    get:\n      tags:\n        - TimeSlot\n      summary: Obtiene un time slot por id\n      operationId: getTimeSlot\n      parameters:\n        - name: id\n          in: path\n          description: Id del time slot\n          required: true\n          schema:\n            type: string\n            example: \"ccb98c48-c03e-4091-acce-fa719f08bd4b\"\n      responses:\n        \"200\":\n          $ref: \"#/components/responses/TimeSlot\"\n    patch:\n      tags:\n        - TimeSlot\n      summary: Actualiza el estado de ocupación del time slot\n      operationId: updateTimeSlotState\n      parameters:\n        - name: id\n          in: path\n          description: Id del time slot\n          required: true\n          schema:\n            type: string\n            example: \"ccb98c48-c03e-4091-acce-fa719f08bd4b\"\n      requestBody:\n        $ref: \"#/components/requestBodies/UpdateTimeSlotOccupationState\"\n      responses:\n        \"200\":\n          $ref: \"#/components/responses/TimeSlot\"\n  /time-slot/{id}/mentee:\n    patch:\n      tags:\n        - TimeSlot\n      summary: Añade o actualiza el mentee del time slot\n      operationId: addMenteeToTimeSlot\n      parameters:\n        - name: id\n          in: path\n          description: Id del time slot\n          required: true\n          schema:\n            type: string\n            example: \"ccb98c48-c03e-4091-acce-fa719f08bd4b\"\n      requestBody:\n        $ref: \"#/components/requestBodies/UpdateTimeSlotAddMentee\"\n      responses:\n        \"200\":\n          $ref: \"#/components/responses/TimeSlot\"\n  /time-slot:\n    post:\n      tags:\n        - TimeSlot\n      summary: Crea nuevo time slot\n      operationId: addTimeSlot\n      requestBody:\n        $ref: \"#/components/requestBodies/TimeSlot\"\n      responses:\n        \"200\":\n          $ref: \"#/components/responses/TimeSlot\"\n      \ncomponents:\n  securitySchemes:\n    ApiKeyAuth:\n      type: apiKey\n      in: header\n      name: X-API-KEY\n  responses:\n    MentorshipList:\n      description: Retorna las mentorías del mentor\n      content:\n        application/json:\n          schema:\n            $ref: \"#/components/schemas/MentorshipListResponse\"\n    TimeSlotList:\n      description: Retorna los time slots del mentor\n      content:\n        application/json:\n          schema:\n            $ref: \"#/components/schemas/TimeSlotListResponse\"\n    TimeSlot:\n      description: Time slot\n    Forbidden:\n      description: Forbidden\n      content:\n        application/json:\n          schema:\n            type: object\n            properties:\n              message:\n                type: string\n                enum:\n                  - Forbidden\n  requestBodies:\n    UpdateTimeSlotOccupationState:\n      content:\n        application/json:\n          schema:\n            $ref: \"#/components/schemas/UpdateTimeSlotOccupationStateRequest\"\n    UpdateTimeSlotAddMentee:\n      content:\n        application/json:\n          schema:\n            $ref: \"#/components/schemas/UpdateTimeSlotAddMenteeRequest\"\n    TimeSlot:\n      content:\n        application/json:\n          schema:\n            $ref: \"#/components/schemas/TimeSlotRequest\"\n    Mentorship:\n      content:\n        application/json:\n          schema:\n            $ref: \"#/components/schemas/MentorshipRequest\"\n  schemas:\n    BasicTimeSlot:\n      type: object\n      properties:\n        is_occupied:\n          type: boolean\n        date:\n          type: number\n        is_cancelled:\n          type: boolean\n        id:\n          type: string\n          format: uuid\n    BasicMentorship:\n      type: object\n      required:\n        - mentor_id\n        - mentee_id\n        - mentee_name\n        - mentee_username_discord\n        - mentee_email\n      properties:\n        mentor_id:\n          type: string\n          example: \"706602792005140532\"\n          description: discord id\n        mentee_id:\n          type: string\n          example: \"706602792005140532\"\n          description: discord id\n        mentee_name:\n          type: string\n          example: \"Santiago Santana\"\n        mentee_username_discord:\n          type: string\n          example: \"Santiago Santana#2098\"\n        mentee_email:\n          type: string\n          example: \"example@example.com\"\n        info:\n          type: string\n          description: información adicional (opcional)\n          example: \"Taba aburrido y me anoté\"\n    MentorshipResponse:\n      allOf:\n        - $ref: '#/components/schemas/BasicMentorship'\n        - type: object\n          properties:\n            id:\n              type: string\n              format: uuid\n              example: \"af8cf24c-6cfe-4483-92d9-16873578f6d2\"\n            mentorship_status:\n              type: string\n              enum:\n                - CANCEL\n                - ACTIVE\n                - CONFIRMED\n              example: CANCEL\n            mentor_email:\n              type: string\n              example: \"example@example.com\"\n            mentor_name:\n              type: string\n              example: \"Santiago Santana\"\n            feedback_mentor:\n              type: string\n            feedback_mentee:\n              type: string\n            feedback_stars:\n              type: number\n            cancel_cause:\n              type: string\n            tokenForCancel:\n              type: string\n            who_cancel:\n              type: string\n              enum:\n                - MENTOR\n                - MENTEE\n            time_slot_info:\n              $ref: '#/components/schemas/BasicTimeSlot'\n    TimeSlotResponse:\n      allOf:\n        - $ref: '#/components/schemas/BasicTimeSlot'\n        - type: object\n          properties:\n            tokenForCancel:\n              type: string\n            user_id:\n              type: string\n              example: \"706602792005140532\"\n              description: discord mentor id\n            mentee_id:\n              type: string\n              example: \"706602792005140532\"\n              description: discord mentee id\n            mentee_username_discord:\n              type: string\n              example: \"Santiago Santana#2098\"\n    MentorshipListResponse:\n      type: object\n      properties:\n        message:\n          type: string\n          example: \"OK.\"\n        data:\n          type: array\n          items:\n            $ref: '#/components/schemas/MentorshipResponse'\n    TimeSlotListResponse:\n      type: object\n      properties:\n        message:\n          type: string\n          example: \"Success\"\n        data:\n          type: array\n          items:\n            $ref: '#/components/schemas/TimeSlotResponse'\n    TimeSlotRequest:\n      type: object\n      required:\n        - user_id\n        - slot_date\n      properties:\n        user_id:\n          type: number\n        slot_date:\n          description: ECMAScript epoch https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date#the_ecmascript_epoch_and_timestamps\n          type: number\n    MentorshipRequest:\n      allOf:\n        - $ref: '#/components/schemas/BasicMentorship'\n        - type: object\n          required:\n            - time_slot_id\n            - time_slot_time\n          properties:\n            time_slot_id:\n              type: string\n              format: uuid\n            time_slot_time:\n              type: number\n              description: Hora en utc-0\n    UpdateTimeSlotOccupationStateRequest:\n      type: object\n      required:\n        - is_occupied\n      properties:\n        is_occupied:\n          type: boolean\n    UpdateTimeSlotAddMenteeRequest:\n      type: object\n      required:\n        - mentee_id\n        - mentee_username\n        - tokenForCancel\n      properties:\n        mentee_id:\n          type: string\n          example: \"364256538056982528\"\n        mentee_username:\n          type: string\n          example: \"Santiago Santana#2098\"\n        tokenForCancel:\n          type: string\n          example: \"ccb98c48-c03e-4091-acce-fa719f08bd4b\"\n",
       "contentType": "yaml",
       "_type": "api_spec"
     },
@@ -399,7 +496,7 @@
     {
       "_id": "env_env_4ae456d7fd6c8f87b3bc429346564a97fd2e7cfd_sub",
       "parentId": "env_4ae456d7fd6c8f87b3bc429346564a97fd2e7cfd",
-      "modified": 1636994676082,
+      "modified": 1637891714313,
       "created": 1636158796235,
       "name": "AWS Dev Environment",
       "data": {
@@ -421,7 +518,7 @@
     {
       "_id": "env_5f8c9a01e4c44390b04678186952dc30",
       "parentId": "env_4ae456d7fd6c8f87b3bc429346564a97fd2e7cfd",
-      "modified": 1636994672348,
+      "modified": 1637892774869,
       "created": 1636164022545,
       "name": "Localhost",
       "data": {

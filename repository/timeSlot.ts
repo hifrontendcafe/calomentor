@@ -8,7 +8,7 @@ import {
   PutItemResult,
   ScanResult,
   GetItemResult,
-  UpdateItemResult
+  UpdateItemResult,
 } from "../utils/dynamoDb";
 import { TimeSlot } from "../types";
 import { toInt } from "../utils/toInt";
@@ -62,26 +62,73 @@ export function createTimeSlot(timeSlotInfo: TimeSlot) {
   }) as Promise<PutItemResult<TimeSlot>>;
 }
 
-interface UpdateParams {
+interface UpdateIsOccupiedParams {
+  type: "CHANGE_OCCUPIED_STATE";
   isOccupied: boolean;
 }
 
-function updateTimeSlot(id: number, { isOccupied }: UpdateParams) {
-  return update<TimeSlot>({
+interface Mentee {
+  id: string;
+  username: string;
+  tokenForCancel: string;
+}
+
+interface UpdateMenteeParams {
+  type: "ADD_MENTEE";
+  mentee: Mentee;
+}
+
+type UpdateParams = UpdateIsOccupiedParams | UpdateMenteeParams;
+
+function updateTimeSlot(id: string, payload: UpdateParams) {
+  const params: Parameters<typeof update>[0] = {
     TableName: TABLE_NAME_TIME_SLOT,
     Key: { id },
-    ExpressionAttributeValues: {
-      ":is_occupied": isOccupied,
-    },
-    UpdateExpression: "SET is_occupied = :is_occupied",
     ReturnValues: "ALL_NEW",
-  }) as Promise<UpdateItemResult<TimeSlot>>;
+  };
+
+  switch (payload.type) {
+    case "CHANGE_OCCUPIED_STATE":
+      params.ExpressionAttributeValues = {
+        ":is_occupied": payload.isOccupied,
+      };
+      params.UpdateExpression = "SET is_occupied = :is_occupied";
+
+      break;
+
+    case "ADD_MENTEE":
+      params.ExpressionAttributeValues = {
+        ":mentee_id": payload.mentee.id,
+        ":mentee_username": payload.mentee.username,
+        ":tokenForCancel": payload.mentee.tokenForCancel,
+      };
+
+      params.UpdateExpression = `SET mentee_id = :mentee_id,
+             mentee_username = :mentee_username,
+             tokenForCancel = :tokenForCancel`;
+      break;
+
+    default:
+      throw new Error("Invalid update operation");
+  }
+
+  return update<TimeSlot>(params) as Promise<UpdateItemResult<TimeSlot>>;
 }
 
-export function fillTimeSlot(id) {
-  return updateTimeSlot(id, { isOccupied: true });
+export function fillTimeSlot(id: string) {
+  return updateTimeSlot(id, {
+    type: "CHANGE_OCCUPIED_STATE",
+    isOccupied: true,
+  });
 }
 
-export function freeTimeSlot(id) {
-  return updateTimeSlot(id, { isOccupied: false });
+export function freeTimeSlot(id: string) {
+  return updateTimeSlot(id, {
+    type: "CHANGE_OCCUPIED_STATE",
+    isOccupied: false,
+  });
+}
+
+export function addMentee(id: string, mentee: Mentee) {
+  return updateTimeSlot(id, { type: "ADD_MENTEE", mentee });
 }
