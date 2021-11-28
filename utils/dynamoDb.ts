@@ -2,17 +2,17 @@ import { DynamoDB } from "aws-sdk";
 import type { AWSError } from "aws-sdk";
 import type { PromiseResult } from "aws-sdk/lib/request";
 
-export type AttributeMap = DynamoDB.DocumentClient.AttributeMap;
-export type GetItemInput = DynamoDB.DocumentClient.GetItemInput;
-export type GetItemOutput = DynamoDB.DocumentClient.GetItemOutput;
-export type PutItemInput = DynamoDB.DocumentClient.PutItemInput;
-export type PutItemOutput = DynamoDB.DocumentClient.PutItemOutput;
-export type UpdateItemInput = DynamoDB.DocumentClient.UpdateItemInput;
-export type UpdateItemOutput = DynamoDB.DocumentClient.UpdateItemOutput;
-export type DeleteItemInput = DynamoDB.DocumentClient.DeleteItemInput;
-export type DeleteItemOutput = DynamoDB.DocumentClient.DeleteItemOutput;
-export type ScanInput = DynamoDB.DocumentClient.ScanInput;
-export type ScanOutput = DynamoDB.DocumentClient.ScanOutput;
+type AttributeMap = DynamoDB.DocumentClient.AttributeMap;
+type GetItemInput = DynamoDB.DocumentClient.GetItemInput;
+type GetItemOutput = DynamoDB.DocumentClient.GetItemOutput;
+type PutItemInput = DynamoDB.DocumentClient.PutItemInput;
+type PutItemOutput = DynamoDB.DocumentClient.PutItemOutput;
+type UpdateItemInput = DynamoDB.DocumentClient.UpdateItemInput;
+type UpdateItemOutput = DynamoDB.DocumentClient.UpdateItemOutput;
+type DeleteItemInput = DynamoDB.DocumentClient.DeleteItemInput;
+type DeleteItemOutput = DynamoDB.DocumentClient.DeleteItemOutput;
+type ScanInput = DynamoDB.DocumentClient.ScanInput;
+type ScanOutput = DynamoDB.DocumentClient.ScanOutput;
 
 export interface GetItemResult<T extends AttributeMap> extends GetItemOutput {
   Item?: T;

@@ -3,7 +3,6 @@ import { TABLE_NAME_TIME_SLOT } from "../constants";
 import { get, put, scan, update, deleteItem } from "../utils/dynamoDb";
 
 import type {
-  ScanInput,
   PutItemResult,
   ScanResult,
   GetItemResult,
@@ -32,7 +31,7 @@ export function getTimeSlotsByUserId(
   userId: string,
   filters: TimeSlotFilters = {}
 ) {
-  const query: ScanInput = {
+  const query: Parameters<typeof scan>[0] = {
     TableName: TABLE_NAME_TIME_SLOT,
     FilterExpression: "#user = :user_id",
     ExpressionAttributeNames: {
