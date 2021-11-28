@@ -1,6 +1,11 @@
+import type { APIGatewayProxyHandler } from "aws-lambda";
+
 import { Callback, Context } from "aws-lambda";
+import type { AWSError } from "aws-sdk";
 import { RESPONSE_CODES, TABLE_NAME_USER } from "../constants";
-import { User } from "../types/userTypes";
+import { createUser } from "../repository/user";
+import type { User } from "../types";
+import { makeErrorResponse, makeSuccessResponse } from "../utils/makeResponses";
 import { throwResponse } from "../utils/throwResponse";
 
 const AWS = require("aws-sdk"); // eslint-disable-line import/no-extraneous-dependencies
@@ -8,11 +13,11 @@ const AWS = require("aws-sdk"); // eslint-disable-line import/no-extraneous-depe
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 let responseMessage = "";
 
-export const createUserService = async (
-  event: any,
-  context: Context,
-  callback: Callback<any>
-): Promise<void> => {
+function isAWSError(error: any): error is AWSError {
+  return error?.code;
+}
+
+export const createUserService: APIGatewayProxyHandler = async (event) => {
   const {
     id,
     discord_username,
@@ -26,8 +31,7 @@ export const createUserService = async (
   } = JSON.parse(event.body);
 
   if (!id || typeof id !== "string") {
-    responseMessage = "Bad Request: id is required or is not a string.";
-    return throwResponse(callback, responseMessage, 400);
+    return makeErrorResponse(400, "-315");
   }
 
   const user: User = {
@@ -45,36 +49,19 @@ export const createUserService = async (
     timezone: "25",
   };
 
-  const params = {
-    TableName: TABLE_NAME_USER,
-    Item: user,
-    ConditionExpression: "attribute_not_exists(id)",
-  };
-
   try {
-    const createUser = await dynamoDb.put(params).promise();
-
-    if (createUser.code === "ConditionalCheckFailedException") {
-      const responseCode: keyof typeof RESPONSE_CODES = "-200";
-      return throwResponse(callback, RESPONSE_CODES[responseCode], 400, {
-        responseMessage: RESPONSE_CODES[responseCode],
-        responseCode,
-      });
+    await createUser(user);
+  } catch (error: unknown) {
+    if (isAWSError(error)) {
+      if (error?.code === "ConditionalCheckFailedException") {
+        return makeErrorResponse(400, "-200", error);
+      }
     }
 
-    const responseCode: keyof typeof RESPONSE_CODES = "200";
-    return throwResponse(callback, RESPONSE_CODES[responseCode], 200, {
-      responseMessage: RESPONSE_CODES[responseCode],
-      responseCode,
-    });
-  } catch (error) {
-    const responseCode: keyof typeof RESPONSE_CODES = "-201";
-    return throwResponse(callback, RESPONSE_CODES[responseCode], 400, {
-      responseMessage: RESPONSE_CODES[responseCode],
-      responseCode,
-      error,
-    });
+    return makeErrorResponse(400, "-201", error);
   }
+
+  return makeSuccessResponse(user);
 };
 
 export const getUsersService = async (

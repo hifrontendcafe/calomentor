@@ -1,7 +1,7 @@
-export const TABLE_NAME_USER: string = "user";
-export const TABLE_NAME_TIME_SLOT: string = "time-slots";
-export const TABLE_NAME_MENTORSHIP: string = "mentorship";
-export const TABLE_NAME_WARNINGS: string = "warnings";
+export const TABLE_NAME_USER = "user";
+export const TABLE_NAME_TIME_SLOT = "time-slots";
+export const TABLE_NAME_MENTORSHIP = "mentorship";
+export const TABLE_NAME_WARNINGS = "warnings";
 
 export const STATUS = {
   ACTIVE: "ACTIVE",
@@ -63,6 +63,7 @@ export const RESPONSE_CODES = {
     "Bad Request: Missing params. The required params are mentee_username, mentee_id and tokenForCancel",
   "-313": "There Was an error trying to delete the slot",
   "-314": "Time slot not found",
+  "-315": "Bad Request: id is required or is not a string.",
   "100": "Succesfully mentorship created.",
   "101": "Mentorship confirmed",
   "102": "Update feedback succesfully",
