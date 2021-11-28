@@ -3,7 +3,12 @@ import type { APIGatewayProxyHandler } from "aws-lambda";
 import { Callback, Context } from "aws-lambda";
 import type { AWSError } from "aws-sdk";
 import { TABLE_NAME_USER } from "../constants";
-import { createUser, getUsers, getUserById } from "../repository/user";
+import {
+  createUser,
+  getUsers,
+  getUserById,
+  deleteUserById,
+} from "../repository/user";
 import type { User } from "../types";
 import { makeErrorResponse, makeSuccessResponse } from "../utils/makeResponses";
 import { throwResponse } from "../utils/throwResponse";
@@ -103,32 +108,26 @@ export const getUserByIdService: APIGatewayProxyHandler = async (event) => {
   return makeSuccessResponse(user);
 };
 
-export const deleteUserByIdService = (
-  event: any,
-  context: Context,
-  callback: Callback<any>
-): void => {
-  const params = {
-    TableName: TABLE_NAME_USER,
-    ProjectionExpression: "discord_id, discord_username, full_name",
-    Key: { id: event.pathParameters.id },
-    ReturnValues: "ALL_OLD",
-  };
+export const deleteUserByIdService: APIGatewayProxyHandler = async (event) => {
+  const id = event?.pathParameters?.id;
 
-  dynamoDb.delete(params, (err, data) => {
-    if (err) {
-      responseMessage = `Unable to delete user. Error: ${err}`;
-      throwResponse(callback, responseMessage, 500);
-    } else {
-      if (Object.keys(data).length === 0) {
-        responseMessage = `Unable to delete user. Id ${event.pathParameters.id} not found`;
-        throwResponse(callback, responseMessage, 404);
-      } else {
-        responseMessage = "User deleted succesfully";
-        throwResponse(callback, responseMessage, 200);
-      }
-    }
-  });
+  if (!id) {
+    return makeErrorResponse(400, "-311");
+  }
+
+  let user: User;
+  try {
+    const userData = await deleteUserById(event.pathParameters.id);
+    user = userData.Attributes;
+  } catch (error) {
+    return makeErrorResponse(500, "-316", error);
+  }
+
+  if (!user) {
+    return makeErrorResponse(404, "-204");
+  }
+
+  return makeSuccessResponse(user, "202");
 };
 
 export const updateUserByIdService = (

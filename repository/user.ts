@@ -1,6 +1,6 @@
 import { TABLE_NAME_USER } from "../constants";
 
-import { get, put, scan } from "../utils/dynamoDb";
+import { deleteItem, get, put, scan } from "../utils/dynamoDb";
 
 import type { User, Role } from "../types";
 
@@ -37,4 +37,12 @@ export function getUserById(id: string) {
     TableName: TABLE_NAME_USER,
     Key: { id },
   });
+}
+
+export function deleteUserById(id: string) {
+  return deleteItem<User>({
+    TableName: TABLE_NAME_USER,
+    Key: {id},
+    ReturnValues: "ALL_OLD",
+  })
 }
