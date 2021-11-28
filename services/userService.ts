@@ -3,7 +3,7 @@ import type { APIGatewayProxyHandler } from "aws-lambda";
 import { Callback, Context } from "aws-lambda";
 import type { AWSError } from "aws-sdk";
 import { RESPONSE_CODES, TABLE_NAME_USER } from "../constants";
-import { createUser } from "../repository/user";
+import { createUser, getUsers } from "../repository/user";
 import type { User } from "../types";
 import { makeErrorResponse, makeSuccessResponse } from "../utils/makeResponses";
 import { throwResponse } from "../utils/throwResponse";
@@ -64,44 +64,21 @@ export const createUserService: APIGatewayProxyHandler = async (event) => {
   return makeSuccessResponse(user);
 };
 
-export const getUsersService = async (
-  event: any,
-  context: Context,
-  callback: Callback<any>
-): Promise<void> => {
-  const params = {
-    TableName: TABLE_NAME_USER,
-    ExpressionAttributeNames: {
-      "#role": "role",
-    },
-    ProjectionExpression:
-      "id, discord_username, full_name, about_me, email, url_photo, #role, links, skills, isActive",
-  };
+export const getUsersService: APIGatewayProxyHandler = async () => {
+  let mentors: User[];
 
   try {
-    let mentors = await dynamoDb.scan(params).promise();
-
-    mentors = mentors.Items?.filter((m) => {
-      return m.role?.includes("mentor");
-    });
-
-    if (mentors.length === 0) {
-      const responseCode: keyof typeof RESPONSE_CODES = "-202";
-      return throwResponse(callback, RESPONSE_CODES[responseCode], 404, {
-        responseMessage: RESPONSE_CODES[responseCode],
-        responseCode,
-      });
-    }
-
-    return throwResponse(callback, "", 200, mentors);
+    const mentorsData = await getUsers({ role: "mentor" });
+    mentors = mentorsData.Items;
   } catch (error) {
-    const responseCode: keyof typeof RESPONSE_CODES = "-203";
-    return throwResponse(callback, RESPONSE_CODES[responseCode], 404, {
-      responseMessage: RESPONSE_CODES[responseCode],
-      responseCode,
-      error,
-    });
+    return makeErrorResponse(400, "-203", error);
   }
+
+  if (mentors.length === 0) {
+    return makeErrorResponse(404, "-202");
+  }
+
+  return makeSuccessResponse(mentors);
 };
 
 export const getUserByIdService = async (

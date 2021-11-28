@@ -44,7 +44,7 @@ export const RESPONSE_CODES = {
   "-200": "Unable to create user. User already exists.",
   "-201": "Unable to create user.",
   "-202": "There is no mentors",
-  "-203": "Unable to get all mentors.",
+  "-203": "Unable to get mentors.",
   "-204": "User not found",
   "-205": "Unable to get user by id",
   "-300": "Unable to add a warning",
