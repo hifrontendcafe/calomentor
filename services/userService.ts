@@ -2,8 +2,8 @@ import type { APIGatewayProxyHandler } from "aws-lambda";
 
 import { Callback, Context } from "aws-lambda";
 import type { AWSError } from "aws-sdk";
-import { RESPONSE_CODES, TABLE_NAME_USER } from "../constants";
-import { createUser, getUsers } from "../repository/user";
+import { TABLE_NAME_USER } from "../constants";
+import { createUser, getUsers, getUserById } from "../repository/user";
 import type { User } from "../types";
 import { makeErrorResponse, makeSuccessResponse } from "../utils/makeResponses";
 import { throwResponse } from "../utils/throwResponse";
@@ -81,34 +81,26 @@ export const getUsersService: APIGatewayProxyHandler = async () => {
   return makeSuccessResponse(mentors);
 };
 
-export const getUserByIdService = async (
-  event: any,
-  context: Context,
-  callback: Callback<any>
-): Promise<void> => {
-  const params = {
-    TableName: TABLE_NAME_USER,
-    Key: { id: event.pathParameters.id },
-  };
-  try {
-    const user = await dynamoDb.get(params).promise();
+export const getUserByIdService: APIGatewayProxyHandler = async (event) => {
+  const id = event?.pathParameters?.id;
 
-    if (Object.keys(user).length === 0) {
-      const responseCode: keyof typeof RESPONSE_CODES = "-204";
-      return throwResponse(callback, RESPONSE_CODES[responseCode], 404, {
-        responseMessage: RESPONSE_CODES[responseCode],
-        responseCode,
-      });
-    }
-    return throwResponse(callback, "", 200, user.Item);
-  } catch (error) {
-    const responseCode: keyof typeof RESPONSE_CODES = "-205";
-    return throwResponse(callback, RESPONSE_CODES[responseCode], 400, {
-      responseMessage: RESPONSE_CODES[responseCode],
-      responseCode,
-      error,
-    });
+  if (!id) {
+    return makeErrorResponse(400, "-311");
   }
+
+  let user: User;
+  try {
+    const userData = await getUserById(event.pathParameters.id);
+    user = userData.Item;
+  } catch (error) {
+    return makeErrorResponse(400, "-205", error);
+  }
+
+  if (!user) {
+    return makeErrorResponse(404, "-204");
+  }
+
+  return makeSuccessResponse(user);
 };
 
 export const deleteUserByIdService = (
