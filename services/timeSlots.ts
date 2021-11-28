@@ -142,7 +142,7 @@ export const deleteTimeSlot = async (event: any) => {
   let deletedResponseData;
   try {
     deletedResponseData = await repositoryDeleteTimeSlot(
-      event.pathParamenters.id
+      event.pathParameters.id
     );
   } catch (err) {
     return makeErrorResponse(400, "-313", err);
