@@ -43,7 +43,7 @@ export const createMentorship = (
   } = event;
 
   if (!mentor_id || !mentee_id || !mentee_email || !time_slot_id) {
-    const responseCode = "-100";
+    const responseCode: keyof typeof RESPONSE_CODES = "-100";
     return throwLambdaResponse(callback, {
       responseMessage: RESPONSE_CODES[responseCode],
       responseCode,
@@ -85,7 +85,7 @@ export const createMentorship = (
   dynamoDb.get(paramsTimeSlot, async (err, timeSlotData) => {
     try {
       if (err) {
-        const responseCode = "-103";
+        const responseCode: keyof typeof RESPONSE_CODES = "-103";
         return throwLambdaResponse(callback, {
           responseMessage: RESPONSE_CODES[responseCode],
           responseCode,
@@ -98,14 +98,14 @@ export const createMentorship = (
 
       dynamoDb.get(paramsUserId, (err, data) => {
         if (err) {
-          const responseCode = "-101";
+          const responseCode: keyof typeof RESPONSE_CODES = "-101";
           return throwLambdaResponse(callback, {
             responseMessage: RESPONSE_CODES[responseCode],
             responseCode,
           });
         } else {
           if (Object.keys(data).length === 0) {
-            const responseCode = "-101";
+            const responseCode: keyof typeof RESPONSE_CODES = "-101";
             return throwLambdaResponse(callback, {
               responseMessage: RESPONSE_CODES[responseCode],
               responseCode,
@@ -132,7 +132,7 @@ export const createMentorship = (
 
             dynamoDb.put(params, async (error, resMentorship) => {
               if (error) {
-                const responseCode = "-102";
+                const responseCode: keyof typeof RESPONSE_CODES = "-102";
                 return throwLambdaResponse(callback, {
                   responseMessage: RESPONSE_CODES[responseCode],
                   responseCode,
@@ -197,14 +197,14 @@ export const createMentorship = (
                     htmlMentor
                   );
                 } catch (error) {
-                  const responseCode = "-1";
+                  const responseCode: keyof typeof RESPONSE_CODES = "-1";
                   return throwLambdaResponse(callback, {
                     responseMessage: RESPONSE_CODES[responseCode],
                     responseCode,
                     responseError: error,
                   });
                 }
-                const responseCode = "100";
+                const responseCode: keyof typeof RESPONSE_CODES = "100";
                 return throwLambdaResponse(callback, {
                   responseMessage: RESPONSE_CODES[responseCode],
                   responseCode,
@@ -228,7 +228,7 @@ export const createMentorship = (
         }
       });
     } catch (error) {
-      const responseCode = "-1";
+      const responseCode: keyof typeof RESPONSE_CODES = "-1";
       return throwLambdaResponse(callback, {
         responseMessage: RESPONSE_CODES[responseCode],
         responseCode,
@@ -256,7 +256,7 @@ export const cancelMentorship = async (
     const mentorship = await dynamoDb.get(paramsGet).promise();
 
     if (mentorship.Item?.mentorship_status === STATUS.CANCEL) {
-      const responseCode = "-109";
+      const responseCode: keyof typeof RESPONSE_CODES = "-109";
       return throwResponse(callback, RESPONSE_CODES[responseCode], 400, {
         responseMessage: RESPONSE_CODES[responseCode],
         responseCode,
@@ -318,14 +318,14 @@ export const cancelMentorship = async (
       forMentor: true,
     });
     sendEmail(mentor_email, `Hola ${mentor_name}!`, htmlMentor);
-    const responseCode = "0";
+    const responseCode: keyof typeof RESPONSE_CODES = "0";
     return throwResponse(callback, RESPONSE_CODES[responseCode], 200, {
       responseMessage: RESPONSE_CODES[responseCode],
       responseCode,
       data: mentorshipUpdated.Attributes,
     });
   } catch (error) {
-    const responseCode = "-104";
+    const responseCode: keyof typeof RESPONSE_CODES = "-104";
     return throwResponse(callback, RESPONSE_CODES[responseCode], 400, {
       responseMessage: RESPONSE_CODES[responseCode],
       responseCode,
@@ -369,7 +369,7 @@ export const reminderMentorship = async (
     confirmationLink: `${process.env.BASE_FRONT_URL}/confirmation?token=${token}`,
   });
   await sendEmail(mentorEmail, `Hola ${mentorName}!`, htmlMentor);
-  const responseCode = "0";
+  const responseCode: keyof typeof RESPONSE_CODES = "0";
   return throwLambdaResponse(callback, {
     responseMessage: RESPONSE_CODES[responseCode],
     responseCode,
@@ -403,7 +403,7 @@ export const sendFeedbackFormMentorship = (
     feedbackLink: `${process.env.BASE_FRONT_URL}/feedback?token=${token}`,
   });
   sendEmail(menteeEmail, `Hola ${menteeName}!`, htmlMentee);
-  const responseCode = "0";
+  const responseCode: keyof typeof RESPONSE_CODES = "0";
   return throwLambdaResponse(callback, {
     responseMessage: RESPONSE_CODES[responseCode],
     responseCode,
@@ -432,7 +432,7 @@ export const feedbackFormMentorship = async (
     const mentorship = await dynamoDb.get(paramsGet).promise();
 
     if (mentorship.Item?.mentorship_status !== STATUS.CONFIRMED) {
-      const responseCode = "-111";
+      const responseCode: keyof typeof RESPONSE_CODES = "-111";
       return throwResponse(callback, RESPONSE_CODES[responseCode], 400, {
         responseMessage: RESPONSE_CODES[responseCode],
         responseCode,
@@ -443,7 +443,7 @@ export const feedbackFormMentorship = async (
       mentorship.Item?.feedback_stars > 0 &&
       mentorship.Item?.feedback_mentee !== ""
     ) {
-      const responseCode = "-112";
+      const responseCode: keyof typeof RESPONSE_CODES = "-112";
       return throwResponse(callback, RESPONSE_CODES[responseCode], 400, {
         responseMessage: RESPONSE_CODES[responseCode],
         responseCode,
@@ -465,14 +465,14 @@ export const feedbackFormMentorship = async (
 
     const updateMentorship = await dynamoDb.update(paramsUpdate).promise();
 
-    const responseCode = "102";
+    const responseCode: keyof typeof RESPONSE_CODES = "102";
     return throwResponse(callback, RESPONSE_CODES[responseCode], 200, {
       responseMessage: RESPONSE_CODES[responseCode],
       responseCode,
       responseData: updateMentorship.Attributes,
     });
   } catch (error) {
-    const responseCode = "-110";
+    const responseCode: keyof typeof RESPONSE_CODES = "-110";
     return throwResponse(callback, RESPONSE_CODES[responseCode], 400, {
       responseMessage: RESPONSE_CODES[responseCode],
       responseCode,
@@ -525,7 +525,7 @@ export const confirmationMentorship = async (
     const mentorship = await dynamoDb.get(paramsGet).promise();
 
     if (mentorship.Item?.mentorship_status !== STATUS.ACTIVE) {
-      const responseCode = "-109";
+      const responseCode: keyof typeof RESPONSE_CODES = "-109";
       return throwResponse(callback, RESPONSE_CODES[responseCode], 400, {
         responseMessage: RESPONSE_CODES[responseCode],
         responseCode,
@@ -544,14 +544,14 @@ export const confirmationMentorship = async (
 
     const updateMentorship = await dynamoDb.update(paramsUpdate).promise();
 
-    const responseCode = "101";
+    const responseCode: keyof typeof RESPONSE_CODES = "101";
     return throwResponse(callback, RESPONSE_CODES[responseCode], 200, {
       responseMessage: RESPONSE_CODES[responseCode],
       responseCode,
       responseData: updateMentorship.Attributes,
     });
   } catch (error) {
-    const responseCode = "-110";
+    const responseCode: keyof typeof RESPONSE_CODES = "-110";
     return throwResponse(callback, RESPONSE_CODES[responseCode], 400, {
       responseMessage: RESPONSE_CODES[responseCode],
       responseCode,

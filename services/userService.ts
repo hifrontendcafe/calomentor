@@ -55,20 +55,20 @@ export const createUserService = async (
     const createUser = await dynamoDb.put(params).promise();
 
     if (createUser.code === "ConditionalCheckFailedException") {
-      const responseCode = "-200";
+      const responseCode: keyof typeof RESPONSE_CODES = "-200";
       return throwResponse(callback, RESPONSE_CODES[responseCode], 400, {
         responseMessage: RESPONSE_CODES[responseCode],
         responseCode,
       });
     }
 
-    const responseCode = "200";
+    const responseCode: keyof typeof RESPONSE_CODES = "200";
     return throwResponse(callback, RESPONSE_CODES[responseCode], 200, {
       responseMessage: RESPONSE_CODES[responseCode],
       responseCode,
     });
   } catch (error) {
-    const responseCode = "-201";
+    const responseCode: keyof typeof RESPONSE_CODES = "-201";
     return throwResponse(callback, RESPONSE_CODES[responseCode], 400, {
       responseMessage: RESPONSE_CODES[responseCode],
       responseCode,
@@ -99,7 +99,7 @@ export const getUsersService = async (
     });
 
     if (mentors.length === 0) {
-      const responseCode = "-202";
+      const responseCode: keyof typeof RESPONSE_CODES = "-202";
       return throwResponse(callback, RESPONSE_CODES[responseCode], 404, {
         responseMessage: RESPONSE_CODES[responseCode],
         responseCode,
@@ -108,7 +108,7 @@ export const getUsersService = async (
 
     return throwResponse(callback, "", 200, mentors);
   } catch (error) {
-    const responseCode = "-203";
+    const responseCode: keyof typeof RESPONSE_CODES = "-203";
     return throwResponse(callback, RESPONSE_CODES[responseCode], 404, {
       responseMessage: RESPONSE_CODES[responseCode],
       responseCode,
@@ -130,7 +130,7 @@ export const getUserByIdService = async (
     const user = await dynamoDb.get(params).promise();
 
     if (Object.keys(user).length === 0) {
-      const responseCode = "-204";
+      const responseCode: keyof typeof RESPONSE_CODES = "-204";
       return throwResponse(callback, RESPONSE_CODES[responseCode], 404, {
         responseMessage: RESPONSE_CODES[responseCode],
         responseCode,
@@ -138,7 +138,7 @@ export const getUserByIdService = async (
     }
     return throwResponse(callback, "", 200, user.Item);
   } catch (error) {
-    const responseCode = "-205";
+    const responseCode: keyof typeof RESPONSE_CODES = "-205";
     return throwResponse(callback, RESPONSE_CODES[responseCode], 400, {
       responseMessage: RESPONSE_CODES[responseCode],
       responseCode,

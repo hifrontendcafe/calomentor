@@ -1,6 +1,9 @@
 import { RESPONSE_CODES } from "../constants";
 
-export function makeSuccessResponse(data: any, responseCode: string = "0") {
+export function makeSuccessResponse(
+  data: any,
+  responseCode: keyof typeof RESPONSE_CODES = "0"
+) {
   return {
     statusCode: 200,
     body: JSON.stringify({
@@ -15,7 +18,7 @@ export function makeSuccessResponse(data: any, responseCode: string = "0") {
 
 export function makeErrorResponse(
   statusCode: number,
-  responseCode: string,
+  responseCode: keyof typeof RESPONSE_CODES,
   error?: any
 ) {
   const data = {};
