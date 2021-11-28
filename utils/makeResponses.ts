@@ -1,3 +1,5 @@
+import type { APIGatewayProxyResult } from "aws-lambda";
+
 import type { OutgoingHttpHeaders } from "http";
 import { RESPONSE_CODES } from "../constants";
 
@@ -12,7 +14,7 @@ export interface Response {
 export function makeSuccessResponse(
   data: any,
   responseCode: keyof typeof RESPONSE_CODES = "0"
-): Response {
+): APIGatewayProxyResult {
   return {
     statusCode: 200,
     body: JSON.stringify({
@@ -29,7 +31,7 @@ export function makeErrorResponse(
   statusCode: number,
   responseCode: keyof typeof RESPONSE_CODES,
   error?: any
-) {
+): APIGatewayProxyResult {
   const data = {};
 
   if (error) {

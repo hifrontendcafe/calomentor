@@ -28,7 +28,7 @@ interface TimeSlotFilters {
 }
 
 export function getTimeSlotsByUserId(
-  userId: number,
+  userId: string,
   filters: TimeSlotFilters = {}
 ) {
   const query: ScanInput = {

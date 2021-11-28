@@ -1,3 +1,5 @@
+import type { APIGatewayProxyHandler } from "aws-lambda";
+
 import { v4 as uuidv4 } from "uuid";
 import { makeErrorResponse, makeSuccessResponse } from "../utils/makeResponses";
 import { TimeSlot } from "../types";
@@ -39,7 +41,7 @@ export const addTimeSlot = async (event: any) => {
   return makeSuccessResponse(timeSlot, "103");
 };
 
-export const getTimeSlotsByUser = async (event: any) => {
+export const getTimeSlotsByUser: APIGatewayProxyHandler = async (event) => {
   const { queryStringParameters, pathParameters } = event;
 
   let timeSlotsData: Awaited<ReturnType<typeof getTimeSlotsByUserId>>;
@@ -47,7 +49,7 @@ export const getTimeSlotsByUser = async (event: any) => {
   try {
     timeSlotsData = await getTimeSlotsByUserId(pathParameters.id, {
       slotDate: queryStringParameters?.slot_date,
-      onlyFree: queryStringParameters?.only_free,
+      onlyFree: queryStringParameters?.only_free === "true",
     });
   } catch (error) {
     return makeErrorResponse(400, "-307", error);
@@ -56,7 +58,7 @@ export const getTimeSlotsByUser = async (event: any) => {
   return makeSuccessResponse(timeSlotsData.Items);
 };
 
-export const getTimeSlotById = async (event: any) => {
+export const getTimeSlotById: APIGatewayProxyHandler = async (event) => {
   const { pathParameters } = event;
 
   let timeSlotData: Awaited<ReturnType<typeof repositoryGetTimeSlotById>>;
@@ -74,7 +76,7 @@ export const getTimeSlotById = async (event: any) => {
   return makeSuccessResponse(timeSlotData.Item);
 };
 
-export const updateTimeSlotState = async (event: any) => {
+export const updateTimeSlotState: APIGatewayProxyHandler = async (event) => {
   const { pathParameters } = event;
   const id = pathParameters.id;
 
@@ -103,7 +105,7 @@ export const updateTimeSlotState = async (event: any) => {
   return makeSuccessResponse(timeSlot, "104");
 };
 
-export const addMenteeToTimeSlot = async (event: any) => {
+export const addMenteeToTimeSlot: APIGatewayProxyHandler = async (event) => {
   const { pathParameters } = event;
   const id = pathParameters.id;
 
@@ -134,7 +136,7 @@ export const addMenteeToTimeSlot = async (event: any) => {
   return makeSuccessResponse(timeSlot, "104");
 };
 
-export const deleteTimeSlot = async (event: any) => {
+export const deleteTimeSlot: APIGatewayProxyHandler = async (event) => {
   if (!event.pathParameters.id) {
     return makeErrorResponse(400, "-310");
   }
