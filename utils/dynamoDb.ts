@@ -14,57 +14,68 @@ type DeleteItemOutput = DynamoDB.DocumentClient.DeleteItemOutput;
 type ScanInput = DynamoDB.DocumentClient.ScanInput;
 type ScanOutput = DynamoDB.DocumentClient.ScanOutput;
 
-export interface GetItemResult<T extends AttributeMap> extends GetItemOutput {
+interface GetItemResult<T extends AttributeMap> extends GetItemOutput {
   Item?: T;
 }
 
 type Get = <T>(
   params: GetItemInput
-) => Promise<PromiseResult<GetItemResult<T | AttributeMap>, AWSError>>;
+) => Promise<PromiseResult<GetItemResult<T>, AWSError>>;
 
-export interface ScanResult<T extends AttributeMap> extends ScanOutput {
+interface ScanResult<T extends AttributeMap> extends ScanOutput {
   Items?: T[];
 }
 
-type Scan = <T extends AttributeMap>(
+type Scan = <T>(
   params: ScanInput
-) => Promise<PromiseResult<ScanResult<T | AttributeMap>, AWSError>>;
+) => Promise<PromiseResult<ScanResult<T>, AWSError>>;
 
-export interface PutItemResult<T> extends PutItemOutput {
+interface PutItemResult<T extends AttributeMap> extends PutItemOutput {
   Attributes?: T;
 }
 
 type Put = <T extends AttributeMap>(
   params: PutItemInput
-) => Promise<PromiseResult<PutItemResult<T | AttributeMap>, AWSError>>;
-export interface UpdateItemResult<T> extends UpdateItemOutput {
+) => Promise<PromiseResult<PutItemResult<T>, AWSError>>;
+interface UpdateItemResult<T> extends UpdateItemOutput {
   Attributes?: T;
 }
 
 type Update = <T extends AttributeMap>(
   params: UpdateItemInput
-) => Promise<PromiseResult<UpdateItemResult<T | AttributeMap>, AWSError>>;
+) => Promise<PromiseResult<UpdateItemResult<T>, AWSError>>;
 
-export interface DeleteItemResult<T> extends DeleteItemOutput {
+interface DeleteItemResult<T> extends DeleteItemOutput {
   Attributes?: T;
 }
 
-type Delete = <T>(
+type Delete = <T extends AttributeMap>(
   params: DeleteItemInput
-) => Promise<PromiseResult<DeleteItemResult<T | AttributeMap>, AWSError>>;
+) => Promise<PromiseResult<DeleteItemResult<T>, AWSError>>;
 
 const dynamoDb = new DynamoDB.DocumentClient();
 
-export const get: Get = (params: GetItemInput) =>
-  dynamoDb.get(params).promise();
+export const get: Get = <T>(params: GetItemInput) =>
+  dynamoDb.get(params).promise() as Promise<
+    PromiseResult<GetItemResult<T>, AWSError>
+  >;
 
-export const scan: Scan = (params: ScanInput) =>
-  dynamoDb.scan(params).promise();
+export const scan: Scan = <T>(params: ScanInput) =>
+  dynamoDb.scan(params).promise() as Promise<
+    PromiseResult<ScanResult<T>, AWSError>
+  >;
 
-export const put: Put = (params) => dynamoDb.put(params).promise();
+export const put: Put = <T>(params) =>
+  dynamoDb.put(params).promise() as Promise<
+    PromiseResult<PutItemResult<T>, AWSError>
+  >;
 
-export const update: Update = (params: UpdateItemInput) =>
-  dynamoDb.update(params).promise();
+export const update: Update = <T>(params: UpdateItemInput) =>
+  dynamoDb.update(params).promise() as Promise<
+    PromiseResult<UpdateItemResult<T>, AWSError>
+  >;
 
-export const deleteItem: Delete = (params: DeleteItemInput) =>
-  dynamoDb.delete(params).promise();
+export const deleteItem: Delete = <T>(params: DeleteItemInput) =>
+  dynamoDb.delete(params).promise() as Promise<
+    PromiseResult<DeleteItemResult<T>, AWSError>
+  >;

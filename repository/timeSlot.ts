@@ -2,24 +2,14 @@ import { TABLE_NAME_TIME_SLOT } from "../constants";
 
 import { get, put, scan, update, deleteItem } from "../utils/dynamoDb";
 
-import type {
-  PutItemResult,
-  ScanResult,
-  GetItemResult,
-  UpdateItemResult,
-  DeleteItemResult,
-} from "../utils/dynamoDb";
-
 import type { TimeSlot } from "../types";
 import { toInt } from "../utils/toInt";
-import type { AWSError } from "aws-sdk";
-import type { PromiseResult } from "aws-sdk/lib/request";
 
 export function getTimeSlotById(id: string) {
   return get<TimeSlot>({
     TableName: TABLE_NAME_TIME_SLOT,
     Key: { id },
-  }) as Promise<PromiseResult<GetItemResult<TimeSlot>, AWSError>>;
+  });
 }
 
 interface TimeSlotFilters {
@@ -54,16 +44,14 @@ export function getTimeSlotsByUserId(
     query.ExpressionAttributeValues[":is_occupied"] = false;
   }
 
-  return scan<TimeSlot[]>(query) as Promise<
-    PromiseResult<ScanResult<TimeSlot>, AWSError>
-  >;
+  return scan<TimeSlot>(query);
 }
 
 export function createTimeSlot(timeSlotInfo: TimeSlot) {
   return put<TimeSlot>({
     TableName: TABLE_NAME_TIME_SLOT,
     Item: timeSlotInfo,
-  }) as Promise<PromiseResult<PutItemResult<TimeSlot>, AWSError>>;
+  });
 }
 
 interface UpdateIsOccupiedParams {
@@ -116,9 +104,7 @@ function updateTimeSlot(id: string, payload: UpdateParams) {
       throw new Error("Invalid update operation");
   }
 
-  return update<TimeSlot>(params) as Promise<
-    PromiseResult<UpdateItemResult<TimeSlot>, AWSError>
-  >;
+  return update<TimeSlot>(params);
 }
 
 export function deleteTimeSlot(id: string) {
@@ -126,7 +112,7 @@ export function deleteTimeSlot(id: string) {
     TableName: TABLE_NAME_TIME_SLOT,
     Key: { id },
     ReturnValues: "ALL_OLD",
-  }) as Promise<PromiseResult<DeleteItemResult<TimeSlot>, AWSError>>;
+  });
 }
 
 export function fillTimeSlot(id: string) {
