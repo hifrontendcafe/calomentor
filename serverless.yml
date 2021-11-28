@@ -104,7 +104,7 @@ functions:
           cors: true
           private: true
   getTimeSlotsById:
-    handler: index.getTimeSlot
+    handler: index.getTimeSlotById
     events:
       - http:
           path: time-slot/{id}
@@ -120,7 +120,7 @@ functions:
           cors: true
           private: true
   updateMenteeOnSlot:
-    handler: index.updateMenteeSlot
+    handler: index.addMenteeToTimeSlot
     events:
       - http:
           path: time-slot/{id}/mentee
@@ -128,7 +128,7 @@ functions:
           cors: true
           private: true
   deleteTimeSlot:
-    handler: index.deleteSlot
+    handler: index.deleteTimeSlot
     events:
       - http:
           path: time-slot/{id}
