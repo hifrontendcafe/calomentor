@@ -1,7 +1,4 @@
-import { Callback, Context } from "aws-lambda";
-import { TABLE_NAME_TIME_SLOT } from "../constants";
 import { v4 as uuidv4 } from "uuid";
-import { throwResponse } from "../utils/throwResponse";
 import { makeErrorResponse, makeSuccessResponse } from "../utils/makeResponses";
 import { TimeSlot } from "../types";
 import {
@@ -10,12 +7,9 @@ import {
   getTimeSlotById,
   fillTimeSlot,
   freeTimeSlot,
-  addMentee,
+  addMenteeToTimeSlot,
+  deleteTimeSlot as repositoryDeleteTimeSlot,
 } from "../repository/timeSlot";
-
-const AWS = require("aws-sdk"); // eslint-disable-line import/no-extraneous-dependencies
-
-const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
 export const addTimeSlot = async (event: any) => {
   const { user_id, slot_date } = JSON.parse(event.body);
@@ -119,10 +113,14 @@ export const updateMenteeToTimeSlot = async (event: any) => {
 
   const { mentee_username, mentee_id, tokenForCancel } = JSON.parse(event.body);
 
+  if (!mentee_username || !mentee_id || !tokenForCancel) {
+    return makeErrorResponse(400, "-311");
+  }
+
   let timeSlot: TimeSlot;
 
   try {
-    const timeSlotData = await addMentee(id, {
+    const timeSlotData = await addMenteeToTimeSlot(id, {
       id: mentee_id,
       username: mentee_username,
       tokenForCancel,
@@ -136,38 +134,19 @@ export const updateMenteeToTimeSlot = async (event: any) => {
   return makeSuccessResponse(timeSlot, "104");
 };
 
-export const deleteTimeSlot = (
-  event: any,
-  context: Context,
-  callback: Callback<any>
-): void => {
+export const deleteTimeSlot = async (event: any) => {
   if (!event.pathParameters.id) {
-    const errorMessage = `Bad Request: id y slots are required`;
-    return throwResponse(callback, errorMessage, 400);
+    return makeErrorResponse(400, "-310");
   }
 
-  const params = {
-    TableName: TABLE_NAME_TIME_SLOT,
-    Key: {
-      id: event.pathParameters.id,
-    },
-    ReturnValues: "ALL_OLD",
-  };
+  let deletedResponseData;
+  try {
+    deletedResponseData = await repositoryDeleteTimeSlot(
+      event.pathParamenters.id
+    );
+  } catch (err) {
+    return makeErrorResponse(400, "-313", err);
+  }
 
-  dynamoDb.delete(params, (err, result) => {
-    if (err || !result.Attributes) {
-      return throwResponse(
-        callback,
-        `There Was an error trying to delete the slot or the slot doesn't exist`,
-        400
-      );
-    } else {
-      return throwResponse(
-        callback,
-        `The slot was succesfully deleted`,
-        200,
-        result.Attributes
-      );
-    }
-  });
+  return makeSuccessResponse(deletedResponseData, "105");
 };

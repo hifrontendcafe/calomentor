@@ -7,6 +7,8 @@ export type PutItemInput = DynamoDB.DocumentClient.PutItemInput;
 export type PutItemOutput = DynamoDB.DocumentClient.PutItemOutput;
 export type UpdateItemInput = DynamoDB.DocumentClient.UpdateItemInput;
 export type UpdateItemOutput = DynamoDB.DocumentClient.UpdateItemOutput;
+export type DeleteItemInput = DynamoDB.DocumentClient.DeleteItemInput;
+export type DeleteItemOutput = DynamoDB.DocumentClient.DeleteItemOutput;
 export type ScanInput = DynamoDB.DocumentClient.ScanInput;
 export type ScanOutput = DynamoDB.DocumentClient.ScanOutput;
 
@@ -14,7 +16,9 @@ export interface GetItemResult<T extends AttributeMap> extends GetItemOutput {
   Item?: T;
 }
 
-type Get = <T>(params: GetItemInput) => Promise<GetItemResult<T | AttributeMap>>;
+type Get = <T>(
+  params: GetItemInput
+) => Promise<GetItemResult<T | AttributeMap>>;
 
 export interface ScanResult<T extends AttributeMap> extends ScanOutput {
   Items?: T[];
@@ -31,7 +35,6 @@ export interface PutItemResult<T> extends PutItemOutput {
 type Put = <T extends AttributeMap>(
   params: PutItemInput
 ) => Promise<PutItemResult<T | AttributeMap>>;
-
 export interface UpdateItemResult<T> extends UpdateItemOutput {
   Attributes?: T;
 }
@@ -39,6 +42,14 @@ export interface UpdateItemResult<T> extends UpdateItemOutput {
 type Update = <T extends AttributeMap>(
   params: UpdateItemInput
 ) => Promise<UpdateItemResult<T | AttributeMap>>;
+
+export interface DeleteItemResult<T> extends DeleteItemOutput {
+  Attributes?: T;
+}
+
+type Delete = <T>(
+  params: DeleteItemInput
+) => Promise<DeleteItemResult<T | AttributeMap>>;
 
 const dynamoDb = new DynamoDB.DocumentClient();
 
@@ -52,3 +63,6 @@ export const put: Put = (params) => dynamoDb.put(params).promise();
 
 export const update: Update = (params: UpdateItemInput) =>
   dynamoDb.update(params).promise();
+
+export const deleteItem: Delete = (params: DeleteItemInput) =>
+  dynamoDb.delete(params).promise();
