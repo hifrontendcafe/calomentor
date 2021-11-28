@@ -3,8 +3,8 @@ import { TABLE_NAME_USER } from "../constants";
 import { put, scan } from "../utils/dynamoDb";
 
 import type { PutItemResult, ScanResult } from "../utils/dynamoDb";
+import type { User, Role } from "../types";
 
-import type { User } from "../types";
 import type { AWSError } from "aws-sdk";
 import type { PromiseResult } from "aws-sdk/lib/request";
 
@@ -17,7 +17,7 @@ export function createUser(user: User) {
 }
 
 interface UserFilters {
-  role?: "mentee" | "mentor";
+  role?: Role;
 }
 
 export function getUsers(filters: UserFilters = {}) {
@@ -29,8 +29,8 @@ export function getUsers(filters: UserFilters = {}) {
   };
 
   if (filters.role) {
-    query.FilterExpression = `contains(#role, :role)`;
-    query.ExpressionAttributeValues[":role"] = filters.role;
+    query.FilterExpression = "contains(#role, :role)";
+    query.ExpressionAttributeValues = { ":role": filters.role };
   }
 
   return scan<User>(query) as Promise<

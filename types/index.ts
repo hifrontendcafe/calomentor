@@ -37,6 +37,8 @@ interface UserLinks {
   portfolio: string;
 }
 
+export type Role = "admin" | "mentor";
+
 export interface User {
   id: string;
   discord_username?: string;
@@ -44,7 +46,7 @@ export interface User {
   about_me?: string;
   email?: string;
   url_photo?: string;
-  role?: string[];
+  role?: Role[];
   links?: UserLinks;
   skills?: string[];
   isActive: boolean;
