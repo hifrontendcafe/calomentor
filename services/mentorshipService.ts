@@ -68,6 +68,7 @@ export const createMentorship = (
     feedback_mentee: "",
     feedback_stars: 0,
     feedback_mentee_private: "",
+    warning_info: {},
   };
 
   let dateToRemind: Date = new Date();

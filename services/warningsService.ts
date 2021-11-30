@@ -57,8 +57,10 @@ export const addWarning = async (
     Key: { id: mentorship_id },
     ExpressionAttributeValues: {
       ":mentorship_status": STATUS.WITHWARNING,
+      ":warning_info": warningData,
     },
-    UpdateExpression: "SET mentorship_status = :mentorship_status",
+    UpdateExpression:
+      "SET mentorship_status = :mentorship_status, warning_info = :warning_info",
     ReturnValues: "ALL_NEW",
   };
 
@@ -96,7 +98,6 @@ export const getWarnings = async (
 
   try {
     const warnings = await dynamoDb.scan(params).promise();
-    console.log(warnings);
     if (warnings.Items?.length === 0) {
       const responseCode: keyof typeof RESPONSE_CODES = "301";
       return throwResponse(callback, RESPONSE_CODES[responseCode], 200, {
@@ -176,11 +177,24 @@ export const forgiveWarning = async (
   };
 
   try {
-    await dynamoDb.update(params).promise();
+    const warningUpdate = await dynamoDb.update(params).promise();
+    const paramsUpdate = {
+      TableName: TABLE_NAME_MENTORSHIP,
+      Key: { id: warningUpdate.mentorship_id },
+      ExpressionAttributeValues: {
+        ":mentorship_status": STATUS.CONFIRMED,
+        ":warning_info": warningUpdate.Attributes,
+      },
+      UpdateExpression:
+        "SET mentorship_status = :mentorship_status, warning_info = :warning_info",
+      ReturnValues: "ALL_NEW",
+    };
+    await dynamoDb.update(paramsUpdate).promise();
     const responseCode: keyof typeof RESPONSE_CODES = "303";
     return throwResponse(callback, RESPONSE_CODES[responseCode], 200, {
       responseMessage: RESPONSE_CODES[responseCode],
       responseCode,
+      warningUpdate,
     });
   } catch (error) {
     const responseCode: keyof typeof RESPONSE_CODES = "-305";
