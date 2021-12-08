@@ -81,3 +81,35 @@ export function deleteItem<T extends Record<string, any>>(
 export function deleteItem(params: DeleteItemInput) {
   return dynamoDb.delete(params).promise();
 }
+
+type UpdateExpression = Pick<
+  UpdateItemInput,
+  "UpdateExpression" | "ExpressionAttributeNames" | "ExpressionAttributeValues"
+>;
+
+export function generateUpdateQuery<
+  T extends Record<string, any> = Record<string, any>
+>(data: T, allowedFieldsToUpdate: (keyof T)[] = null): UpdateExpression {
+  const expression: UpdateExpression = {
+    UpdateExpression: "set",
+    ExpressionAttributeNames: {},
+    ExpressionAttributeValues: {},
+  };
+
+  Object.entries(data).forEach(([key, item]) => {
+    if (allowedFieldsToUpdate === null || allowedFieldsToUpdate.includes(key)) {
+      expression.UpdateExpression += ` #${key} = :${key},`;
+      expression.ExpressionAttributeNames[`#${key}`] = key;
+      expression.ExpressionAttributeValues[`:${key}`] = item;
+    }
+  });
+
+  // remove last comma
+  expression.UpdateExpression = expression.UpdateExpression.slice(0, -1);
+
+  if (Object.keys(expression.ExpressionAttributeNames).length === 0) {
+    throw new Error("No valid fields to update");
+  }
+
+  return expression;
+}
