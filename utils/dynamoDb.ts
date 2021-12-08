@@ -87,6 +87,12 @@ type UpdateExpression = Pick<
   "UpdateExpression" | "ExpressionAttributeNames" | "ExpressionAttributeValues"
 >;
 
+/**
+ * From a record with fields and values to update and
+ * a optional list of allowed fields to update
+ * generates an {@link UpdateExpression} that could
+ * be used in a dynamodb update operation
+ */
 export function generateUpdateQuery<
   T extends Record<string, any> = Record<string, any>
 >(data: T, allowedFieldsToUpdate: (keyof T)[] = null): UpdateExpression {
