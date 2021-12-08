@@ -1,6 +1,13 @@
 import { TABLE_NAME_USER } from "../constants";
 
-import { deleteItem, get, put, scan } from "../utils/dynamoDb";
+import {
+  deleteItem,
+  generateUpdateQuery,
+  get,
+  put,
+  scan,
+  update,
+} from "../utils/dynamoDb";
 
 import type { User, Role } from "../types";
 
@@ -42,7 +49,34 @@ export function getUserById(id: string) {
 export function deleteUserById(id: string) {
   return deleteItem<User>({
     TableName: TABLE_NAME_USER,
-    Key: {id},
+    Key: { id },
     ReturnValues: "ALL_OLD",
-  })
+  });
+}
+
+export function updateUser(id: string, data: User) {
+  let updateExpression: ReturnType<typeof generateUpdateQuery>;
+  try {
+    updateExpression = generateUpdateQuery<User>(data, [
+      "discord_username",
+      "full_name",
+      "about_me",
+      "email",
+      "url_photo",
+      "role",
+      "links",
+      "skills",
+      "timezone",
+    ]);
+  } catch (err) {
+    throw err;
+  }
+
+  return update<User>({
+    TableName: TABLE_NAME_USER,
+    Key: { id },
+    ConditionExpression: "attribute_exists(id)",
+    ReturnValues: "ALL_NEW",
+    ...updateExpression,
+  });
 }

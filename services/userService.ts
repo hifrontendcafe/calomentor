@@ -8,8 +8,10 @@ import {
   getUsers,
   getUserById,
   deleteUserById,
+  updateUser,
 } from "../repository/user";
 import type { User } from "../types";
+import { generateUpdateQuery } from "../utils/dynamoDb";
 import { makeErrorResponse, makeSuccessResponse } from "../utils/makeResponses";
 import { throwResponse } from "../utils/throwResponse";
 
@@ -130,71 +132,33 @@ export const deleteUserByIdService: APIGatewayProxyHandler = async (event) => {
   return makeSuccessResponse(user, "202");
 };
 
-export const updateUserByIdService = (
-  event: any,
-  context: Context,
-  callback: Callback<any>
-): void => {
+export const updateUserByIdService: APIGatewayProxyHandler = async (event) => {
+  const id = event?.pathParameters?.id;
+
+  if (!id) {
+    return makeErrorResponse(400, "-311");
+  }
+
   const data = JSON.parse(event.body);
 
-  const generateUpdateQuery = (fields) => {
-    const allowedFieldsToUpdate = [
-      "discord_username",
-      "full_name",
-      "about_me",
-      "email",
-      "url_photo",
-      "role",
-      "links",
-      "skills",
-      "timezone",
-    ];
+  let result: Awaited<ReturnType<typeof updateUser>>;
+  try {
+    result = await updateUser(id, data);
+  } catch (err) {
+    return makeErrorResponse(400, "-317", err);
+  }
 
-    let expression = {
-      UpdateExpression: "set",
-      ExpressionAttributeNames: {},
-      ExpressionAttributeValues: {},
-    };
-
-    Object.entries(fields).forEach(([key, item]) => {
-      if (allowedFieldsToUpdate.includes(key)) {
-        expression.UpdateExpression += ` #${key} = :${key},`;
-        expression.ExpressionAttributeNames[`#${key}`] = key;
-        expression.ExpressionAttributeValues[`:${key}`] = item;
-      }
-    });
-
-    expression.UpdateExpression = expression.UpdateExpression.slice(0, -1);
-
-    if (Object.keys(expression.ExpressionAttributeNames).length === 0) {
-      responseMessage = "Bad Request: no valid fields to update.";
-      return throwResponse(callback, responseMessage, 400);
-    } else return expression;
-  };
-
-  let updateExpression = generateUpdateQuery(data);
-
-  const params = {
-    TableName: TABLE_NAME_USER,
-    Key: { id: event.pathParameters.id },
-    ConditionExpression: "attribute_exists(id)",
-    ReturnValues: "ALL_NEW",
-    ...updateExpression,
-  };
-
-  dynamoDb.update(params, (error, data) => {
-    if (error) {
-      if (error.code === "ConditionalCheckFailedException") {
-        responseMessage = `Unable to update user. Id ${event.pathParameters.id} not found`;
-        throwResponse(callback, responseMessage, 404);
-      }
-      responseMessage = `Unable to update user. Error: ${error}`;
-      throwResponse(callback, responseMessage, 400);
-    } else {
-      responseMessage = `User with id ${event.pathParameters.id} updated succesfully.`;
-      throwResponse(callback, responseMessage, 200, data.Attributes);
+  const error = result.$response.error;
+  const user: User = result.Attributes;
+  if (error || !user) {
+    if ((error as AWSError)?.code === "ConditionalCheckFailedException") {
+      return makeErrorResponse(400, "-318", error);
     }
-  });
+
+    return makeErrorResponse(400, "-317", error);
+  }
+
+  return makeSuccessResponse(user, "203");
 };
 
 export const activateUserService = (
