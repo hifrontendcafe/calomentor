@@ -11,7 +11,6 @@ import {
   updateUser,
 } from "../repository/user";
 import type { User } from "../types";
-import { generateUpdateQuery } from "../utils/dynamoDb";
 import { makeErrorResponse, makeSuccessResponse } from "../utils/makeResponses";
 import { throwResponse } from "../utils/throwResponse";
 
