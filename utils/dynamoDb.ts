@@ -119,3 +119,7 @@ export function generateUpdateQuery<
 
   return expression;
 }
+
+export function isAWSError(error: any): error is AWSError {
+  return error?.code;
+}

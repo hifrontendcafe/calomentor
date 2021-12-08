@@ -11,6 +11,7 @@ import {
   updateUser,
 } from "../repository/user";
 import type { User } from "../types";
+import { isAWSError } from "../utils/dynamoDb";
 import { makeErrorResponse, makeSuccessResponse } from "../utils/makeResponses";
 import { throwResponse } from "../utils/throwResponse";
 
@@ -19,8 +20,8 @@ const AWS = require("aws-sdk"); // eslint-disable-line import/no-extraneous-depe
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 let responseMessage = "";
 
-function isAWSError(error: any): error is AWSError {
-  return error?.code;
+function isConditionalCheckFailedError(error: any) {
+  return isAWSError(error) && error?.code === "ConditionalCheckFailedException";
 }
 
 export const createUserService: APIGatewayProxyHandler = async (event) => {
@@ -58,10 +59,8 @@ export const createUserService: APIGatewayProxyHandler = async (event) => {
   try {
     await createUser(user);
   } catch (error: unknown) {
-    if (isAWSError(error)) {
-      if (error?.code === "ConditionalCheckFailedException") {
-        return makeErrorResponse(400, "-200", error);
-      }
+    if (isConditionalCheckFailedError(error)) {
+      return makeErrorResponse(400, "-200", error);
     }
 
     return makeErrorResponse(400, "-201", error);
@@ -150,7 +149,7 @@ export const updateUserByIdService: APIGatewayProxyHandler = async (event) => {
   const error = result.$response.error;
   const user: User = result.Attributes;
   if (error || !user) {
-    if ((error as AWSError)?.code === "ConditionalCheckFailedException") {
+    if (isConditionalCheckFailedError(error)) {
       return makeErrorResponse(400, "-318", error);
     }
 
