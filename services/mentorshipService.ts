@@ -1,4 +1,5 @@
-import { Callback, Context } from "aws-lambda";
+import { Callback, Context, Handler } from "aws-lambda";
+
 import { throwLambdaResponse, throwResponse } from "../utils/throwResponse";
 import {
   RESPONSE_CODES,
@@ -6,13 +7,15 @@ import {
   TABLE_NAME_MENTORSHIP,
   TABLE_NAME_USER,
   TABLE_NAME_TIME_SLOT,
-  FILTERDATES,
 } from "../constants";
 
-import { fillTimeSlot, freeTimeSlot } from "../repository/timeSlot";
+import {
+  addMenteeToTimeSlot,
+  fillTimeSlot,
+  freeTimeSlot,
+} from "../repository/timeSlot";
 import { v4 as uuidv4 } from "uuid";
-import { isPast, subDays } from "date-fns";
-import { format, zonedTimeToUtc } from "date-fns-tz";
+import { subDays } from "date-fns";
 import { sendEmail } from "../utils/sendEmail";
 const jwt = require("jsonwebtoken");
 import { confirmationMail } from "../mails/confirmation";
@@ -20,18 +23,31 @@ import { cancelMail } from "../mails/cancel";
 import { reminderMail } from "../mails/reminder";
 import { feedbackMail } from "../mails/feedback";
 import { toDateString, toTimeString } from "../utils/dates";
-
-const axios = require("axios");
+import { Mentorship } from "../types";
 
 const AWS = require("aws-sdk");
 
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
-export const createMentorship = (
-  event: any,
-  context: Context,
-  callback: Callback<any>
-): void => {
+interface MentorshipRequestBody {
+  mentor_id?: string;
+  mentee_id?: string;
+  mentee_email?: string;
+  time_slot_id?: string;
+  mentee_name: string;
+  mentee_username_discord: string;
+  info: string;
+}
+
+interface MentorshipResponse {
+  responseMessage: string;
+  responseCode: string;
+}
+
+export const createMentorship: Handler<
+  MentorshipRequestBody,
+  MentorshipResponse
+> = (event, context, callback) => {
   const {
     mentor_id,
     mentee_id,
@@ -43,19 +59,18 @@ export const createMentorship = (
   } = event;
 
   if (!mentor_id || !mentee_id || !mentee_email || !time_slot_id) {
-    const responseCode: keyof typeof RESPONSE_CODES = "-100";
-    return throwLambdaResponse(callback, {
-      responseMessage: RESPONSE_CODES[responseCode],
-      responseCode,
+    return throwLambdaResponse<MentorshipResponse>(callback, {
+      responseMessage: RESPONSE_CODES["-100"],
+      responseCode: "-100",
     });
   }
 
-  const mentorship = {
+  const mentorship: Mentorship = {
     id: uuidv4(),
     mentor_id,
-    mentor_email: "",
-    mentor_name: "",
-    tokenForCancel: "",
+    mentor_email: null,
+    mentor_name: null,
+    tokenForCancel: null,
     mentee_id,
     mentee_name,
     mentee_username_discord,
@@ -63,11 +78,11 @@ export const createMentorship = (
     info,
     mentorship_status: STATUS.ACTIVE,
     time_slot_id,
-    cancel_cause: "",
-    who_cancel: "",
-    feedback_mentee: "",
-    feedback_stars: 0,
-    feedback_mentee_private: "",
+    cancel_cause: null,
+    who_cancel: null,
+    feedback_mentee: null,
+    feedback_stars: null,
+    feedback_mentee_private: null,
   };
 
   let dateToRemind: Date = new Date();
