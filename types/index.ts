@@ -11,6 +11,17 @@ export interface TimeSlot {
   tokenForCancel: string;
 }
 
+export interface WARNING {
+  id: string;
+  date: Date;
+  mentee_id: string;
+  warn_type: WARN;
+  warn_cause: string;
+  mentorship_id: string;
+  warn_status: WARNSTATE;
+  forgive_cause: string;
+}
+
 export interface Mentorship {
   mentee_email: string;
   mentee_username_discord: string;
@@ -30,16 +41,7 @@ export interface Mentorship {
   time_slot_id?: string;
   feedback_stars: 1 | 2 | 3 | 4 | 5;
   feedback_mentee_private?: string;
-  warning_info?: {
-    id: string;
-    date: Date;
-    mentee_id: string;
-    warn_type: WARN;
-    warn_cause: string;
-    mentorship_id: string;
-    warn_status: WARNSTATE;
-    forgive_cause: string;
-  };
+  warning_info?: WARNING;
 }
 
 interface UserLinks {
