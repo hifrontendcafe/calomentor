@@ -50,6 +50,6 @@ export interface User {
   links?: UserLinks;
   skills?: string[];
   isActive: boolean;
-  lastActivateBy: string;
+  lastActivateBy: string; // discord id
   timezone: string;
 }

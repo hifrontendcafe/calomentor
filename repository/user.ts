@@ -54,20 +54,17 @@ export function deleteUserById(id: string) {
   });
 }
 
-export function updateUser(id: string, data: User) {
+export function updateUser(
+  id: string,
+  data: Partial<User>,
+  allowedToUpdate: (keyof User)[] = null
+) {
   let updateExpression: ReturnType<typeof generateUpdateQuery>;
   try {
-    updateExpression = generateUpdateQuery<User>(data, [
-      "discord_username",
-      "full_name",
-      "about_me",
-      "email",
-      "url_photo",
-      "role",
-      "links",
-      "skills",
-      "timezone",
-    ]);
+    updateExpression = generateUpdateQuery<Partial<User>>(
+      data,
+      allowedToUpdate
+    );
   } catch (err) {
     throw err;
   }
@@ -78,5 +75,19 @@ export function updateUser(id: string, data: User) {
     ConditionExpression: "attribute_exists(id)",
     ReturnValues: "ALL_NEW",
     ...updateExpression,
+  });
+}
+
+export function activateUser(id: string, lastActivateBy: string) {
+  return updateUser(id, {
+    isActive: true,
+    lastActivateBy: lastActivateBy,
+  });
+}
+
+export function deactivateUser(id: string, lastActivateBy: string) {
+  return updateUser(id, {
+    isActive: false,
+    lastActivateBy: lastActivateBy,
   });
 }

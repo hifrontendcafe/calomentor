@@ -9,6 +9,8 @@ import {
   getUserById,
   deleteUserById,
   updateUser,
+  activateUser,
+  deactivateUser,
 } from "../repository/user";
 import type { User } from "../types";
 import { isAWSError } from "../utils/dynamoDb";
@@ -141,7 +143,17 @@ export const updateUserByIdService: APIGatewayProxyHandler = async (event) => {
 
   let result: Awaited<ReturnType<typeof updateUser>>;
   try {
-    result = await updateUser(id, data);
+    result = await updateUser(id, data, [
+      "discord_username",
+      "full_name",
+      "about_me",
+      "email",
+      "url_photo",
+      "role",
+      "links",
+      "skills",
+      "timezone",
+    ]);
   } catch (err) {
     return makeErrorResponse(400, "-317", err);
   }
@@ -159,45 +171,39 @@ export const updateUserByIdService: APIGatewayProxyHandler = async (event) => {
   return makeSuccessResponse(user, "203");
 };
 
-export const activateUserService = (
-  event: any,
-  context: Context,
-  callback: Callback<any>
-): void => {
-  const { isActive, lastActivateBy } = JSON.parse(event.body);
+export const activateUserService: APIGatewayProxyHandler = async (event) => {
+  const id = event?.pathParameters?.id;
 
-  if (typeof isActive !== "boolean" && lastActivateBy) {
-    responseMessage =
-      "Bad Request: isActive property is missing or is not allowable option.";
-    return throwResponse(callback, responseMessage, 400);
+  if (!id) {
+    return makeErrorResponse(400, "-311");
   }
 
-  const params = {
-    TableName: TABLE_NAME_USER,
-    Key: {
-      id: event.pathParameters.id,
-    },
-    ExpressionAttributeValues: {
-      ":isActive": isActive,
-      ":lastActivateBy": lastActivateBy,
-    },
-    ConditionExpression: "attribute_exists(id)",
-    UpdateExpression:
-      "SET isActive = :isActive, lastActivateBy = :lastActivateBy",
-    ReturnValues: "ALL_NEW",
-  };
+  const { isActive, lastActivateBy } = JSON.parse(event.body);
 
-  dynamoDb.update(params, (error, data) => {
-    if (error) {
-      if (error.code === "ConditionalCheckFailedException") {
-        responseMessage = `Unable to activate user. Id ${event.pathParameters.id} not found`;
-        throwResponse(callback, responseMessage, 404);
-      }
-      (responseMessage = `Unable to activate user. Error: ${error}`),
-        throwResponse(callback, responseMessage, 400);
+  if (typeof isActive !== "boolean" || !lastActivateBy) {
+    return makeErrorResponse(400, "-319");
+  }
+
+  let result: Awaited<ReturnType<typeof updateUser>>;
+  try {
+    if (isActive) {
+      result = await activateUser(id, lastActivateBy);
     } else {
-      responseMessage = `User with id ${event.pathParameters.id} activated succesfully.`;
-      throwResponse(callback, responseMessage, 200, data.Attributes);
+      result = await deactivateUser(id, lastActivateBy);
     }
-  });
+  } catch (error) {
+    return makeErrorResponse(400, "-317", error);
+  }
+
+  const error = result.$response.error;
+  const user: User = result.Attributes;
+  if (error || !user) {
+    if (isConditionalCheckFailedError(error)) {
+      return makeErrorResponse(400, "-318", error);
+    }
+
+    return makeErrorResponse(400, "-317", error);
+  }
+
+  return makeSuccessResponse(user, "203");
 };
