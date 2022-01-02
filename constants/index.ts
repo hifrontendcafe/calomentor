@@ -1,7 +1,7 @@
-export const TABLE_NAME_USER: string = "user";
-export const TABLE_NAME_TIME_SLOT: string = "time-slots";
-export const TABLE_NAME_MENTORSHIP: string = "mentorship";
-export const TABLE_NAME_WARNINGS: string = "warnings";
+export const TABLE_NAME_USER = "user";
+export const TABLE_NAME_TIME_SLOT = "time-slots";
+export const TABLE_NAME_MENTORSHIP = "mentorship";
+export const TABLE_NAME_WARNINGS = "warnings";
 
 export const STATUS = {
   ACTIVE: "ACTIVE",
@@ -44,7 +44,7 @@ export const RESPONSE_CODES = {
   "-200": "Unable to create user. User already exists.",
   "-201": "Unable to create user.",
   "-202": "There is no mentors",
-  "-203": "Unable to get all mentors.",
+  "-203": "Unable to get mentors.",
   "-204": "User not found",
   "-205": "Unable to get user by id",
   "-300": "Unable to add a warning",
@@ -61,8 +61,14 @@ export const RESPONSE_CODES = {
   "-311": "Bad Request: Missing params. id is required",
   "-312":
     "Bad Request: Missing params. The required params are mentee_username, mentee_id and tokenForCancel",
-  "-313": "There Was an error trying to delete the slot",
+  "-313": "There was an error trying to delete the slot",
   "-314": "Time slot not found",
+  "-315": "Bad Request: id is required or is not a string.",
+  "-316": "There was an error trying to delete the user",
+  "-317": "There was an error trying to update the user",
+  "-318": "There was an error trying to update the user. Id not found",
+  "-319":
+    "Bad Request: isActive property is missing or is not allowable option.",
   "100": "Succesfully mentorship created.",
   "101": "Mentorship confirmed",
   "102": "Update feedback succesfully",
@@ -71,6 +77,8 @@ export const RESPONSE_CODES = {
   "105": "Time slot successfully deleted",
   "200": "User created succesfully",
   "201": "User",
+  "202": "User successfully deleted",
+  "203": "User successfully updated",
   "300": "Warning added",
   "301": "There is no warnings for this mentee",
   "302": "Warnings",

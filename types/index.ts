@@ -29,3 +29,27 @@ export interface Mentorship {
   time_slot_id?: string;
   feedback_mentee_private?: string;
 }
+
+interface UserLinks {
+  github: string;
+  twitter: string;
+  linkedin: string;
+  portfolio: string;
+}
+
+export type Role = "admin" | "mentor";
+
+export interface User {
+  id: string;
+  discord_username?: string;
+  full_name?: string;
+  about_me?: string;
+  email?: string;
+  url_photo?: string;
+  role?: Role[];
+  links?: UserLinks;
+  skills?: string[];
+  isActive: boolean;
+  lastActivateBy: string; // discord id
+  timezone: string;
+}

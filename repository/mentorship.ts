@@ -1,11 +1,11 @@
-import { TABLE_NAME_MENTORSHIP, } from "../constants";
-import { scan, ScanResult } from "../utils/dynamoDb";
+import { TABLE_NAME_MENTORSHIP } from "../constants";
+import { scan } from "../utils/dynamoDb";
 import { Mentorship } from "../types";
 
 export function getMentorshipsByMentorId(id) {
   return scan<Mentorship>({
     TableName: TABLE_NAME_MENTORSHIP,
     FilterExpression: "mentor_id = :mentor_id",
-    ExpressionAttributeValues: { ":mentor_id": id, },
-  }) as Promise<ScanResult<Mentorship>>;
+    ExpressionAttributeValues: { ":mentor_id": id },
+  });
 }

@@ -1,6 +1,20 @@
+import type { APIGatewayProxyHandler } from "aws-lambda";
+
 import { Callback, Context } from "aws-lambda";
-import { RESPONSE_CODES, TABLE_NAME_USER } from "../constants";
-import { User } from "../types/userTypes";
+import type { AWSError } from "aws-sdk";
+import { TABLE_NAME_USER } from "../constants";
+import {
+  createUser,
+  getUsers,
+  getUserById,
+  deleteUserById,
+  updateUser,
+  activateUser,
+  deactivateUser,
+} from "../repository/user";
+import type { User } from "../types";
+import { isAWSError } from "../utils/dynamoDb";
+import { makeErrorResponse, makeSuccessResponse } from "../utils/makeResponses";
 import { throwResponse } from "../utils/throwResponse";
 
 const AWS = require("aws-sdk"); // eslint-disable-line import/no-extraneous-dependencies
@@ -8,11 +22,11 @@ const AWS = require("aws-sdk"); // eslint-disable-line import/no-extraneous-depe
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 let responseMessage = "";
 
-export const createUserService = async (
-  event: any,
-  context: Context,
-  callback: Callback<any>
-): Promise<void> => {
+function isConditionalCheckFailedError(error: any) {
+  return isAWSError(error) && error?.code === "ConditionalCheckFailedException";
+}
+
+export const createUserService: APIGatewayProxyHandler = async (event) => {
   const {
     id,
     discord_username,
@@ -26,8 +40,7 @@ export const createUserService = async (
   } = JSON.parse(event.body);
 
   if (!id || typeof id !== "string") {
-    responseMessage = "Bad Request: id is required or is not a string.";
-    return throwResponse(callback, responseMessage, 400);
+    return makeErrorResponse(400, "-315");
   }
 
   const user: User = {
@@ -45,145 +58,92 @@ export const createUserService = async (
     timezone: "25",
   };
 
-  const params = {
-    TableName: TABLE_NAME_USER,
-    Item: user,
-    ConditionExpression: "attribute_not_exists(id)",
-  };
+  try {
+    await createUser(user);
+  } catch (error: unknown) {
+    if (isConditionalCheckFailedError(error)) {
+      return makeErrorResponse(400, "-200", error);
+    }
+
+    return makeErrorResponse(400, "-201", error);
+  }
+
+  return makeSuccessResponse(user);
+};
+
+export const getUsersService: APIGatewayProxyHandler = async () => {
+  let mentors: User[];
 
   try {
-    const createUser = await dynamoDb.put(params).promise();
-
-    if (createUser.code === "ConditionalCheckFailedException") {
-      const responseCode: keyof typeof RESPONSE_CODES = "-200";
-      return throwResponse(callback, RESPONSE_CODES[responseCode], 400, {
-        responseMessage: RESPONSE_CODES[responseCode],
-        responseCode,
-      });
-    }
-
-    const responseCode: keyof typeof RESPONSE_CODES = "200";
-    return throwResponse(callback, RESPONSE_CODES[responseCode], 200, {
-      responseMessage: RESPONSE_CODES[responseCode],
-      responseCode,
-    });
+    const mentorsData = await getUsers({ role: "mentor" });
+    mentors = mentorsData.Items;
   } catch (error) {
-    const responseCode: keyof typeof RESPONSE_CODES = "-201";
-    return throwResponse(callback, RESPONSE_CODES[responseCode], 400, {
-      responseMessage: RESPONSE_CODES[responseCode],
-      responseCode,
-      error,
-    });
+    return makeErrorResponse(400, "-203", error);
   }
+
+  if (mentors.length === 0) {
+    return makeErrorResponse(404, "-202");
+  }
+
+  return makeSuccessResponse(mentors);
 };
 
-export const getUsersService = async (
-  event: any,
-  context: Context,
-  callback: Callback<any>
-): Promise<void> => {
-  const params = {
-    TableName: TABLE_NAME_USER,
-    ExpressionAttributeNames: {
-      "#role": "role",
-    },
-    ProjectionExpression:
-      "id, discord_username, full_name, about_me, email, url_photo, #role, links, skills, isActive",
-  };
+export const getUserByIdService: APIGatewayProxyHandler = async (event) => {
+  const id = event?.pathParameters?.id;
 
+  if (!id) {
+    return makeErrorResponse(400, "-311");
+  }
+
+  let user: User;
   try {
-    let mentors = await dynamoDb.scan(params).promise();
-
-    mentors = mentors.Items?.filter((m) => {
-      return m.role?.includes("mentor");
-    });
-
-    if (mentors.length === 0) {
-      const responseCode: keyof typeof RESPONSE_CODES = "-202";
-      return throwResponse(callback, RESPONSE_CODES[responseCode], 404, {
-        responseMessage: RESPONSE_CODES[responseCode],
-        responseCode,
-      });
-    }
-
-    return throwResponse(callback, "", 200, mentors);
+    const userData = await getUserById(event.pathParameters.id);
+    user = userData.Item;
   } catch (error) {
-    const responseCode: keyof typeof RESPONSE_CODES = "-203";
-    return throwResponse(callback, RESPONSE_CODES[responseCode], 404, {
-      responseMessage: RESPONSE_CODES[responseCode],
-      responseCode,
-      error,
-    });
+    return makeErrorResponse(400, "-205", error);
   }
+
+  if (!user) {
+    return makeErrorResponse(404, "-204");
+  }
+
+  return makeSuccessResponse(user);
 };
 
-export const getUserByIdService = async (
-  event: any,
-  context: Context,
-  callback: Callback<any>
-): Promise<void> => {
-  const params = {
-    TableName: TABLE_NAME_USER,
-    Key: { id: event.pathParameters.id },
-  };
+export const deleteUserByIdService: APIGatewayProxyHandler = async (event) => {
+  const id = event?.pathParameters?.id;
+
+  if (!id) {
+    return makeErrorResponse(400, "-311");
+  }
+
+  let user: User;
   try {
-    const user = await dynamoDb.get(params).promise();
-
-    if (Object.keys(user).length === 0) {
-      const responseCode: keyof typeof RESPONSE_CODES = "-204";
-      return throwResponse(callback, RESPONSE_CODES[responseCode], 404, {
-        responseMessage: RESPONSE_CODES[responseCode],
-        responseCode,
-      });
-    }
-    return throwResponse(callback, "", 200, user.Item);
+    const userData = await deleteUserById(event.pathParameters.id);
+    user = userData.Attributes;
   } catch (error) {
-    const responseCode: keyof typeof RESPONSE_CODES = "-205";
-    return throwResponse(callback, RESPONSE_CODES[responseCode], 400, {
-      responseMessage: RESPONSE_CODES[responseCode],
-      responseCode,
-      error,
-    });
+    return makeErrorResponse(500, "-316", error);
   }
+
+  if (!user) {
+    return makeErrorResponse(404, "-204");
+  }
+
+  return makeSuccessResponse(user, "202");
 };
 
-export const deleteUserByIdService = (
-  event: any,
-  context: Context,
-  callback: Callback<any>
-): void => {
-  const params = {
-    TableName: TABLE_NAME_USER,
-    ProjectionExpression: "discord_id, discord_username, full_name",
-    Key: { id: event.pathParameters.id },
-    ReturnValues: "ALL_OLD",
-  };
+export const updateUserByIdService: APIGatewayProxyHandler = async (event) => {
+  const id = event?.pathParameters?.id;
 
-  dynamoDb.delete(params, (err, data) => {
-    if (err) {
-      responseMessage = `Unable to delete user. Error: ${err}`;
-      throwResponse(callback, responseMessage, 500);
-    } else {
-      if (Object.keys(data).length === 0) {
-        responseMessage = `Unable to delete user. Id ${event.pathParameters.id} not found`;
-        throwResponse(callback, responseMessage, 404);
-      } else {
-        responseMessage = "User deleted succesfully";
-        throwResponse(callback, responseMessage, 200);
-      }
-    }
-  });
-};
+  if (!id) {
+    return makeErrorResponse(400, "-311");
+  }
 
-export const updateUserByIdService = (
-  event: any,
-  context: Context,
-  callback: Callback<any>
-): void => {
   const data = JSON.parse(event.body);
 
-  const generateUpdateQuery = (fields) => {
-    const allowedFieldsToUpdate = [
+  let result: Awaited<ReturnType<typeof updateUser>>;
+  try {
+    result = await updateUser(id, data, [
       "discord_username",
       "full_name",
       "about_me",
@@ -193,94 +153,57 @@ export const updateUserByIdService = (
       "links",
       "skills",
       "timezone",
-    ];
-
-    let expression = {
-      UpdateExpression: "set",
-      ExpressionAttributeNames: {},
-      ExpressionAttributeValues: {},
-    };
-
-    Object.entries(fields).forEach(([key, item]) => {
-      if (allowedFieldsToUpdate.includes(key)) {
-        expression.UpdateExpression += ` #${key} = :${key},`;
-        expression.ExpressionAttributeNames[`#${key}`] = key;
-        expression.ExpressionAttributeValues[`:${key}`] = item;
-      }
-    });
-
-    expression.UpdateExpression = expression.UpdateExpression.slice(0, -1);
-
-    if (Object.keys(expression.ExpressionAttributeNames).length === 0) {
-      responseMessage = "Bad Request: no valid fields to update.";
-      return throwResponse(callback, responseMessage, 400);
-    } else return expression;
-  };
-
-  let updateExpression = generateUpdateQuery(data);
-
-  const params = {
-    TableName: TABLE_NAME_USER,
-    Key: { id: event.pathParameters.id },
-    ConditionExpression: "attribute_exists(id)",
-    ReturnValues: "ALL_NEW",
-    ...updateExpression,
-  };
-
-  dynamoDb.update(params, (error, data) => {
-    if (error) {
-      if (error.code === "ConditionalCheckFailedException") {
-        responseMessage = `Unable to update user. Id ${event.pathParameters.id} not found`;
-        throwResponse(callback, responseMessage, 404);
-      }
-      responseMessage = `Unable to update user. Error: ${error}`;
-      throwResponse(callback, responseMessage, 400);
-    } else {
-      responseMessage = `User with id ${event.pathParameters.id} updated succesfully.`;
-      throwResponse(callback, responseMessage, 200, data.Attributes);
-    }
-  });
-};
-
-export const activateUserService = (
-  event: any,
-  context: Context,
-  callback: Callback<any>
-): void => {
-  const { isActive, lastActivateBy } = JSON.parse(event.body);
-
-  if (typeof isActive !== "boolean" && lastActivateBy) {
-    responseMessage =
-      "Bad Request: isActive property is missing or is not allowable option.";
-    return throwResponse(callback, responseMessage, 400);
+    ]);
+  } catch (err) {
+    return makeErrorResponse(400, "-317", err);
   }
 
-  const params = {
-    TableName: TABLE_NAME_USER,
-    Key: {
-      id: event.pathParameters.id,
-    },
-    ExpressionAttributeValues: {
-      ":isActive": isActive,
-      ":lastActivateBy": lastActivateBy,
-    },
-    ConditionExpression: "attribute_exists(id)",
-    UpdateExpression:
-      "SET isActive = :isActive, lastActivateBy = :lastActivateBy",
-    ReturnValues: "ALL_NEW",
-  };
-
-  dynamoDb.update(params, (error, data) => {
-    if (error) {
-      if (error.code === "ConditionalCheckFailedException") {
-        responseMessage = `Unable to activate user. Id ${event.pathParameters.id} not found`;
-        throwResponse(callback, responseMessage, 404);
-      }
-      (responseMessage = `Unable to activate user. Error: ${error}`),
-        throwResponse(callback, responseMessage, 400);
-    } else {
-      responseMessage = `User with id ${event.pathParameters.id} activated succesfully.`;
-      throwResponse(callback, responseMessage, 200, data.Attributes);
+  const error = result.$response.error;
+  const user: User = result.Attributes;
+  if (error || !user) {
+    if (isConditionalCheckFailedError(error)) {
+      return makeErrorResponse(400, "-318", error);
     }
-  });
+
+    return makeErrorResponse(400, "-317", error);
+  }
+
+  return makeSuccessResponse(user, "203");
+};
+
+export const activateUserService: APIGatewayProxyHandler = async (event) => {
+  const id = event?.pathParameters?.id;
+
+  if (!id) {
+    return makeErrorResponse(400, "-311");
+  }
+
+  const { isActive, lastActivateBy } = JSON.parse(event.body);
+
+  if (typeof isActive !== "boolean" || !lastActivateBy) {
+    return makeErrorResponse(400, "-319");
+  }
+
+  let result: Awaited<ReturnType<typeof updateUser>>;
+  try {
+    if (isActive) {
+      result = await activateUser(id, lastActivateBy);
+    } else {
+      result = await deactivateUser(id, lastActivateBy);
+    }
+  } catch (error) {
+    return makeErrorResponse(400, "-317", error);
+  }
+
+  const error = result.$response.error;
+  const user: User = result.Attributes;
+  if (error || !user) {
+    if (isConditionalCheckFailedError(error)) {
+      return makeErrorResponse(400, "-318", error);
+    }
+
+    return makeErrorResponse(400, "-317", error);
+  }
+
+  return makeSuccessResponse(user, "203");
 };

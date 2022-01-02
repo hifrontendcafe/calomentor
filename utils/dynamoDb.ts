@@ -1,68 +1,125 @@
 import { DynamoDB } from "aws-sdk";
+import type { AWSError } from "aws-sdk";
+import type { PromiseResult } from "aws-sdk/lib/request";
 
-export type AttributeMap = DynamoDB.DocumentClient.AttributeMap;
-export type GetItemInput = DynamoDB.DocumentClient.GetItemInput;
-export type GetItemOutput = DynamoDB.DocumentClient.GetItemOutput;
-export type PutItemInput = DynamoDB.DocumentClient.PutItemInput;
-export type PutItemOutput = DynamoDB.DocumentClient.PutItemOutput;
-export type UpdateItemInput = DynamoDB.DocumentClient.UpdateItemInput;
-export type UpdateItemOutput = DynamoDB.DocumentClient.UpdateItemOutput;
-export type DeleteItemInput = DynamoDB.DocumentClient.DeleteItemInput;
-export type DeleteItemOutput = DynamoDB.DocumentClient.DeleteItemOutput;
-export type ScanInput = DynamoDB.DocumentClient.ScanInput;
-export type ScanOutput = DynamoDB.DocumentClient.ScanOutput;
+type GetItemInput = DynamoDB.DocumentClient.GetItemInput;
+type GetItemOutput = DynamoDB.DocumentClient.GetItemOutput;
+type PutItemInput = DynamoDB.DocumentClient.PutItemInput;
+type PutItemOutput = DynamoDB.DocumentClient.PutItemOutput;
+type UpdateItemInput = DynamoDB.DocumentClient.UpdateItemInput;
+type UpdateItemOutput = DynamoDB.DocumentClient.UpdateItemOutput;
+type DeleteItemInput = DynamoDB.DocumentClient.DeleteItemInput;
+type DeleteItemOutput = DynamoDB.DocumentClient.DeleteItemOutput;
+type ScanInput = DynamoDB.DocumentClient.ScanInput;
+type ScanOutput = DynamoDB.DocumentClient.ScanOutput;
 
-export interface GetItemResult<T extends AttributeMap> extends GetItemOutput {
+type Result<T> = Promise<PromiseResult<T, AWSError>>;
+
+interface GetItemResult<T = Record<string, any>> extends GetItemOutput {
   Item?: T;
 }
 
-type Get = <T>(
-  params: GetItemInput
-) => Promise<GetItemResult<T | AttributeMap>>;
-
-export interface ScanResult<T extends AttributeMap> extends ScanOutput {
+interface ScanResult<T = Record<string, any>> extends ScanOutput {
   Items?: T[];
 }
 
-type Scan = <T extends AttributeMap>(
-  params: ScanInput
-) => Promise<ScanResult<T | AttributeMap>>;
-
-export interface PutItemResult<T> extends PutItemOutput {
+interface UpdateItemResult<T = Record<string, any>> extends UpdateItemOutput {
   Attributes?: T;
 }
 
-type Put = <T extends AttributeMap>(
-  params: PutItemInput
-) => Promise<PutItemResult<T | AttributeMap>>;
-export interface UpdateItemResult<T> extends UpdateItemOutput {
+interface PutItemResult<T = Record<string, any>> extends PutItemOutput {
   Attributes?: T;
 }
 
-type Update = <T extends AttributeMap>(
-  params: UpdateItemInput
-) => Promise<UpdateItemResult<T | AttributeMap>>;
-
-export interface DeleteItemResult<T> extends DeleteItemOutput {
+interface DeleteItemResult<T = Record<string, any>> extends DeleteItemOutput {
   Attributes?: T;
 }
-
-type Delete = <T>(
-  params: DeleteItemInput
-) => Promise<DeleteItemResult<T | AttributeMap>>;
 
 const dynamoDb = new DynamoDB.DocumentClient();
 
-export const get: Get = (params: GetItemInput) =>
-  dynamoDb.get(params).promise();
+export function get(params: GetItemInput): Result<GetItemResult>;
+export function get<T extends Record<string, any>>(
+  params: GetItemInput
+): Result<GetItemResult<T>>;
 
-export const scan: Scan = (params: ScanInput) =>
-  dynamoDb.scan(params).promise();
+export function get(params: GetItemInput) {
+  return dynamoDb.get(params).promise();
+}
 
-export const put: Put = (params) => dynamoDb.put(params).promise();
+export function scan(params: ScanInput): Result<ScanResult>;
+export function scan<T extends Record<string, any>>(
+  params: ScanInput
+): Result<ScanResult<T>>;
 
-export const update: Update = (params: UpdateItemInput) =>
-  dynamoDb.update(params).promise();
+export function scan(params: ScanInput) {
+  return dynamoDb.scan(params).promise();
+}
 
-export const deleteItem: Delete = (params: DeleteItemInput) =>
-  dynamoDb.delete(params).promise();
+export function put(params: PutItemInput): Result<PutItemResult>;
+export function put<T extends Record<string, any>>(
+  params: PutItemInput
+): Result<PutItemResult<T>>;
+
+export function put(params: PutItemInput) {
+  return dynamoDb.put(params).promise();
+}
+
+export function update(params: UpdateItemInput): Result<UpdateItemResult>;
+export function update<T extends Record<string, any>>(
+  params: UpdateItemInput
+): Result<UpdateItemResult<T>>;
+
+export function update(params: UpdateItemInput) {
+  return dynamoDb.update(params).promise();
+}
+
+export function deleteItem(params: DeleteItemInput): Result<DeleteItemResult>;
+export function deleteItem<T extends Record<string, any>>(
+  params: DeleteItemInput
+): Result<DeleteItemResult<T>>;
+
+export function deleteItem(params: DeleteItemInput) {
+  return dynamoDb.delete(params).promise();
+}
+
+type UpdateExpression = Pick<
+  UpdateItemInput,
+  "UpdateExpression" | "ExpressionAttributeNames" | "ExpressionAttributeValues"
+>;
+
+/**
+ * From a record with fields and values to update and
+ * a optional list of allowed fields to update
+ * generates an {@link UpdateExpression} that could
+ * be used in a dynamodb update operation
+ */
+export function generateUpdateQuery<
+  T extends Record<string, any> = Record<string, any>
+>(data: T, allowedFieldsToUpdate: (keyof T)[] = null): UpdateExpression {
+  const expression: UpdateExpression = {
+    UpdateExpression: "set",
+    ExpressionAttributeNames: {},
+    ExpressionAttributeValues: {},
+  };
+
+  Object.entries(data).forEach(([key, item]) => {
+    if (allowedFieldsToUpdate === null || allowedFieldsToUpdate.includes(key)) {
+      expression.UpdateExpression += ` #${key} = :${key},`;
+      expression.ExpressionAttributeNames[`#${key}`] = key;
+      expression.ExpressionAttributeValues[`:${key}`] = item;
+    }
+  });
+
+  // remove last comma
+  expression.UpdateExpression = expression.UpdateExpression.slice(0, -1);
+
+  if (Object.keys(expression.ExpressionAttributeNames).length === 0) {
+    throw new Error("No valid fields to update");
+  }
+
+  return expression;
+}
+
+export function isAWSError(error: any): error is AWSError {
+  return error?.code;
+}
