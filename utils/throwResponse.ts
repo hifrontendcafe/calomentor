@@ -1,4 +1,4 @@
-import { Callback } from "aws-lambda";
+import { Callback } from "aws-lambda/handler";
 import { GlobalResponse } from "../types/globalTypes";
 
 export const throwResponse = (
@@ -25,6 +25,6 @@ export const throwResponse = (
   callback(null, response);
 };
 
-export const throwLambdaResponse = (callback, response) => {
+export const throwLambdaResponse = <T>(callback: Callback, response: T) => {
   callback(null, response);
 };
