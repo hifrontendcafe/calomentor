@@ -13,7 +13,6 @@ export interface Mentorship {
   mentee_email: string;
   mentee_username_discord: string;
   mentor_email: string;
-  feedback_mentor: string;
   feedback_mentee: string;
   mentor_id: string;
   mentor_name: string;
@@ -27,6 +26,7 @@ export interface Mentorship {
   who_cancel: "MENTOR" | "MENTEE";
   time_slot_info?: TimeSlot;
   time_slot_id?: string;
+  feedback_stars: 1 | 2 | 3 | 4 | 5;
   feedback_mentee_private?: string;
 }
 
