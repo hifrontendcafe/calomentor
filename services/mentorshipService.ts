@@ -83,6 +83,7 @@ export const createMentorship: Handler<
     feedback_mentee: null,
     feedback_stars: null,
     feedback_mentee_private: null,
+    warning_info: null,
   };
 
   let dateToRemind: Date = new Date();
@@ -159,7 +160,7 @@ export const createMentorship: Handler<
                   await addMenteeToTimeSlot(mentorship.time_slot_id, {
                     id: mentee_id,
                     username: mentee_username_discord,
-                      tokenForCancel: token,
+                    tokenForCancel: token,
                   });
 
                   await dynamoDb

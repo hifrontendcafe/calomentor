@@ -1,3 +1,5 @@
+import { WARN, WARNSTATE } from "../constants";
+
 export interface TimeSlot {
   id: string;
   user_id: string;
@@ -28,6 +30,16 @@ export interface Mentorship {
   time_slot_id?: string;
   feedback_stars: 1 | 2 | 3 | 4 | 5;
   feedback_mentee_private?: string;
+  warning_info?: {
+    id: string;
+    date: Date;
+    mentee_id: string;
+    warn_type: WARN;
+    warn_cause: string;
+    mentorship_id: string;
+    warn_status: WARNSTATE;
+    forgive_cause: string;
+  };
 }
 
 interface UserLinks {
