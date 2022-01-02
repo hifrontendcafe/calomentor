@@ -39,10 +39,34 @@ interface MentorshipRequestBody {
   info: string;
 }
 
-interface MentorshipResponse {
+interface MentorshipStateMachine {
+  mentorId: string;
+  mentorEmail: string;
+  mentorName: string;
+  menteeId: string;
+  menteeEmail: string;
+  menteeName: string;
+}
+
+interface BaseMentorshipResponse {
   responseMessage: string;
   responseCode: string;
 }
+
+interface MentorshipSuccessResponse extends BaseMentorshipResponse {
+  responseData: {
+    mentorship: MentorshipStateMachine;
+    dateToRemind: Date;
+    mentorshipDate: Date;
+    token: string;
+  };
+}
+
+interface MentorshipErrorResponse extends BaseMentorshipResponse {
+  responseError: unknown;
+}
+
+type MentorshipResponse = MentorshipSuccessResponse | MentorshipErrorResponse;
 
 export const createMentorship: Handler<
   MentorshipRequestBody,
@@ -62,6 +86,7 @@ export const createMentorship: Handler<
     return throwLambdaResponse<MentorshipResponse>(callback, {
       responseMessage: RESPONSE_CODES["-100"],
       responseCode: "-100",
+      responseError: RESPONSE_CODES["-100"],
     });
   }
 
@@ -171,6 +196,7 @@ export const createMentorship: Handler<
                     cancelLink: `${process.env.BASE_FRONT_URL}/cancel?token=${token}`,
                     forMentor: false,
                   });
+
                   sendEmail(
                     mentorship.mentee_email,
                     `Hola ${mentee_name}!`,
@@ -190,15 +216,14 @@ export const createMentorship: Handler<
                     htmlMentor
                   );
                 } catch (error) {
-                  const responseCode: keyof typeof RESPONSE_CODES = "-1";
                   return throwLambdaResponse(callback, {
-                    responseMessage: RESPONSE_CODES[responseCode],
-                    responseCode,
+                    responseMessage: RESPONSE_CODES["-1"],
+                    responseCode: "-1",
                     responseError: error,
                   });
                 }
                 const responseCode: keyof typeof RESPONSE_CODES = "100";
-                return throwLambdaResponse(callback, {
+                return throwLambdaResponse<MentorshipResponse>(callback, {
                   responseMessage: RESPONSE_CODES[responseCode],
                   responseCode,
                   responseData: {

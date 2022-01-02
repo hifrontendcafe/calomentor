@@ -1,3 +1,12 @@
+interface ConfirmationMailParams {
+  mentorName: string;
+  menteeName: string;
+  date: string;
+  time: string;
+  cancelLink: string;
+  forMentor: boolean;
+}
+
 export const confirmationMail = ({
   mentorName,
   menteeName,
@@ -5,7 +14,7 @@ export const confirmationMail = ({
   time,
   cancelLink,
   forMentor,
-}) => {
+}: ConfirmationMailParams) => {
   return `<!DOCTYPE html>
   <html
     xmlns="http://www.w3.org/1999/xhtml"
