@@ -163,23 +163,6 @@ export const createMentorship: Handler<
                     tokenForCancel: token,
                   });
 
-                  await dynamoDb
-                    .update({
-                      TableName: TABLE_NAME_TIME_SLOT,
-                      Key: {
-                        id: mentorship.time_slot_id,
-                      },
-                      ExpressionAttributeValues: {
-                        ":mentee_id": mentee_username_discord,
-                        ":mentee_username": mentee_id,
-                        ":tokenForCancel": token,
-                      },
-                      UpdateExpression:
-                        "SET mentee_id = :mentee_id, mentee_username = :mentee_username, tokenForCancel = :tokenForCancel",
-                      ReturnValues: "ALL_NEW",
-                    })
-                    .promise();
-
                   const htmlMentee = confirmationMail({
                     mentorName: data.Item?.full_name,
                     menteeName: mentee_name,
