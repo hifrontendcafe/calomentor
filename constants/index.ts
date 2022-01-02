@@ -8,20 +8,20 @@ export const STATUS = {
   CANCEL: "CANCEL",
   CONFIRMED: "CONFIRMED",
   WITHWARNING: "WITHWARNING",
-};
+} as const;
 
 export const FILTERDATES = {
   PAST: "PAST",
   FUTURE: "FUTURE",
   ALL: "ALL",
-};
+} as const;
 
 export const WARNSTATE = {
   ACTIVE: "ACTIVE",
   FORGIVE: "FORGIVE",
-};
+} as const;
 
-export const WARNTYPE = ["NO_ASSIST", "COC_WARN"];
+export const WARNTYPE = ["NO_ASSIST", "COC_WARN"] as const;
 
 export const RESPONSE_CODES = {
   "0": "OK.",
@@ -83,4 +83,4 @@ export const RESPONSE_CODES = {
   "301": "There is no warnings for this mentee",
   "302": "Warnings",
   "303": "Warning deleted",
-};
+} as const;
