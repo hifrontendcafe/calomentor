@@ -156,16 +156,10 @@ export const createMentorship: Handler<
                 try {
                   await fillTimeSlot(mentorship.time_slot_id);
 
-                  await axios({
-                    method: "PATCH",
-                    headers: { "x-api-key": process.env.API_KEY },
-                    data: JSON.stringify({
-                      id: mentorship.time_slot_id,
-                      mentee_username: mentee_username_discord,
-                      mentee_id: mentee_id,
+                  await addMenteeToTimeSlot(mentorship.time_slot_id, {
+                    id: mentee_id,
+                    username: mentee_username_discord,
                       tokenForCancel: token,
-                    }),
-                    url: `${process.env.BASE_URL}/time-slot/mentee`,
                   });
 
                   await dynamoDb
