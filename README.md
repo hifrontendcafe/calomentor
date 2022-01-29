@@ -55,7 +55,7 @@ yarn run start-offline
 
 ## Proceso al crear una mentoría
 
-![asd](./docs/create-mentorship-flow.png)
+![Mentorship Flow](./docs/create-mentorship-flow.png)
 
 ## Insomnia
 
