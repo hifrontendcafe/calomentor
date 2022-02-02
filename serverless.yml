@@ -20,7 +20,7 @@ provider:
   apiName: calomentor-api
   apiGateway:
     apiKeys:
-      - "es-santa-pero-le-gusta-el-fallafel-by-Agus"
+      - ${file(./config.dev.json):API_KEY_PHRASE}
   stage: dev
   iam:
     role:
