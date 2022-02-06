@@ -44,6 +44,18 @@ Para utilizar la API, se debera añadir el siguiente header a las requests cuyo 
 
 - `X-API-KEY`
 
+Previo a ejecutar el proyecto deberemos tener instalando en nuestra computadora el framework Serverless
+
+```bash
+yarn add -g serverless
+```
+
+Luego de instalar Serverless Framework deberemos loguearnos con las credenciales de AWS
+
+```bash
+serverless config credentials --provider aws --key {{AWS_KEY}}  --secret {{AWS_SECRET_KEY}}
+```
+
 Instalar dependencias
 
 ```bash
