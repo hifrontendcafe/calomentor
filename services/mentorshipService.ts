@@ -38,6 +38,7 @@ export const createMentorship = (
     mentee_name,
     mentee_username_discord,
     mentee_email,
+    mentee_timezone,
     info,
     time_slot_id,
   } = event;
@@ -60,6 +61,7 @@ export const createMentorship = (
     mentee_name,
     mentee_username_discord,
     mentee_email,
+    mentee_timezone,
     info,
     mentorship_status: STATUS.ACTIVE,
     time_slot_id,
