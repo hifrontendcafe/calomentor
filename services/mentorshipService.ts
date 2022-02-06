@@ -219,6 +219,7 @@ export const createMentorship = (
                       menteeId: mentorship.mentee_id,
                       menteeEmail: mentorship.mentee_email,
                       menteeName: mentorship.mentee_name,
+                      mentee_timezone: mentorship.mentee_timezone
                     },
                     dateToRemind,
                     mentorshipDate,
