@@ -370,7 +370,7 @@ export const reminderMentorship = async (
     confirmationLink: `${process.env.BASE_FRONT_URL}/confirmation?token=${token}`,
   });
   await sendEmail(mentorEmail, `Hola ${mentorName}!`, htmlMentor);
-  // TODO: /POST => {{BASE_BOT_URL}}/message/embed
+  
   await axios.post(`${process.env.BASE_BOT_URL}/message/embed`, 
   {
     "author": {
@@ -387,7 +387,7 @@ export const reminderMentorship = async (
     "image": "", 
     "thumbnail": "",
     "title": "Recordatorio de la Mentoria",
-    "timestamp": getUnixTime(mentorshipDate),
+    "timestamp": getUnixTime(date),
     "mentions": [
       menteeId, 
       mentorId
