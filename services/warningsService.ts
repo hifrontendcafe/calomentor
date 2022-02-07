@@ -19,9 +19,8 @@ export const addWarning = async (
   context: Context,
   callback: Callback<any>
 ): Promise<void> => {
-  const { mentee_id, warn_type, warn_cause, mentorship_id, warning_assignee_id } = JSON.parse(
-    event.body
-  );
+  const { mentee_id, warn_type, warn_cause, mentorship_id, warning_author_id } =
+    JSON.parse(event.body);
 
   if (
     !mentee_id &&
@@ -45,7 +44,7 @@ export const addWarning = async (
     mentorship_id,
     status: WARNSTATE.ACTIVE,
     forgive_cause: "",
-    warning_assignee_id,
+    warning_author_id,
   };
 
   const warningInfo = {
