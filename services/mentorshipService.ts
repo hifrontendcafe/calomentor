@@ -11,7 +11,7 @@ import {
 
 import { fillTimeSlot, freeTimeSlot } from "../repository/timeSlot";
 import { v4 as uuidv4 } from "uuid";
-import { isPast, subDays } from "date-fns";
+import { isPast, subDays, getUnixTime } from "date-fns";
 import { format, zonedTimeToUtc } from "date-fns-tz";
 import { sendEmail } from "../utils/sendEmail";
 const jwt = require("jsonwebtoken");
@@ -19,7 +19,7 @@ import { confirmationMail } from "../mails/confirmation";
 import { cancelMail } from "../mails/cancel";
 import { reminderMail } from "../mails/reminder";
 import { feedbackMail } from "../mails/feedback";
-import { toDateString, toTimeString } from "../utils/dates";
+import { toDateString, toTimeString, distanceFromNow } from "../utils/dates";
 
 const axios = require("axios");
 
@@ -344,7 +344,7 @@ export const reminderMentorship = async (
 ): Promise<void> => {
   const {
     responseData: {
-      mentorship: { mentorEmail, menteeEmail, mentorName, menteeName },
+      mentorship: { mentorEmail, menteeEmail, mentorName, menteeName, mentorId, menteeId },
       token,
       mentorshipDate,
     },
@@ -370,6 +370,31 @@ export const reminderMentorship = async (
     confirmationLink: `${process.env.BASE_FRONT_URL}/confirmation?token=${token}`,
   });
   await sendEmail(mentorEmail, `Hola ${mentorName}!`, htmlMentor);
+  // TODO: /POST => {{BASE_BOT_URL}}/message/embed
+  await axios.post(`${process.env.BASE_BOT_URL}/message/embed`, 
+  {
+    "author": {
+        "name": "Calomentor",
+        "iconURL": "https://cdn.discordapp.com/avatars/938137983243124736/8321279f2ca0d141ffd37f8ef8199ff5.webp?size=80"
+    }, 
+    "description":  `¡Hola! <@${menteeId}> tu mentoria con <@${mentorId}> se realizara en los canales de voz llamados salas en ${distanceFromNow(mentorshipDate)}.`,
+    "color": "ff0000", 
+    "URL": "",
+    "footer": {
+      "text": "Recordatorio de la Mentoria",
+      "iconURL": "https://cdn.discordapp.com/avatars/938137983243124736/8321279f2ca0d141ffd37f8ef8199ff5.webp?size=80"
+    },
+    "image": "", 
+    "thumbnail": "",
+    "title": "Recordatorio de la Mentoria",
+    "timestamp": getUnixTime(mentorshipDate),
+    "mentions": [
+      menteeId, 
+      mentorId
+    ],
+    "channel": process.env.MENTORISHIP_NOTIFICATIONS_CHANNEL_ID
+  })
+
   const responseCode: keyof typeof RESPONSE_CODES = "0";
   return throwLambdaResponse(callback, {
     responseMessage: RESPONSE_CODES[responseCode],
