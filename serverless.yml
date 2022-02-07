@@ -11,6 +11,10 @@ provider:
     CALOMENTOR_MAIL_ACCESS_TOKEN: ${file(./config.dev.json):CALOMENTOR_MAIL_ACCESS_TOKEN}
     BASE_URL: ${file(./config.dev.json):BASE_URL}
     BASE_FRONT_URL: ${file(./config.dev.json):BASE_FRONT_URL}
+    BASE_BOT_URL: ${file(./config.dev.json):BASE_BOT_URL}
+    MENTORISHIP_NOTIFICATIONS_CHANNEL_ID: ${file(./config.dev.json):MENTORISHIP_NOTIFICATIONS_CHANNEL_ID}
+    MENTEE_ROLE_ID: ${file(./config.dev.json):MENTEE_ROLE_ID}
+    API_KEY_PHRASE: ${file(./config.dev.json):API_KEY_PHRASE}
     JWT_KEY: ${file(./config.dev.json):JWT_KEY}
     API_KEY: ${file(./config.dev.json):API_KEY}
   runtime: nodejs14.x
