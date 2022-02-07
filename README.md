@@ -33,6 +33,9 @@ CALOMENTOR_MAIL_REFRESH_TOKEN
 CALOMENTOR_MAIL_ACCESS_TOKEN
 BASE_URL
 BASE_FRONT_URL
+BASE_BOT_URL
+MENTORISHIP_NOTIFICATIONS_CHANNEL_ID // Por ahora para testeos va a ser la url del canal bot_test
+MENTEE_ROLE_ID
 JWT_KEY
 API_KEY_PHRASE
 API_KEY
@@ -41,6 +44,18 @@ API_KEY
 Para utilizar la API, se debera añadir el siguiente header a las requests cuyo valor debe ser una API KEY
 
 - `X-API-KEY`
+
+Previo a ejecutar el proyecto deberemos tener instalando en nuestra computadora el framework Serverless
+
+```bash
+yarn add -g serverless
+```
+
+Luego de instalar Serverless Framework deberemos loguearnos con las credenciales de AWS
+
+```bash
+serverless config credentials --provider aws --key {{AWS_KEY}}  --secret {{AWS_SECRET_KEY}}
+```
 
 Instalar dependencias
 
