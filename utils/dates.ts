@@ -1,4 +1,5 @@
 import { zonedTimeToUtc } from "date-fns-tz";
+import { formatDistanceToNow } from "date-fns";
 
 const timeZone: string = "America/Montevideo";
 const locale: string = "es-AR";
@@ -17,4 +18,8 @@ export const toTimeString: (date: Date) => string = (date) => {
     hour: "2-digit",
     minute: "2-digit",
   });
+};
+
+export const distanceFromNow: (date: Date) => string = (date) => {
+  return formatDistanceToNow(zonedTimeToUtc(date, timeZone), { addSuffix: false });
 };
