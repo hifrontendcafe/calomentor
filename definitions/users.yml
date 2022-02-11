@@ -1,0 +1,48 @@
+activate:
+  handler: index.activateUser
+  events:
+    - http:
+        path: user/activate/{id}
+        method: patch
+        cors: true
+        private: true
+createUser:
+  handler: index.createUser
+  events:
+    - http:
+        path: user
+        method: post
+        cors: true
+        private: true
+getUsers:
+  handler: index.getUsers
+  events:
+    - http:
+        path: user
+        method: get
+        cors: true
+        private: true
+getUserById:
+  handler: index.getUserById
+  events:
+    - http:
+        path: user/{id}
+        method: get
+        cors: true
+        private: true
+deleteUserById:
+  handler: index.deleteUserById
+  events:
+    - http:
+        path: user/{id}
+        method: delete
+        cors: true
+        private: true
+updateUserById:
+  handler: index.updateUserById
+  events:
+    - http:
+        path: user/{id}
+        method: put
+        cors: true
+        private: true
