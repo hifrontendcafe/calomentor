@@ -21,12 +21,11 @@
     "aws-sdk": "^2.973.0",
     "serverless-offline": "^8.0.0",
     "serverless-plugin-typescript": "^2.0.0",
-    "serverless-pseudo-parameters": "^2.6.0",
     "serverless-step-functions": "^3.0.0",
     "typescript": "^4.4.4"
   },
   "dependencies": {
-    "axios": "^0.24.0",
+    "axios": "0.25.0",
     "date-fns": "^2.25.0",
     "date-fns-tz": "^1.1.6",
     "jsonwebtoken": "^8.5.1",
