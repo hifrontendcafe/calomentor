@@ -1,0 +1,32 @@
+addWarningMentorship:
+  handler: index.addWarningMentorship
+  events:
+    - http:
+        path: warning
+        method: post
+        cors: true
+        private: true
+getWarningsMentorship:
+  handler: index.getWarningsMentorship
+  events:
+    - http:
+        path: warning
+        method: get
+        cors: true
+        private: true
+getWarningsMentorshipByMentee:
+  handler: index.getWarningsMentorshipByMentee
+  events:
+    - http:
+        path: warning/{id}
+        method: get
+        cors: true
+        private: true
+forgiveWarningMentorship:
+  handler: index.forgiveWarningMentorship
+  events:
+    - http:
+        path: warning/{id}
+        method: patch
+        cors: true
+        private: true

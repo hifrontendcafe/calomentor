@@ -1,0 +1,40 @@
+mentorshipCreateAPI:
+  handler: index.mentorshipCreate
+  events:
+    - http:
+        path: mentorship/create
+        method: post
+        cors: true
+        private: true
+mentorshipCancelAPI:
+  handler: index.mentorshipCancel
+  events:
+    - http:
+        path: mentorship/cancel
+        method: post
+        cors: true
+        private: true
+getAllMentorships:
+  handler: index.getAllMentorships
+  events:
+    - http:
+        path: mentorship/{id}
+        method: get
+        cors: true
+        private: true
+mentorshipConfirmation:
+  handler: index.mentorshipConfirmation
+  events:
+    - http:
+        path: mentorship/confirmation
+        method: patch
+        cors: true
+        private: true
+mentorshipFeedback:
+  handler: index.mentorshipFeedbackForm
+  events:
+    - http:
+        path: mentorship/feedback
+        method: patch
+        cors: true
+        private: true

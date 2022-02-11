@@ -1,0 +1,48 @@
+addTimeSlot:
+  handler: index.addTimeSlot
+  events:
+    - http:
+        path: time-slot
+        method: post
+        cors: true
+        private: true
+getTimeSlotsByUserId:
+  handler: index.getTimeSlotsByUser
+  events:
+    - http:
+        path: time-slot/user/{id}
+        method: get
+        cors: true
+        private: true
+getTimeSlotsById:
+  handler: index.getTimeSlotById
+  events:
+    - http:
+        path: time-slot/{id}
+        method: get
+        cors: true
+        private: true
+updateTimeSlotState:
+  handler: index.updateTimeSlotState
+  events:
+    - http:
+        path: time-slot/{id}
+        method: patch
+        cors: true
+        private: true
+updateMenteeOnSlot:
+  handler: index.addMenteeToTimeSlot
+  events:
+    - http:
+        path: time-slot/{id}/mentee
+        method: patch
+        cors: true
+        private: true
+deleteTimeSlot:
+  handler: index.deleteTimeSlot
+  events:
+    - http:
+        path: time-slot/{id}
+        method: delete
+        cors: true
+        private: true
