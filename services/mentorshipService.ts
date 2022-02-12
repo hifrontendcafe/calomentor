@@ -6,7 +6,6 @@ import {
   TABLE_NAME_MENTORSHIP,
   TABLE_NAME_USER,
   TABLE_NAME_TIME_SLOT,
-  FILTERDATES,
 } from "../constants";
 
 import {
@@ -15,8 +14,7 @@ import {
   removeMenteeFromTimeSlot,
 } from "../repository/timeSlot";
 import { v4 as uuidv4 } from "uuid";
-import { isPast, subDays } from "date-fns";
-import { format, zonedTimeToUtc } from "date-fns-tz";
+import { subDays } from "date-fns";
 import { sendEmail } from "../utils/sendEmail";
 const jwt = require("jsonwebtoken");
 import { confirmationMail } from "../mails/confirmation";
