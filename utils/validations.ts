@@ -1,4 +1,4 @@
-import { getUserById } from "../repository/user";
+import { getUserById, getUserByToken } from "../repository/user";
 import { Role } from "../types";
 
 export const createAndUpdateUserValidations = (
@@ -66,4 +66,18 @@ export const isUserRoleUpdated = async (id: string, roleToUpdate: Role[]): Promi
   }
 
   return true
+}
+
+export const hasRole = async (userToken: string, role: Role) => {
+  const {Items} = await getUserByToken(userToken)
+  const [user] = Items
+  return user.role.includes(role)
+}
+
+export const isAdmin = async (userToken: string) => { 
+  return await hasRole(userToken, "admin")
+}
+
+export const isMentor = async (userToken: string) => {
+  return await hasRole(userToken, "mentor")
 }

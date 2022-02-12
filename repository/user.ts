@@ -46,6 +46,19 @@ export function getUserById(id: string) {
   });
 }
 
+export function getUserByToken(token: string) {
+  return scan<User>({
+    TableName: TABLE_NAME_USER,
+    FilterExpression: "#token = :userToken",
+    ExpressionAttributeNames: {
+      "#token": "userToken",
+    },
+    ExpressionAttributeValues: {
+      ":userToken": token,
+    },
+  });
+}
+
 export function deleteUserById(id: string) {
   return deleteItem<User>({
     TableName: TABLE_NAME_USER,
