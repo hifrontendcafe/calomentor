@@ -26,7 +26,6 @@ import { makeErrorResponse, makeSuccessResponse } from "../utils/makeResponses";
 import {
   getMentorshipById,
   updateMentorship,
-  updateMentorship,
 } from "../repository/mentorship";
 
 const axios = require("axios");
