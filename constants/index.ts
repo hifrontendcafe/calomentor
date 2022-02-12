@@ -16,12 +16,15 @@ export const FILTERDATES = {
   ALL: "ALL",
 };
 
-export const WARNSTATE = {
-  ACTIVE: "ACTIVE",
-  FORGIVE: "FORGIVE",
-};
+export enum WARNSTATE {
+  ACTIVE = "ACTIVE",
+  FORGIVE = "FORGIVE",
+}
 
-export const WARNTYPE = ["NO_ASSIST", "COC_WARN"];
+export enum WARN {
+  "NO_ASSIST" = "NO_ASSIST",
+  "COC_WARN" = "COC_WARN",
+}
 
 export const RESPONSE_CODES = {
   "0": "OK.",
