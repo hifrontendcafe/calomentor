@@ -10,7 +10,7 @@ import {
 import { v4 as uuidv4 } from "uuid";
 import { throwResponse } from "../utils/throwResponse";
 import { Warning } from "../types";
-import { addWarning, getAllWarningsById } from "../repository/warning";
+import { addWarning, getWarningsData } from "../repository/warning";
 import { updateMentorship } from "../repository/mentorship";
 import { makeErrorResponse, makeSuccessResponse } from "../utils/makeResponses";
 
@@ -62,7 +62,7 @@ export const addWarningService: APIGatewayProxyHandler = async (event) => {
 
 export const getWarnings: APIGatewayProxyHandler = async (event) => {
   try {
-    const warnings = await getAllWarningsById(event.pathParameters?.id);
+    const warnings = await getWarningsData(event.pathParameters?.id);
     if (warnings.Items?.length === 0) {
       return makeSuccessResponse(null, "301");
     }
@@ -72,33 +72,12 @@ export const getWarnings: APIGatewayProxyHandler = async (event) => {
   }
 };
 
-export const getAllWarnings = async (
-  event: any,
-  context: Context,
-  callback: Callback<any>
-): Promise<void> => {
-  const params = {
-    TableName: TABLE_NAME_WARNINGS,
-    ProjectionExpression:
-      "id, mentee_id, warn_type, warn_cause, mentorship_id, date, forgive_cause",
-  };
-
+export const getAllWarnings: APIGatewayProxyHandler = async () => {
   try {
-    const warnings = await dynamoDb.scan(params).promise();
-
-    const responseCode: keyof typeof RESPONSE_CODES = "302";
-    return throwResponse(callback, RESPONSE_CODES[responseCode], 200, {
-      responseMessage: RESPONSE_CODES[responseCode],
-      responseCode,
-      warnings: warnings.Items,
-    });
+    const warnings = await getWarningsData()
+    return makeSuccessResponse({ warnings: warnings.Items }, "302");
   } catch (error) {
-    const responseCode: keyof typeof RESPONSE_CODES = "-303";
-    return throwResponse(callback, RESPONSE_CODES[responseCode], 400, {
-      responseMessage: RESPONSE_CODES[responseCode],
-      responseCode,
-      error,
-    });
+    return makeErrorResponse(400, "-303", error);
   }
 };
 
