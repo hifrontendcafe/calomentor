@@ -23,7 +23,10 @@ import { reminderMail } from "../mails/reminder";
 import { feedbackMail } from "../mails/feedback";
 import { toDateString, toTimeString } from "../utils/dates";
 import { makeErrorResponse, makeSuccessResponse } from "../utils/makeResponses";
-import { getMentorshipById, updateMentorship } from "../repository/mentorship";
+import {
+  getMentorshipById,
+  updateMentorship,
+} from "../repository/mentorship";
 
 const axios = require("axios");
 
@@ -246,9 +249,7 @@ export const createMentorship = (
   //TODO: Send confirmation discord dm to the mentor and mentee
 };
 
-export const cancelMentorship: APIGatewayProxyHandler = async (
-  event
-) => {
+export const cancelMentorship: APIGatewayProxyHandler = async (event) => {
   const { cancelCause, whoCancel } = JSON.parse(event.body);
   const { token } = event.queryStringParameters;
   const jwtData: any = jwt.verify(token, process.env.JWT_KEY);
@@ -294,7 +295,7 @@ export const cancelMentorship: APIGatewayProxyHandler = async (
       forMentor: true,
     });
     sendEmail(mentor_email, `Hola ${mentor_name}!`, htmlMentor);
-    
+
     return makeSuccessResponse({ data: mentorshipUpdated.Attributes }, "0");
   } catch (error) {
     return makeErrorResponse(500, "-104");
@@ -445,57 +446,24 @@ export const checkCancelFunction = (
   });
 };
 
-export const confirmationMentorship = async (
-  event: any,
-  context: Context,
-  callback: Callback<any>
-): Promise<void> => {
+export const confirmationMentorship: APIGatewayProxyHandler = async (event) => {
   const { token } = JSON.parse(event.body);
   const jwtData: any = jwt.verify(token, process.env.JWT_KEY);
 
-  const paramsGet = {
-    TableName: TABLE_NAME_MENTORSHIP,
-    Key: { id: jwtData.mentorshipId },
-  };
-
   try {
-    const mentorship = await dynamoDb.get(paramsGet).promise();
+    const mentorship = await getMentorshipById(jwtData.mentorshipId);
 
     if (mentorship.Item?.mentorship_status !== STATUS.ACTIVE) {
-      const responseCode: keyof typeof RESPONSE_CODES = "-109";
-      return throwResponse(callback, RESPONSE_CODES[responseCode], 400, {
-        responseMessage: RESPONSE_CODES[responseCode],
-        responseCode,
-      });
+      return makeErrorResponse(400, "-109");
     }
 
-    const paramsUpdate = {
-      TableName: TABLE_NAME_MENTORSHIP,
-      Key: { id: jwtData.mentorshipId },
-      ExpressionAttributeValues: {
-        ":mentorship_status": STATUS.CONFIRMED,
-      },
-      UpdateExpression: "SET mentorship_status = :mentorship_status",
-      ReturnValues: "ALL_NEW",
-    };
-
-    const updateMentorship = await dynamoDb.update(paramsUpdate).promise();
-
-    const responseCode: keyof typeof RESPONSE_CODES = "101";
-    return throwResponse(callback, RESPONSE_CODES[responseCode], 200, {
-      responseMessage: RESPONSE_CODES[responseCode],
-      responseCode,
-      responseData: updateMentorship.Attributes,
-    });
+    const { Attributes } = await updateMentorship(
+      jwtData.mentorshipId,
+      { mentorship_status: STATUS.CONFIRMED },
+      ["mentorship_status"]
+    );
+    return makeSuccessResponse({ responseData: Attributes }, "101");
   } catch (error) {
-    const responseCode: keyof typeof RESPONSE_CODES = "-110";
-    return throwResponse(callback, RESPONSE_CODES[responseCode], 400, {
-      responseMessage: RESPONSE_CODES[responseCode],
-      responseCode,
-      error,
-    });
+    return makeErrorResponse(400, "-110", error);
   }
-
-  //TODO: Enviar dm al mentor confirmando la mentoria
-  //TODO: Enviar mail al mentor confirmando la mentoria
 };
