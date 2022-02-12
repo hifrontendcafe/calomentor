@@ -1,8 +1,5 @@
 import type { APIGatewayProxyHandler } from "aws-lambda";
 
-import { Callback, Context } from "aws-lambda";
-import type { AWSError } from "aws-sdk";
-import { TABLE_NAME_USER } from "../constants";
 import {
   createUser,
   getUsers,
@@ -11,16 +8,13 @@ import {
   updateUser,
   activateUser,
   deactivateUser,
+  addTokenToUser,
 } from "../repository/user";
 import type { User } from "../types";
 import { isAWSError } from "../utils/dynamoDb";
 import { makeErrorResponse, makeSuccessResponse } from "../utils/makeResponses";
-import { throwResponse } from "../utils/throwResponse";
-
-const AWS = require("aws-sdk"); // eslint-disable-line import/no-extraneous-dependencies
-
-const dynamoDb = new AWS.DynamoDB.DocumentClient();
-let responseMessage = "";
+import { isUserRoleUpdated } from "../utils/validations";
+import { v4 as uuidv4 } from "uuid";
 
 function isConditionalCheckFailedError(error: any) {
   return isAWSError(error) && error?.code === "ConditionalCheckFailedException";
@@ -57,6 +51,7 @@ export const createUserService: APIGatewayProxyHandler = async (event) => {
     isActive: false,
     lastActivateBy: "",
     timezone,
+    userToken: uuidv4()
   };
 
   try {
@@ -141,6 +136,16 @@ export const updateUserByIdService: APIGatewayProxyHandler = async (event) => {
   }
 
   const data = JSON.parse(event.body);
+
+  try {
+    const isRoleUpdated = await isUserRoleUpdated(id, data.role)
+    if(isRoleUpdated) {
+      const userToken = uuidv4()
+      await addTokenToUser(id, userToken)
+    }
+  } catch (error) {
+    return makeErrorResponse(400, "-320", error);
+  }
 
   let result: Awaited<ReturnType<typeof updateUser>>;
   try {

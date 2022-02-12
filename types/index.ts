@@ -52,4 +52,5 @@ export interface User {
   isActive: boolean;
   lastActivateBy: string; // discord id
   timezone: string;
+  userToken: string;
 }
