@@ -28,7 +28,7 @@ export const addWarningService: APIGatewayProxyHandler = async (event) => {
     !warn_cause &&
     !mentorship_id
   ) {
-    return makeErrorResponse(400, "300");
+    return makeErrorResponse(400, "-301");
   }
 
   const warningData: Warning = {
@@ -56,7 +56,7 @@ export const addWarningService: APIGatewayProxyHandler = async (event) => {
 
     return makeSuccessResponse(warningData, "300");
   } catch (error) {
-    return makeErrorResponse(400, "300", error);
+    return makeErrorResponse(400, "-300", error);
   }
 };
 
