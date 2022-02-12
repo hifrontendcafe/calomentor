@@ -91,3 +91,10 @@ export function deactivateUser(id: string, lastActivateBy: string) {
     lastActivateBy: lastActivateBy,
   });
 }
+
+export function addTokenToUser(id: string, userToken: string) {
+  return updateUser(id, {
+    isActive: false,
+    userToken,
+  });
+}

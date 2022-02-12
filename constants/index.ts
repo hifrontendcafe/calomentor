@@ -69,6 +69,7 @@ export const RESPONSE_CODES = {
   "-318": "There was an error trying to update the user. Id not found",
   "-319":
     "Bad Request: isActive property is missing or is not allowable option.",
+  "-320": "There was an error trying to update the user. Token not updated",
   "100": "Succesfully mentorship created.",
   "101": "Mentorship confirmed",
   "102": "Update feedback succesfully",

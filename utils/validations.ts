@@ -1,3 +1,6 @@
+import { getUserById } from "../repository/user";
+import { Role } from "../types";
+
 export const createAndUpdateUserValidations = (
   discord_username,
   full_name,
@@ -49,3 +52,18 @@ export const createAndUpdateUserValidations = (
 
   return errorMessage;
 };
+
+export const isUserRoleUpdated = async (id: string, roleToUpdate: Role[]): Promise<boolean> => {
+  const {Item: {role}} = await getUserById(id)
+
+  const oldRoleSorted = role.sort()
+  const newRoleSorted = roleToUpdate.sort()
+
+  const everyRoleCondition = oldRoleSorted.every((eachRole, index) => eachRole === newRoleSorted[index])
+
+  if(everyRoleCondition){
+    return false
+  }
+
+  return true
+}
