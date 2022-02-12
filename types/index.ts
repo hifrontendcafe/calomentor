@@ -30,7 +30,8 @@ export interface Mentorship {
   time_slot_info?: TimeSlot;
   time_slot_id?: string;
   feedback_mentee_private?: string;
-  warning_info?: Warning
+  warning_info?: Warning;
+  feedback_stars: 1 | 2 | 3 | 4 | 5;
 }
 
 interface UserLinks {

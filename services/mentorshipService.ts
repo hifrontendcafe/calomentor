@@ -380,71 +380,41 @@ export const sendFeedbackFormMentorship = (
   //TODO: Send feedback form dm to the mentee
 };
 
-export const feedbackFormMentorship = async (
-  event: any,
-  context: Context,
-  callback: Callback<any>
-): Promise<void> => {
+export const feedbackFormMentorship: APIGatewayProxyHandler = async (event) => {
   const { token, feedback, privateFeedback, starsFeedback } = JSON.parse(
     event.body
   );
   const jwtData: any = jwt.verify(token, process.env.JWT_KEY);
 
-  const paramsGet = {
-    TableName: TABLE_NAME_MENTORSHIP,
-    Key: { id: jwtData.mentorshipId },
-  };
-
   try {
-    const mentorship = await dynamoDb.get(paramsGet).promise();
+    const {
+      Item: { mentorship_status, feedback_stars, feedback_mentee },
+    } = await getMentorshipById(jwtData.mentorshipId);
 
-    if (mentorship.Item?.mentorship_status !== STATUS.CONFIRMED) {
-      const responseCode: keyof typeof RESPONSE_CODES = "-111";
-      return throwResponse(callback, RESPONSE_CODES[responseCode], 400, {
-        responseMessage: RESPONSE_CODES[responseCode],
-        responseCode,
-      });
+    if (mentorship_status !== STATUS.CONFIRMED) {
+      return makeErrorResponse(400, "-111");
     }
 
-    if (
-      mentorship.Item?.feedback_stars > 0 &&
-      mentorship.Item?.feedback_mentee !== ""
-    ) {
-      const responseCode: keyof typeof RESPONSE_CODES = "-112";
-      return throwResponse(callback, RESPONSE_CODES[responseCode], 400, {
-        responseMessage: RESPONSE_CODES[responseCode],
-        responseCode,
-      });
+    if (feedback_stars > 0 && feedback_mentee !== "") {
+      return makeErrorResponse(400, "-112");
     }
 
-    const paramsUpdate = {
-      TableName: TABLE_NAME_MENTORSHIP,
-      Key: { id: jwtData.mentorshipId },
-      ExpressionAttributeValues: {
-        ":feedback_mentee": feedback,
-        ":feedback_mentee_private": privateFeedback,
-        ":feedback_stars": starsFeedback,
+    const mentorshipUpdated = await updateMentorship(
+      jwtData.mentorshipId,
+      {
+        feedback_mentee: feedback,
+        feedback_mentee_private: privateFeedback,
+        feedback_stars: starsFeedback,
       },
-      UpdateExpression:
-        "SET feedback_mentee = :feedback_mentee, feedback_mentee_private = :feedback_mentee_private, feedback_stars = :feedback_stars",
-      ReturnValues: "ALL_NEW",
-    };
+      ["feedback_mentee", "feedback_mentee_private", "feedback_stars"]
+    );
 
-    const updateMentorship = await dynamoDb.update(paramsUpdate).promise();
-
-    const responseCode: keyof typeof RESPONSE_CODES = "102";
-    return throwResponse(callback, RESPONSE_CODES[responseCode], 200, {
-      responseMessage: RESPONSE_CODES[responseCode],
-      responseCode,
-      responseData: updateMentorship.Attributes,
-    });
+    return makeSuccessResponse(
+      { responseData: mentorshipUpdated.Attributes },
+      "102"
+    );
   } catch (error) {
-    const responseCode: keyof typeof RESPONSE_CODES = "-110";
-    return throwResponse(callback, RESPONSE_CODES[responseCode], 400, {
-      responseMessage: RESPONSE_CODES[responseCode],
-      responseCode,
-      error,
-    });
+    return makeErrorResponse(500, "-110", error);
   }
 };
 
