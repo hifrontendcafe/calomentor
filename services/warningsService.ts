@@ -5,16 +5,18 @@ import {
   TABLE_NAME_MENTORSHIP,
   TABLE_NAME_WARNINGS,
   WARNSTATE,
-  WARNTYPE,
+  WARN,
 } from "../constants";
 import { v4 as uuidv4 } from "uuid";
 import { throwResponse } from "../utils/throwResponse";
+import { Warning } from "../types";
+import { addWarning } from "../repository/warning";
 
 const AWS = require("aws-sdk"); // eslint-disable-line import/no-extraneous-dependencies
 
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
-export const addWarning = async (
+export const addWarningService = async (
   event: any,
   context: Context,
   callback: Callback<any>
@@ -24,7 +26,7 @@ export const addWarning = async (
 
   if (
     !mentee_id &&
-    !WARNTYPE.includes(warn_type) &&
+    !Object.values(WARN).includes(warn_type) &&
     !warn_cause &&
     !mentorship_id
   ) {
@@ -35,7 +37,7 @@ export const addWarning = async (
     });
   }
 
-  const warningData = {
+  const warningData: Warning = {
     id: uuidv4(),
     date: Date.now(),
     mentee_id,
@@ -43,7 +45,7 @@ export const addWarning = async (
     warn_cause,
     mentorship_id,
     status: WARNSTATE.ACTIVE,
-    forgive_cause: "",
+    forgive_cause: null,
     warning_author_id,
   };
 
