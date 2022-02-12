@@ -138,7 +138,7 @@ export const updateUserByIdService: APIGatewayProxyHandler = async (event) => {
   const data = JSON.parse(event.body);
 
   try {
-    const isRoleUpdated = isUserRoleUpdated(id, data.role)
+    const isRoleUpdated = await isUserRoleUpdated(id, data.role)
     if(isRoleUpdated) {
       const userToken = uuidv4()
       await addTokenToUser(id, userToken)
