@@ -1,10 +1,18 @@
+interface CancelMailParams {
+  mentorName: string;
+  menteeName: string;
+  date: string;
+  time: string;
+  forMentor: boolean;
+}
+
 export const cancelMail = ({
   mentorName,
   menteeName,
   date,
   time,
   forMentor,
-}) => {
+}: CancelMailParams) => {
   return `<!DOCTYPE html>
   <html
     xmlns="http://www.w3.org/1999/xhtml"
