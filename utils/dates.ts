@@ -1,21 +1,22 @@
 import * as dayjs from 'dayjs'
-import timezone from 'dayjs/plugin/timezone'
-import utc from 'dayjs/plugin/utc'
-import localizedFormat from 'dayjs/plugin/localizedFormat'
+import * as timezone from 'dayjs/plugin/timezone'
+import * as utc from 'dayjs/plugin/utc'
+import * as localizedFormat from 'dayjs/plugin/localizedFormat'
+import 'dayjs/locale/es-mx'
 
+dayjs.extend(localizedFormat)
 dayjs.extend(utc)
 dayjs.extend(timezone)
-dayjs.extend(localizedFormat)
 
 const timeZone: string = "America/Montevideo";
-const locale: string = "es-AR";
+const locale: string = "es-mx";
 
 export const toDateString: (date: Date) => string = (date) => {
-  return dayjs(date).tz(timeZone).format("LL")
+  return dayjs(date).tz(timeZone).locale(locale).format("LL")
 };
 
 export const toTimeString: (date: Date) => string = (date) => {
-  return dayjs(date).tz(timeZone).format("LT")
+  return dayjs(date).tz(timeZone).locale(locale).format("LT")
 };
 
 export const isPastDate = (date: Date, dateToCompare?: Date): boolean => {
