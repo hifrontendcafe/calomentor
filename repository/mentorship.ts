@@ -2,6 +2,12 @@ import { TABLE_NAME_MENTORSHIP } from "../constants";
 import { generateUpdateQuery, get, scan, update } from "../utils/dynamoDb";
 import { Mentorship } from "../types";
 
+export function getAllMentorships() {
+  return scan<Mentorship>({
+    TableName: TABLE_NAME_MENTORSHIP
+  });
+}
+
 export function getMentorshipById(id: string) {
   return get<Mentorship>({
     TableName: TABLE_NAME_MENTORSHIP,

@@ -10,11 +10,11 @@ export enum STATUS {
   WITHWARNING = "WITHWARNING",
 }
 
-export const FILTERDATES = {
-  PAST: "PAST",
-  FUTURE: "FUTURE",
-  ALL: "ALL",
-};
+export enum FILTERDATES {
+  PAST = "PAST",
+  FUTURE = "FUTURE",
+  ALL = "ALL",
+}
 
 export enum WARNSTATE {
   ACTIVE = "ACTIVE",
@@ -44,6 +44,8 @@ export const RESPONSE_CODES = {
   "-111": "The mentorship is not confirmed",
   "-112": "The mentorship already has a feedback",
   "-113": "Bad Request: user_id, date y slots are required",
+  "-116": "Bad Request: user is not an admin",
+  "-117": "Bad Request: must to provide a valid userToken",
   "-200": "Unable to create user. User already exists.",
   "-201": "Unable to create user.",
   "-202": "There is no mentors",
