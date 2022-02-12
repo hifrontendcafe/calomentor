@@ -1,5 +1,4 @@
-import { APIGatewayProxyHandler, Context } from "aws-lambda";
-import { isPast, isFuture } from "date-fns";
+import { APIGatewayProxyHandler } from "aws-lambda";
 import {
   getAllMentorships,
   getMentorshipsByMentorId,
@@ -14,6 +13,7 @@ import { Mentorship } from "../../types";
 import { FILTERDATES } from "../../constants";
 import { isAdmin } from "../../utils/validations";
 import { getUserByToken } from "../../repository/user";
+import { isFutureDate, isPastDate } from "../../utils/dates";
 
 const getMentorships: APIGatewayProxyHandler = async (event) => {
   const { pathParameters, queryStringParameters } = event;
@@ -66,8 +66,8 @@ const getMentorships: APIGatewayProxyHandler = async (event) => {
 
     const date = new Date(timeSlotResult.Item.date);
     const checkDateFilter =
-      (filterDates === FILTERDATES.PAST && isPast(date)) ||
-      (filterDates === FILTERDATES.FUTURE && isFuture(date)) ||
+      (filterDates === FILTERDATES.PAST && isPastDate(date)) ||
+      (filterDates === FILTERDATES.FUTURE && isFutureDate(date)) ||
       !filterDates;
 
     if (!checkDateFilter) {

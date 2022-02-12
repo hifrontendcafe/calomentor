@@ -14,14 +14,13 @@ import {
   removeMenteeFromTimeSlot,
 } from "../repository/timeSlot";
 import { v4 as uuidv4 } from "uuid";
-import { subDays } from "date-fns";
 import { sendEmail } from "../utils/sendEmail";
 const jwt = require("jsonwebtoken");
 import { confirmationMail } from "../mails/confirmation";
 import { cancelMail } from "../mails/cancel";
 import { reminderMail } from "../mails/reminder";
 import { feedbackMail } from "../mails/feedback";
-import { toDateString, toTimeString } from "../utils/dates";
+import { substractTime, toDateString, toTimeString } from "../utils/dates";
 import { makeErrorResponse, makeSuccessResponse } from "../utils/makeResponses";
 import {
   getMentorshipById,
@@ -104,7 +103,7 @@ export const createMentorship = (
       const slot = timeSlotData.Item;
 
       const mentorshipDate = new Date(slot.date);
-      dateToRemind = subDays(mentorshipDate, 1);
+      dateToRemind = substractTime(mentorshipDate, 1, "days");
 
       dynamoDb.get(paramsUserId, (err, data) => {
         if (err) {
