@@ -34,3 +34,27 @@ export function getWarningsData(id?: string) {
 
   return scan<Warning>(query);
 }
+
+export function updateWarning(
+  id: string,
+  data: Partial<Warning>,
+  allowedToUpdate: (keyof Warning)[] = null
+) {
+  let updateExpression: ReturnType<typeof generateUpdateQuery>;
+  try {
+    updateExpression = generateUpdateQuery<Partial<Warning>>(
+      data,
+      allowedToUpdate
+    );
+  } catch (err) {
+    throw err;
+  }
+
+  return update<Warning>({
+    TableName: TABLE_NAME_WARNINGS,
+    Key: { id },
+    ConditionExpression: "attribute_exists(id)",
+    ReturnValues: "ALL_NEW",
+    ...updateExpression,
+  });
+}
