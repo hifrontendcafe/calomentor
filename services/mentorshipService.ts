@@ -1,5 +1,5 @@
 import { APIGatewayProxyHandler, Callback, Context } from "aws-lambda";
-import { throwLambdaResponse, throwResponse } from "../utils/throwResponse";
+import { throwLambdaResponse } from "../utils/throwResponse";
 import {
   RESPONSE_CODES,
   STATUS,
