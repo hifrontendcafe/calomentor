@@ -49,11 +49,6 @@ export const addWarningService = async (
     warning_author_id,
   };
 
-  const warningInfo = {
-    TableName: TABLE_NAME_WARNINGS,
-    Item: warningData,
-  };
-
   const paramsUpdate = {
     TableName: TABLE_NAME_MENTORSHIP,
     Key: { id: mentorship_id },
@@ -67,7 +62,7 @@ export const addWarningService = async (
   };
 
   try {
-    await dynamoDb.put(warningInfo).promise();
+    await addWarning(warningData)
     await dynamoDb.update(paramsUpdate).promise();
     const responseCode: keyof typeof RESPONSE_CODES = "300";
     return throwResponse(callback, RESPONSE_CODES[responseCode], 200, {
