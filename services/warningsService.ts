@@ -10,7 +10,7 @@ import {
 import { v4 as uuidv4 } from "uuid";
 import { throwResponse } from "../utils/throwResponse";
 import { Warning } from "../types";
-import { addWarning } from "../repository/warning";
+import { addWarning, getAllWarningsById } from "../repository/warning";
 import { updateMentorship } from "../repository/mentorship";
 import { makeErrorResponse, makeSuccessResponse } from "../utils/makeResponses";
 
@@ -60,41 +60,15 @@ export const addWarningService: APIGatewayProxyHandler = async (event) => {
   }
 };
 
-export const getWarnings = async (
-  event: any,
-  context: Context,
-  callback: Callback<any>
-): Promise<void> => {
-  const params = {
-    TableName: TABLE_NAME_WARNINGS,
-    FilterExpression: "mentee_id = :mentee_id",
-    ExpressionAttributeValues: {
-      ":mentee_id": event.pathParameters?.id,
-    },
-  };
-
+export const getWarnings: APIGatewayProxyHandler = async (event) => {
   try {
-    const warnings = await dynamoDb.scan(params).promise();
+    const warnings = await getAllWarningsById(event.pathParameters?.id);
     if (warnings.Items?.length === 0) {
-      const responseCode: keyof typeof RESPONSE_CODES = "301";
-      return throwResponse(callback, RESPONSE_CODES[responseCode], 200, {
-        responseMessage: RESPONSE_CODES[responseCode],
-        responseCode,
-      });
+      return makeSuccessResponse(null, "301");
     }
-    const responseCode: keyof typeof RESPONSE_CODES = "-302";
-    return throwResponse(callback, RESPONSE_CODES[responseCode], 400, {
-      responseMessage: RESPONSE_CODES[responseCode],
-      responseCode,
-      warnings: warnings.Items,
-    });
+    return makeErrorResponse(400, "-302", { warnings: warnings.Items });
   } catch (error) {
-    const responseCode: keyof typeof RESPONSE_CODES = "-303";
-    return throwResponse(callback, RESPONSE_CODES[responseCode], 400, {
-      responseMessage: RESPONSE_CODES[responseCode],
-      responseCode,
-      error,
-    });
+    return makeErrorResponse(400, "-303", error);
   }
 };
 
