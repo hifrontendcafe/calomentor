@@ -1,4 +1,4 @@
-import { Callback, Context } from "aws-lambda";
+import { APIGatewayProxyHandler, Callback, Context } from "aws-lambda";
 import {
   RESPONSE_CODES,
   STATUS,
@@ -11,16 +11,14 @@ import { v4 as uuidv4 } from "uuid";
 import { throwResponse } from "../utils/throwResponse";
 import { Warning } from "../types";
 import { addWarning } from "../repository/warning";
+import { updateMentorship } from "../repository/mentorship";
+import { makeErrorResponse } from "../utils/makeResponses";
 
 const AWS = require("aws-sdk"); // eslint-disable-line import/no-extraneous-dependencies
 
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
-export const addWarningService = async (
-  event: any,
-  context: Context,
-  callback: Callback<any>
-): Promise<void> => {
+export const addWarningService: APIGatewayProxyHandler = async (event) => {
   const { mentee_id, warn_type, warn_cause, mentorship_id, warning_author_id } =
     JSON.parse(event.body);
 
@@ -30,11 +28,7 @@ export const addWarningService = async (
     !warn_cause &&
     !mentorship_id
   ) {
-    const responseCode: keyof typeof RESPONSE_CODES = "-301";
-    return throwResponse(callback, RESPONSE_CODES[responseCode], 400, {
-      responseMessage: RESPONSE_CODES[responseCode],
-      responseCode,
-    });
+    return makeErrorResponse(400, "300");
   }
 
   const warningData: Warning = {
@@ -49,34 +43,20 @@ export const addWarningService = async (
     warning_author_id,
   };
 
-  const paramsUpdate = {
-    TableName: TABLE_NAME_MENTORSHIP,
-    Key: { id: mentorship_id },
-    ExpressionAttributeValues: {
-      ":mentorship_status": STATUS.WITHWARNING,
-      ":warning_info": warningData,
-    },
-    UpdateExpression:
-      "SET mentorship_status = :mentorship_status, warning_info = :warning_info",
-    ReturnValues: "ALL_NEW",
-  };
-
   try {
-    await addWarning(warningData)
-    await dynamoDb.update(paramsUpdate).promise();
-    const responseCode: keyof typeof RESPONSE_CODES = "300";
-    return throwResponse(callback, RESPONSE_CODES[responseCode], 200, {
-      responseMessage: RESPONSE_CODES[responseCode],
-      responseCode,
-      warning: warningData,
-    });
+    await addWarning(warningData);
+    await updateMentorship(
+      mentorship_id,
+      {
+        mentorship_status: STATUS.WITHWARNING,
+        warning_info: warningData,
+      },
+      ["mentorship_status", "warning_info"]
+    );
+
+    return makeErrorResponse(200, "300", warningData);
   } catch (error) {
-    const responseCode: keyof typeof RESPONSE_CODES = "-300";
-    return throwResponse(callback, RESPONSE_CODES[responseCode], 400, {
-      responseMessage: RESPONSE_CODES[responseCode],
-      responseCode,
-      error,
-    });
+    return makeErrorResponse(400, "300", error);
   }
 };
 
