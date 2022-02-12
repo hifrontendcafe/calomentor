@@ -1,4 +1,4 @@
-import { Callback, Context } from "aws-lambda";
+import { APIGatewayProxyHandler, Callback, Context } from "aws-lambda";
 import { throwLambdaResponse, throwResponse } from "../utils/throwResponse";
 import {
   RESPONSE_CODES,
@@ -6,13 +6,15 @@ import {
   TABLE_NAME_MENTORSHIP,
   TABLE_NAME_USER,
   TABLE_NAME_TIME_SLOT,
-  FILTERDATES,
 } from "../constants";
 
-import { fillTimeSlot, freeTimeSlot } from "../repository/timeSlot";
+import {
+  fillTimeSlot,
+  freeTimeSlot,
+  removeMenteeFromTimeSlot,
+} from "../repository/timeSlot";
 import { v4 as uuidv4 } from "uuid";
-import { isPast, subDays } from "date-fns";
-import { format, zonedTimeToUtc } from "date-fns-tz";
+import { subDays } from "date-fns";
 import { sendEmail } from "../utils/sendEmail";
 const jwt = require("jsonwebtoken");
 import { confirmationMail } from "../mails/confirmation";
@@ -20,6 +22,8 @@ import { cancelMail } from "../mails/cancel";
 import { reminderMail } from "../mails/reminder";
 import { feedbackMail } from "../mails/feedback";
 import { toDateString, toTimeString } from "../utils/dates";
+import { makeErrorResponse, makeSuccessResponse } from "../utils/makeResponses";
+import { getMentorshipById, updateMentorship } from "../repository/mentorship";
 
 const axios = require("axios");
 
@@ -219,7 +223,7 @@ export const createMentorship = (
                       menteeId: mentorship.mentee_id,
                       menteeEmail: mentorship.mentee_email,
                       menteeName: mentorship.mentee_name,
-                      mentee_timezone: mentorship.mentee_timezone
+                      mentee_timezone: mentorship.mentee_timezone,
                     },
                     dateToRemind,
                     mentorshipDate,
@@ -242,64 +246,32 @@ export const createMentorship = (
   //TODO: Send confirmation discord dm to the mentor and mentee
 };
 
-export const cancelMentorship = async (
-  event: any,
-  context: Context,
-  callback: Callback<any>
-): Promise<void> => {
+export const cancelMentorship: APIGatewayProxyHandler = async (
+  event
+) => {
   const { cancelCause, whoCancel } = JSON.parse(event.body);
   const { token } = event.queryStringParameters;
   const jwtData: any = jwt.verify(token, process.env.JWT_KEY);
 
-  const paramsGet = {
-    TableName: TABLE_NAME_MENTORSHIP,
-    Key: { id: jwtData.mentorshipId },
-  };
-
   try {
-    const mentorship = await dynamoDb.get(paramsGet).promise();
+    const mentorship = await getMentorshipById(jwtData.mentorshipId);
 
     if (mentorship.Item?.mentorship_status === STATUS.CANCEL) {
-      const responseCode: keyof typeof RESPONSE_CODES = "-109";
-      return throwResponse(callback, RESPONSE_CODES[responseCode], 400, {
-        responseMessage: RESPONSE_CODES[responseCode],
-        responseCode,
-      });
+      return makeErrorResponse(400, "-109");
     }
 
     await freeTimeSlot(mentorship.Item?.time_slot_id);
+    await removeMenteeFromTimeSlot(mentorship.Item?.time_slot_id);
 
-    await dynamoDb
-      .update({
-        TableName: TABLE_NAME_TIME_SLOT,
-        Key: {
-          id: mentorship.Item?.time_slot_id,
-        },
-        ExpressionAttributeValues: {
-          ":mentee_id": "",
-          ":mentee_username": "",
-          ":tokenForCancel": "",
-        },
-        UpdateExpression:
-          "SET mentee_id = :mentee_id, mentee_username = :mentee_username, tokenForCancel = :tokenForCancel",
-        ReturnValues: "ALL_NEW",
-      })
-      .promise();
-
-    const mentorshipUpdated = await dynamoDb
-      .update({
-        TableName: TABLE_NAME_MENTORSHIP,
-        Key: { id: jwtData.mentorshipId },
-        ExpressionAttributeValues: {
-          ":mentorship_status": STATUS.CANCEL,
-          ":cancel_cause": cancelCause,
-          ":who_cancel": whoCancel,
-        },
-        UpdateExpression:
-          "SET mentorship_status = :mentorship_status, cancel_cause = :cancel_cause, who_cancel = :who_cancel",
-        ReturnValues: "ALL_NEW",
-      })
-      .promise();
+    const mentorshipUpdated = await updateMentorship(
+      jwtData.mentorshipId,
+      {
+        mentorship_status: STATUS.CANCEL,
+        cancel_cause: cancelCause,
+        who_cancel: whoCancel,
+      },
+      ["mentorship_status", "cancel_cause", "who_cancel"]
+    );
 
     const { mentee_name, mentee_email, mentor_name, mentor_email } =
       mentorshipUpdated.Attributes;
@@ -322,19 +294,10 @@ export const cancelMentorship = async (
       forMentor: true,
     });
     sendEmail(mentor_email, `Hola ${mentor_name}!`, htmlMentor);
-    const responseCode: keyof typeof RESPONSE_CODES = "0";
-    return throwResponse(callback, RESPONSE_CODES[responseCode], 200, {
-      responseMessage: RESPONSE_CODES[responseCode],
-      responseCode,
-      data: mentorshipUpdated.Attributes,
-    });
+    
+    return makeSuccessResponse({ data: mentorshipUpdated.Attributes }, "0");
   } catch (error) {
-    const responseCode: keyof typeof RESPONSE_CODES = "-104";
-    return throwResponse(callback, RESPONSE_CODES[responseCode], 400, {
-      responseMessage: RESPONSE_CODES[responseCode],
-      responseCode,
-      error: error,
-    });
+    return makeErrorResponse(500, "-104");
   }
 
   //TODO: Send cancel discord dm to the mentor and mentee
