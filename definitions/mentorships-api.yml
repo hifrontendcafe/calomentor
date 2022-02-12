@@ -14,11 +14,19 @@ mentorshipCancelAPI:
         method: post
         cors: true
         private: true
-getAllMentorships:
+getAllMentorshipsById:
   handler: index.getAllMentorships
   events:
     - http:
         path: mentorship/{id}
+        method: get
+        cors: true
+        private: true
+getAllMentorships:
+  handler: index.getAllMentorships
+  events:
+    - http:
+        path: mentorship
         method: get
         cors: true
         private: true
