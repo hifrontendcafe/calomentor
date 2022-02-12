@@ -10,8 +10,6 @@ import {
 import { updateMentorship } from "../repository/mentorship";
 import { makeErrorResponse, makeSuccessResponse } from "../utils/makeResponses";
 
-const AWS = require("aws-sdk"); // eslint-disable-line import/no-extraneous-dependencies
-
 export const addWarningService: APIGatewayProxyHandler = async (event) => {
   const { mentee_id, warn_type, warn_cause, mentorship_id, warning_author_id } =
     JSON.parse(event.body);
