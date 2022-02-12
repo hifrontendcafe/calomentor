@@ -61,7 +61,7 @@ export interface User {
 
 export interface Warning {
   id: string;
-  date: number;
+  warning_date: number;
   mentee_id: string;
   warn_type: WARN;
   warn_cause: string;

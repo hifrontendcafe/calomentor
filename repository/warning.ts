@@ -22,7 +22,7 @@ export function getWarningsData(id?: string) {
     };
   } else {
     query.ProjectionExpression =
-      "id, mentee_id, warn_type, warn_cause, mentorship_id, date, forgive_cause";
+      "id, mentee_id, warn_type, warn_cause, mentorship_id, warning_date, forgive_cause";
   }
 
   return scan<Warning>(query);

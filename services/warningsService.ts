@@ -25,7 +25,7 @@ export const addWarningService: APIGatewayProxyHandler = async (event) => {
 
   const warningData: Warning = {
     id: uuidv4(),
-    date: Date.now(),
+    warning_date: Date.now(),
     mentee_id,
     warn_type,
     warn_cause,
