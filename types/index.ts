@@ -1,3 +1,5 @@
+import { STATUS, WARN, WARNSTATE } from "../constants";
+
 export interface TimeSlot {
   id: string;
   user_id: string;
@@ -21,13 +23,14 @@ export interface Mentorship {
   mentee_name: string;
   tokenForCancel: string;
   mentee_id: string;
-  mentorship_status: "CANCEL" | "ACTIVE" | "CONFIRMED";
+  mentorship_status: STATUS;
   id: string;
   cancel_cause: string;
   who_cancel: "MENTOR" | "MENTEE";
   time_slot_info?: TimeSlot;
   time_slot_id?: string;
   feedback_mentee_private?: string;
+  warning_info?: Warning
 }
 
 interface UserLinks {
@@ -53,4 +56,16 @@ export interface User {
   lastActivateBy: string; // discord id
   timezone: string;
   userToken: string;
+}
+
+export interface Warning {
+  id: string;
+  date: number;
+  mentee_id: string;
+  warn_type: WARN;
+  warn_cause: string;
+  mentorship_id: string;
+  status: WARNSTATE;
+  forgive_cause?: string;
+  warning_author_id: string;
 }
