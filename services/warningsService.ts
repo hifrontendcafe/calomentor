@@ -12,7 +12,7 @@ import { throwResponse } from "../utils/throwResponse";
 import { Warning } from "../types";
 import { addWarning } from "../repository/warning";
 import { updateMentorship } from "../repository/mentorship";
-import { makeErrorResponse } from "../utils/makeResponses";
+import { makeErrorResponse, makeSuccessResponse } from "../utils/makeResponses";
 
 const AWS = require("aws-sdk"); // eslint-disable-line import/no-extraneous-dependencies
 
@@ -54,7 +54,7 @@ export const addWarningService: APIGatewayProxyHandler = async (event) => {
       ["mentorship_status", "warning_info"]
     );
 
-    return makeErrorResponse(200, "300", warningData);
+    return makeSuccessResponse(warningData, "300");
   } catch (error) {
     return makeErrorResponse(400, "300", error);
   }
