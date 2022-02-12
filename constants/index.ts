@@ -3,12 +3,12 @@ export const TABLE_NAME_TIME_SLOT = "time-slots";
 export const TABLE_NAME_MENTORSHIP = "mentorship";
 export const TABLE_NAME_WARNINGS = "warnings";
 
-export const STATUS = {
-  ACTIVE: "ACTIVE",
-  CANCEL: "CANCEL",
-  CONFIRMED: "CONFIRMED",
-  WITHWARNING: "WITHWARNING",
-};
+export enum STATUS {
+  ACTIVE = "ACTIVE",
+  CANCEL = "CANCEL",
+  CONFIRMED = "CONFIRMED",
+  WITHWARNING = "WITHWARNING",
+}
 
 export const FILTERDATES = {
   PAST: "PAST",

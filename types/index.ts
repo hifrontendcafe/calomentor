@@ -1,4 +1,4 @@
-import { WARN, WARNSTATE } from "../constants";
+import { STATUS, WARN, WARNSTATE } from "../constants";
 
 export interface TimeSlot {
   id: string;
@@ -23,13 +23,14 @@ export interface Mentorship {
   mentee_name: string;
   tokenForCancel: string;
   mentee_id: string;
-  mentorship_status: "CANCEL" | "ACTIVE" | "CONFIRMED";
+  mentorship_status: STATUS;
   id: string;
   cancel_cause: string;
   who_cancel: "MENTOR" | "MENTEE";
   time_slot_info?: TimeSlot;
   time_slot_id?: string;
   feedback_mentee_private?: string;
+  warning_info?: Warning
 }
 
 interface UserLinks {
