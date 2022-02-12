@@ -17,12 +17,20 @@ export function addWarning(warning: Warning) {
   });
 }
 
-export function getAllWarningsById(id: string) {
-  return scan<Warning>({
+export function getWarningsData(id?: string) {
+  let query: Parameters<typeof scan>[0] = {
     TableName: TABLE_NAME_WARNINGS,
-    FilterExpression: "mentee_id = :mentee_id",
-    ExpressionAttributeValues: {
+  };
+
+  if (id) {
+    query.FilterExpression = "mentee_id = :mentee_id";
+    query.ExpressionAttributeValues = {
       ":mentee_id": id,
-    },
-  });
+    };
+  } else {
+    query.ProjectionExpression =
+      "id, mentee_id, warn_type, warn_cause, mentorship_id, date, forgive_cause";
+  }
+
+  return scan<Warning>(query);
 }
