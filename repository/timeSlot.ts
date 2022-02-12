@@ -66,8 +66,8 @@ interface Mentee {
 }
 
 interface UpdateMenteeParams {
-  type: "ADD_MENTEE";
-  mentee: Mentee;
+  type: "ADD_MENTEE" | "REMOVE_MENTEE";
+  mentee?: Mentee;
 }
 
 type UpdateParams = UpdateIsOccupiedParams | UpdateMenteeParams;
@@ -98,6 +98,18 @@ function updateTimeSlot(id: string, payload: UpdateParams) {
       params.UpdateExpression = `SET mentee_id = :mentee_id,
              mentee_username = :mentee_username,
              tokenForCancel = :tokenForCancel`;
+      break;
+
+    case "REMOVE_MENTEE":
+      params.ExpressionAttributeValues = {
+        ":mentee_id": "",
+        ":mentee_username": "",
+        ":tokenForCancel": "",
+      };
+
+      params.UpdateExpression = `SET mentee_id = :mentee_id,
+               mentee_username = :mentee_username,
+               tokenForCancel = :tokenForCancel`;
       break;
 
     default:
@@ -131,4 +143,8 @@ export function freeTimeSlot(id: string) {
 
 export function addMenteeToTimeSlot(id: string, mentee: Mentee) {
   return updateTimeSlot(id, { type: "ADD_MENTEE", mentee });
+}
+
+export function removeMenteeFromTimeSlot(id: string) {
+  return updateTimeSlot(id, { type: "REMOVE_MENTEE" });
 }
