@@ -9,6 +9,7 @@ import {
 } from "../repository/warning";
 import { getMentorshipById, updateMentorship } from "../repository/mentorship";
 import { makeErrorResponse, makeSuccessResponse } from "../utils/makeResponses";
+import { getUserById } from "../repository/user";
 
 export const addWarningService: APIGatewayProxyHandler = async (event) => {
   const { mentee_id, warn_type, warn_cause, mentorship_id, warning_author_id } =
@@ -35,14 +36,19 @@ export const addWarningService: APIGatewayProxyHandler = async (event) => {
     warning_author_id,
     mentee_name: null,
     mentor_name: null,
+    warning_author_name: null,
   };
 
   try {
     const {
       Item: { mentee_name, mentor_name },
     } = await getMentorshipById(mentorship_id);
+    const {
+      Item: { full_name },
+    } = await getUserById(warning_author_id);
     warningData.mentee_name = mentee_name;
     warningData.mentor_name = mentor_name;
+    warningData.warning_author_name = full_name;
     await addWarning(warningData);
     await updateMentorship(
       mentorship_id,

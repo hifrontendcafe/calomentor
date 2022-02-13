@@ -22,7 +22,7 @@ export function getWarningsData(id?: string) {
     };
   } else {
     query.ProjectionExpression =
-      "id, mentee_id, warn_type, warn_cause, mentorship_id, warning_date, forgive_cause, mentor_name, mentee_name, status, warning_author_id";
+      "id, mentee_id, warn_type, warn_cause, mentorship_id, warning_date, forgive_cause, mentor_name, mentee_name, status, warning_author_id, warning_author_name";
   }
 
   return scan<Warning>(query);

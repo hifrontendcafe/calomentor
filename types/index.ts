@@ -71,4 +71,5 @@ export interface Warning {
   status: WARNSTATE;
   forgive_cause?: string;
   warning_author_id: string;
+  warning_author_name: string;
 }
