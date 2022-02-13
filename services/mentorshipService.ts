@@ -7,15 +7,14 @@ import {
   TABLE_NAME_USER,
   TABLE_NAME_TIME_SLOT,
 } from "../constants";
-
 import {
+  addMenteeToTimeSlot,
   fillTimeSlot,
   freeTimeSlot,
   removeMenteeFromTimeSlot,
 } from "../repository/timeSlot";
 import { v4 as uuidv4 } from "uuid";
 import { sendEmail } from "../utils/sendEmail";
-const jwt = require("jsonwebtoken");
 import { confirmationMail } from "../mails/confirmation";
 import { cancelMail } from "../mails/cancel";
 import { reminderMail } from "../mails/reminder";
@@ -25,10 +24,9 @@ import { makeErrorResponse, makeSuccessResponse } from "../utils/makeResponses";
 import { getMentorshipById, updateMentorship } from "../repository/mentorship";
 import { Mentorship } from "../types";
 
+const jwt = require("jsonwebtoken");
 const axios = require("axios");
-
 const AWS = require("aws-sdk");
-
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
 interface MentorshipRequestBody {
@@ -39,6 +37,7 @@ interface MentorshipRequestBody {
   mentee_name: string;
   mentee_username_discord: string;
   info: string;
+  mentee_timezone: string;
 }
 
 interface MentorshipStateMachine {
@@ -48,6 +47,7 @@ interface MentorshipStateMachine {
   menteeId: string;
   menteeEmail: string;
   menteeName: string;
+  mentee_timezone: string;
 }
 
 interface BaseMentorshipResponse {
