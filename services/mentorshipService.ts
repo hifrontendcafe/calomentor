@@ -23,10 +23,7 @@ import { reminderMail } from "../mails/reminder";
 import { feedbackMail } from "../mails/feedback";
 import { toDateString, toTimeString } from "../utils/dates";
 import { makeErrorResponse, makeSuccessResponse } from "../utils/makeResponses";
-import {
-  getMentorshipById,
-  updateMentorship,
-} from "../repository/mentorship";
+import { getMentorshipById, updateMentorship } from "../repository/mentorship";
 
 const axios = require("axios");
 
@@ -296,7 +293,7 @@ export const cancelMentorship: APIGatewayProxyHandler = async (event) => {
     });
     sendEmail(mentor_email, `Hola ${mentor_name}!`, htmlMentor);
 
-    return makeSuccessResponse({ data: mentorshipUpdated.Attributes }, "0");
+    return makeSuccessResponse(mentorshipUpdated.Attributes, "0");
   } catch (error) {
     return makeErrorResponse(500, "-104");
   }
@@ -410,10 +407,7 @@ export const feedbackFormMentorship: APIGatewayProxyHandler = async (event) => {
       ["feedback_mentee", "feedback_mentee_private", "feedback_stars"]
     );
 
-    return makeSuccessResponse(
-      { responseData: mentorshipUpdated.Attributes },
-      "102"
-    );
+    return makeSuccessResponse(mentorshipUpdated.Attributes, "102");
   } catch (error) {
     return makeErrorResponse(500, "-110", error);
   }
@@ -462,7 +456,7 @@ export const confirmationMentorship: APIGatewayProxyHandler = async (event) => {
       { mentorship_status: STATUS.CONFIRMED },
       ["mentorship_status"]
     );
-    return makeSuccessResponse({ responseData: Attributes }, "101");
+    return makeSuccessResponse(Attributes, "101");
   } catch (error) {
     return makeErrorResponse(400, "-110", error);
   }
