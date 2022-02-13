@@ -58,7 +58,7 @@ export const getWarnings: APIGatewayProxyHandler = async (event) => {
     if (warnings.Items?.length === 0) {
       return makeSuccessResponse(null, "301");
     }
-    return makeErrorResponse(400, "-302", { warnings: warnings.Items });
+    return makeErrorResponse(400, "-302", warnings.Items);
   } catch (error) {
     return makeErrorResponse(400, "-303", error);
   }
@@ -67,7 +67,7 @@ export const getWarnings: APIGatewayProxyHandler = async (event) => {
 export const getAllWarnings: APIGatewayProxyHandler = async () => {
   try {
     const warnings = await getWarningsData();
-    return makeSuccessResponse({ warnings: warnings.Items }, "302");
+    return makeSuccessResponse(warnings.Items, "302");
   } catch (error) {
     return makeErrorResponse(400, "-303", error);
   }
