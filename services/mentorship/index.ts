@@ -1,1 +1,1 @@
-export {default as getMentorships} from './getAllMentorships';
+export {default as getMentorships} from './Api/getAllMentorships';
