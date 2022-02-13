@@ -1,20 +1,40 @@
-import { zonedTimeToUtc } from "date-fns-tz";
+import * as dayjs from 'dayjs'
+import * as timezone from 'dayjs/plugin/timezone'
+import * as utc from 'dayjs/plugin/utc'
+import * as localizedFormat from 'dayjs/plugin/localizedFormat'
+import 'dayjs/locale/es-mx'
+
+dayjs.extend(localizedFormat)
+dayjs.extend(utc)
+dayjs.extend(timezone)
 
 const timeZone: string = "America/Montevideo";
-const locale: string = "es-AR";
+const locale: string = "es-mx";
 
 export const toDateString: (date: Date) => string = (date) => {
-  return zonedTimeToUtc(date, timeZone).toLocaleDateString(locale, {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
+  return dayjs(date).tz(timeZone).locale(locale).format("LL")
 };
 
 export const toTimeString: (date: Date) => string = (date) => {
-  return zonedTimeToUtc(date, timeZone).toLocaleTimeString(locale, {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  return dayjs(date).tz(timeZone).locale(locale).format("LT")
+};
+
+export const isPastDate = (date: Date, dateToCompare?: Date): boolean => {
+  return dayjs(dateToCompare).isAfter(dayjs(date))
+};
+
+export const isFutureDate = (date: Date, dateToCompare?: Date): boolean => {
+  return dayjs(dateToCompare).isBefore(dayjs(date))
+};
+
+export const isSameDate = (dateOne: Date, dateTwo: Date): boolean => {
+  return dayjs(dateOne).isSame(dayjs(dateTwo))
+};
+
+export const addTime = (date: Date, timeToAdd: number, unit: dayjs.UnitType): Date => {
+  return dayjs(date).add(timeToAdd, unit).toDate()
+};
+
+export const substractTime = (date: Date, timeToAdd: number, unit: dayjs.UnitType): Date => {
+  return dayjs(date).subtract(timeToAdd, unit).toDate()
 };

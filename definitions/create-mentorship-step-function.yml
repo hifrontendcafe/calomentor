@@ -1,0 +1,109 @@
+stateMachines:
+  createMentorship:
+    role: arn:aws:iam::822886109108:role/service-role/StepFunctions-mentorship-role-88e1969f
+    name: createMentorship
+    events:
+      - http:
+          path: sf/mentorship
+          method: post
+          cors:
+            origin: "*"
+            headers:
+              - Content-Type
+              - X-Api-Key
+            allowCredentials: true
+          private: true
+          response:
+            headers:
+              Content-Type: "'application/json'"
+              Access-Control-Allow-Origin: "'*'"
+            template:
+              application/json: |
+                {
+                  "status": 200,
+                  "info": "OK"
+                }
+    definition:
+      StartAt: MENTORSHIP_INITIAL
+      States:
+        MENTORSHIP_INITIAL:
+          Type: Task
+          Resource:
+            {
+              "Fn::Join":
+                [
+                  ":",
+                  [
+                    "arn:aws:lambda:sa-east-1",
+                    { "Ref": "AWS::AccountId" },
+                    "function:${self:service}-${self:provider.stage}-mentorshipCreate",
+                  ],
+                ],
+            }
+          Next: MENTORSHIP_REMINDER_WAIT
+        MENTORSHIP_REMINDER_WAIT:
+          Type: Wait
+          TimestampPath: "$.responseData.dateToRemind"
+          Next: CHECK_CANCEL_TASK
+        CHECK_CANCEL_TASK:
+          Type: Task
+          Resource:
+            {
+              "Fn::Join":
+                [
+                  ":",
+                  [
+                    "arn:aws:lambda:sa-east-1",
+                    { "Ref": "AWS::AccountId" },
+                    "function:${self:service}-${self:provider.stage}-checkCancel",
+                  ],
+                ],
+            }
+          Next: CHECK_CANCEL_CHOICE
+        CHECK_CANCEL_CHOICE:
+          Type: Choice
+          Choices:
+            - Variable: "$.is_cancel"
+              BooleanEquals: true
+              Next: END_BY_CANCEL
+            - Variable: "$.is_cancel"
+              BooleanEquals: false
+              Next: MENTORSHIP_REMINDER
+          Default: MENTORSHIP_REMINDER
+        END_BY_CANCEL:
+          Type: Fail
+          Cause: "Mentorship cancelled"
+        MENTORSHIP_REMINDER:
+          Type: Task
+          Resource:
+            {
+              "Fn::Join":
+                [
+                  ":",
+                  [
+                    "arn:aws:lambda:sa-east-1",
+                    { "Ref": "AWS::AccountId" },
+                    "function:${self:service}-${self:provider.stage}-mentorshipReminder",
+                  ],
+                ],
+            }
+          Next: MENTORSHIP_FEEDBACK_WAIT
+        MENTORSHIP_FEEDBACK_WAIT:
+          Type: Wait
+          TimestampPath: "$.responseData.mentorshipDate"
+          Next: SEND_FEEDBACK
+        SEND_FEEDBACK:
+          Type: Task
+          Resource:
+            {
+              "Fn::Join":
+                [
+                  ":",
+                  [
+                    "arn:aws:lambda:sa-east-1",
+                    { "Ref": "AWS::AccountId" },
+                    "function:${self:service}-${self:provider.stage}-mentorshipFeedbackSend",
+                  ],
+                ],
+            }
+          End: true

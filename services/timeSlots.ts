@@ -12,8 +12,9 @@ import {
   addMenteeToTimeSlot as repositoryAddMenteeToTimeSlot,
   deleteTimeSlot as repositoryDeleteTimeSlot,
 } from "../repository/timeSlot";
+import { isPastDate, isSameDate, addTime } from "../utils/dates";
 
-export const addTimeSlot = async (event: any) => {
+export const addTimeSlot: APIGatewayProxyHandler = async (event: any) => {
   const { user_id, slot_date } = JSON.parse(event.body);
 
   if (!user_id && !slot_date) {
@@ -21,6 +22,23 @@ export const addTimeSlot = async (event: any) => {
   }
 
   const date = new Date(slot_date);
+
+  if(isPastDate(date)) {
+    return makeErrorResponse(400, "-114");
+  }
+
+  const {Items} = await getTimeSlotsByUserId(user_id)
+
+  const timeslot = Items.find(timeslot => {
+    const isSame = isSameDate(new Date(timeslot.date), date)
+    const timeslotFortyFiveBefore = addTime(new Date(timeslot.date), 45, "minutes")
+    const hasSameFortyFiveBefore = isPastDate(timeslotFortyFiveBefore, date)
+    return !isSame && !hasSameFortyFiveBefore
+  })
+
+  if(timeslot) {
+    return makeErrorResponse(400, "-115");
+  }
 
   const timeSlot: TimeSlot = {
     id: uuidv4(),

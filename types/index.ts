@@ -1,4 +1,4 @@
-import { WARN, WARNSTATE } from "../constants";
+import { STATUS, WARN, WARNSTATE } from "../constants";
 
 export interface TimeSlot {
   id: string;
@@ -33,7 +33,7 @@ export interface Mentorship {
   mentee_name: string;
   tokenForCancel: string;
   mentee_id: string;
-  mentorship_status: "CANCEL" | "ACTIVE" | "CONFIRMED";
+  mentorship_status: STATUS;
   id: string;
   cancel_cause: string;
   who_cancel: "MENTOR" | "MENTEE";
@@ -66,4 +66,20 @@ export interface User {
   isActive: boolean;
   lastActivateBy: string; // discord id
   timezone: string;
+  userToken: string;
+}
+
+export interface Warning {
+  id: string;
+  warning_date: number;
+  mentee_id: string;
+  mentee_name?: string;
+  mentor_name?: string;
+  warn_type: WARN;
+  warn_cause: string;
+  mentorship_id: string;
+  status: WARNSTATE;
+  forgive_cause?: string;
+  warning_author_id: string;
+  warning_author_name: string;
 }

@@ -1,6 +1,8 @@
-import { Context } from "aws-lambda";
-import { isPast, isFuture } from "date-fns";
-import { getMentorshipsByMentorId } from "../../repository/mentorship";
+import { APIGatewayProxyHandler } from "aws-lambda";
+import {
+  getAllMentorships,
+  getMentorshipsByMentorId,
+} from "../../repository/mentorship";
 import { getTimeSlotById } from "../../repository/timeSlot";
 import {
   makeErrorResponse,
@@ -9,18 +11,35 @@ import {
 import { Mentorship } from "../../types";
 
 import { FILTERDATES } from "../../constants";
+import { isAdmin } from "../../utils/validations";
+import { getUserByToken } from "../../repository/user";
+import { isFutureDate, isPastDate } from "../../utils/dates";
 
-const getMentorships = async (event: any, _context: Context) => {
+const getMentorships: APIGatewayProxyHandler = async (event) => {
   const { pathParameters, queryStringParameters } = event;
 
-  const { id } = pathParameters;
+  const id = pathParameters?.id;
   const filter = queryStringParameters?.filter;
   const filterDates = queryStringParameters?.filterDates;
+
+  if (filterDates === FILTERDATES.ALL) {
+    const userToken = event.headers["user-token"];
+    if (!userToken || (await getUserByToken(userToken)).Count === 0) {
+      return makeErrorResponse(401, "-117");
+    }
+    if (!(await isAdmin(userToken))) {
+      return makeErrorResponse(403, "-116");
+    }
+  }
 
   let data: Awaited<ReturnType<typeof getMentorshipsByMentorId>>;
 
   try {
-    data = await getMentorshipsByMentorId(id);
+    if (id) {
+      data = await getMentorshipsByMentorId(id);
+    } else {
+      data = await getAllMentorships();
+    }
   } catch (err) {
     return makeErrorResponse(400, "-107", err);
   }
@@ -47,8 +66,8 @@ const getMentorships = async (event: any, _context: Context) => {
 
     const date = new Date(timeSlotResult.Item.date);
     const checkDateFilter =
-      (filterDates === FILTERDATES.PAST && isPast(date)) ||
-      (filterDates === FILTERDATES.FUTURE && isFuture(date)) ||
+      (filterDates === FILTERDATES.PAST && isPastDate(date)) ||
+      (filterDates === FILTERDATES.FUTURE && isFutureDate(date)) ||
       !filterDates;
 
     if (!checkDateFilter) {
@@ -63,7 +82,6 @@ const getMentorships = async (event: any, _context: Context) => {
   }
 
   return makeSuccessResponse(mentorshipsToReturn);
-  //TODO: Validate admin
 };
 
 export default getMentorships;

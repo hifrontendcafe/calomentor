@@ -30,7 +30,7 @@ import {
 } from "./services/mentorshipService";
 
 import {
-  addWarning,
+  addWarningService,
   forgiveWarning,
   getAllWarnings,
   getWarnings,
@@ -126,8 +126,11 @@ export const mentorshipConfirmation: Handler = (
   callback: Callback<any>
 ) => confirmationMentorship(event, context, callback);
 
-export const getAllMentorships: Handler = (event: any, context: Context) =>
-  getMentorships(event, context);
+export const getAllMentorships: Handler = (
+  event: any,
+  context: Context,
+  callback: Callback<any>
+) => getMentorships(event, context, callback);
 
 // Warnings functions handlers
 
@@ -135,7 +138,7 @@ export const addWarningMentorship: Handler = (
   event: any,
   context: Context,
   callback: Callback<any>
-) => addWarning(event, context, callback);
+) => addWarningService(event, context, callback);
 
 export const getWarningsMentorship: Handler = (
   event: any,

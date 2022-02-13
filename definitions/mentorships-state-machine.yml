@@ -1,0 +1,10 @@
+mentorshipCreate:
+  handler: index.mentorshipCreate
+mentorshipCancel:
+  handler: index.mentorshipCancel
+checkCancel:
+  handler: index.checkCancel
+mentorshipReminder:
+  handler: index.mentorshipReminder
+mentorshipFeedbackSend:
+  handler: index.mentorshipFeedbackSend
