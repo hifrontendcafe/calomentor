@@ -1,0 +1,219 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_date": "2022-02-13T23:02:14.766Z",
+  "__export_source": "insomnia.desktop.app:v2021.7.2",
+  "resources": [
+    {
+      "_id": "req_c8274b042a05488eae187a0225035489",
+      "parentId": "wrk_33c55924083645cd83d9d34fd74a0ba9",
+      "modified": 1644793298567,
+      "created": 1644792538046,
+      "url": "{{ _.base_url }}/mentorship/removeRole",
+      "name": "Eliminar rol a un usuario",
+      "description": "",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"user\": \"641995600946003998\",\n  \"role\": \"876961344677613628\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json",
+          "id": "pair_c34c3a883d8b4faeb45edd656496ad9f"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1644792538046,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "wrk_33c55924083645cd83d9d34fd74a0ba9",
+      "parentId": null,
+      "modified": 1644781960264,
+      "created": 1644781960264,
+      "name": "Calobot",
+      "description": "",
+      "scope": "design",
+      "_type": "workspace"
+    },
+    {
+      "_id": "req_98f179df68c14e949d9d2ed093672b4e",
+      "parentId": "wrk_33c55924083645cd83d9d34fd74a0ba9",
+      "modified": 1644793001837,
+      "created": 1644792528982,
+      "url": "{{ _.base_url }}/mentorship/addRole",
+      "name": "Agregar rol a un usuario",
+      "description": "",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"user\": \"641995600946003998\",\n  \"role\": \"876961344677613628\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json",
+          "id": "pair_09fd994f95c1463cbdc1ab2ba30378d3"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1644792528982,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_1ba0e42903c5410e9917e11da18aba29",
+      "parentId": "wrk_33c55924083645cd83d9d34fd74a0ba9",
+      "modified": 1644793001257,
+      "created": 1644792347296,
+      "url": "{{ _.base_url }}/message/embed",
+      "name": "Enviar mensajes al canal de notificaciones",
+      "description": "",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"author\": {\n     \"name\": \"Mentorship\",\n     \"iconURL\": \"https://i.imgur.com/XQ9xZ9u.png\"\n   },\n   \"description\": \" hola <@379323608654282752> esta confirmada tu mentoria\",\n   \"color\": \"ff0000\",\n   \"URL\": \"\",\n   \"footer\": {\n      \"text\": \"Mentorship\",\n      \"iconURL\": \"https://i.imgur.com/XQ9xZ9u.png\"\n   },\n   \"image\": \"\",\n   \"thumbnail\": \"\",\n   \"title\": \"Mentorship\",\n   \"timestamp\": \"1637884504371\",\n   \"mentions\": [\n      \"641995600946003998\",\n      \"641995600946003998\"\n   ],\n   \"channel\": \"776196097131413534\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json",
+          "id": "pair_9d680ee6aa714719bcbf8f819e8f896c"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1644792347296,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_30a6c5a4936e46f982820973e139e169",
+      "parentId": "wrk_33c55924083645cd83d9d34fd74a0ba9",
+      "modified": 1644792999904,
+      "created": 1644782021249,
+      "url": "{{ _.base_url }}/message/user/641995600946003998{{ _.base_url }}/mentorship/addRole",
+      "name": "Enviar mensajes directos a un usuario de discord",
+      "description": "",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"author\": {\n     \"name\": \"Calomentor\",\n     \"iconURL\": \"https://i.imgur.com/XQ9xZ9u.png\"\n   },\n   \"description\": \" hola <@379323608654282752> esta confirmada tu mentoria\",\n   \"color\": \"ff0000\",\n   \"footer\": {\n      \"text\": \"Mentorship\",\n      \"iconURL\": \"https://i.imgur.com/XQ9xZ9u.png\"\n   },\n   \"title\": \"Mentorship\",\n   \"timestamp\": \"1637884504371\",\n   \"isEmbed\": true\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json",
+          "id": "pair_a558a464a66549e6bf1b190567609f7f"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1644782021250,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "env_6cd789784eac4a3db420fa9b6676f08f",
+      "parentId": "wrk_33c55924083645cd83d9d34fd74a0ba9",
+      "modified": 1644792954822,
+      "created": 1644781960272,
+      "name": "Base Environment",
+      "data": { "base_url": "{{ host }}{{ base_path }}" },
+      "dataPropertyOrder": { "&": ["base_url"] },
+      "color": null,
+      "isPrivate": false,
+      "metaSortKey": 1635907787471,
+      "_type": "environment"
+    },
+    {
+      "_id": "jar_ab0ee48db9ad49b99e0d78b65f012d49",
+      "parentId": "wrk_33c55924083645cd83d9d34fd74a0ba9",
+      "modified": 1644781960282,
+      "created": 1644781960282,
+      "name": "Default Jar",
+      "cookies": [],
+      "_type": "cookie_jar"
+    },
+    {
+      "_id": "spc_ec90c26338ef4766b55f31d86c6c1c6b",
+      "parentId": "wrk_33c55924083645cd83d9d34fd74a0ba9",
+      "modified": 1644793296488,
+      "created": 1644781960284,
+      "fileName": "Calobot",
+      "contents": "",
+      "contentType": "yaml",
+      "_type": "api_spec"
+    },
+    {
+      "_id": "uts_077abfa2ee3346569bb4f51dde419662",
+      "parentId": "wrk_33c55924083645cd83d9d34fd74a0ba9",
+      "modified": 1644781960366,
+      "created": 1644781960366,
+      "name": "Calomentor",
+      "_type": "unit_test_suite"
+    },
+    {
+      "_id": "env_env_6cd789784eac4a3db420fa9b6676f08f_sub",
+      "parentId": "env_6cd789784eac4a3db420fa9b6676f08f",
+      "modified": 1644792945514,
+      "created": 1644781966251,
+      "name": "Calobot",
+      "data": { "base_path": "/api/v1", "host": "137.184.98.86:3001" },
+      "dataPropertyOrder": { "&": ["base_path", "host"] },
+      "color": null,
+      "isPrivate": false,
+      "metaSortKey": 1644781966251,
+      "_type": "environment"
+    },
+    {
+      "_id": "ut_493de003085e46d2987776cc835491bf",
+      "parentId": "uts_077abfa2ee3346569bb4f51dde419662",
+      "modified": 1644781960369,
+      "created": 1644781960369,
+      "requestId": "req_wrk_205ca41958af42c8b5a46f6f851475211938b83c",
+      "name": "Create Mentorship",
+      "code": "const response1 = await insomnia.send();\nexpect(response1.status).to.equal(200);",
+      "_type": "unit_test"
+    },
+    {
+      "_id": "ut_1ee5ac96034b4ea391a6c347d1ca2dbc",
+      "parentId": "uts_077abfa2ee3346569bb4f51dde419662",
+      "modified": 1644781960374,
+      "created": 1644781960374,
+      "requestId": null,
+      "name": "Returns 200",
+      "code": "const response1 = await insomnia.send();\nexpect(response1.status).to.equal(200);",
+      "_type": "unit_test"
+    }
+  ]
+}
