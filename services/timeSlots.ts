@@ -14,7 +14,7 @@ import {
 } from "../repository/timeSlot";
 import { isPastDate, isSameDate, addTime } from "../utils/dates";
 
-export const addTimeSlot = async (event: any) => {
+export const addTimeSlot: APIGatewayProxyHandler = async (event: any) => {
   const { user_id, slot_date } = JSON.parse(event.body);
 
   if (!user_id && !slot_date) {
