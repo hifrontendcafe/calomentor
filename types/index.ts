@@ -63,6 +63,8 @@ export interface Warning {
   id: string;
   warning_date: number;
   mentee_id: string;
+  mentee_name?: string;
+  mentor_name?: string;
   warn_type: WARN;
   warn_cause: string;
   mentorship_id: string;
