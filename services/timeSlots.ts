@@ -14,7 +14,7 @@ import {
 } from "../repository/timeSlot";
 import { isPastDate, isSameDate, addTime } from "../utils/dates";
 
-export const addTimeSlot: APIGatewayProxyHandler = async (event: any) => {
+export const addTimeSlot: APIGatewayProxyHandler = async (event) => {
   const { user_id, slot_date } = JSON.parse(event.body);
 
   if (!user_id && !slot_date) {
@@ -47,7 +47,7 @@ export const addTimeSlot: APIGatewayProxyHandler = async (event: any) => {
     is_occupied: false,
     mentee_username: "",
     mentee_id: "",
-    tokenForCancel: "",
+    mentorship_token: "",
   };
 
   try {
@@ -131,9 +131,9 @@ export const addMenteeToTimeSlot: APIGatewayProxyHandler = async (event) => {
     return makeErrorResponse(400, "-311");
   }
 
-  const { mentee_username, mentee_id, tokenForCancel } = JSON.parse(event.body);
+  const { mentee_username, mentee_id, mentorship_token } = JSON.parse(event.body);
 
-  if (!mentee_username || !mentee_id || !tokenForCancel) {
+  if (!mentee_username || !mentee_id || !mentorship_token) {
     return makeErrorResponse(400, "-311");
   }
 
@@ -143,7 +143,7 @@ export const addMenteeToTimeSlot: APIGatewayProxyHandler = async (event) => {
     const timeSlotData = await repositoryAddMenteeToTimeSlot(id, {
       id: mentee_id,
       username: mentee_username,
-      tokenForCancel,
+      mentorship_token,
     });
 
     timeSlot = timeSlotData.Attributes;

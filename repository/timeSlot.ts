@@ -62,7 +62,7 @@ interface UpdateIsOccupiedParams {
 interface Mentee {
   id: string;
   username: string;
-  tokenForCancel: string;
+  mentorship_token: string;
 }
 
 interface UpdateMenteeParams {
@@ -92,24 +92,24 @@ function updateTimeSlot(id: string, payload: UpdateParams) {
       params.ExpressionAttributeValues = {
         ":mentee_id": payload.mentee.id,
         ":mentee_username": payload.mentee.username,
-        ":tokenForCancel": payload.mentee.tokenForCancel,
+        ":mentorship_token": payload.mentee.mentorship_token,
       };
 
       params.UpdateExpression = `SET mentee_id = :mentee_id,
              mentee_username = :mentee_username,
-             tokenForCancel = :tokenForCancel`;
+             mentorship_token = :mentorship_token`;
       break;
 
     case "REMOVE_MENTEE":
       params.ExpressionAttributeValues = {
         ":mentee_id": "",
         ":mentee_username": "",
-        ":tokenForCancel": "",
+        ":mentorship_token": "",
       };
 
       params.UpdateExpression = `SET mentee_id = :mentee_id,
                mentee_username = :mentee_username,
-               tokenForCancel = :tokenForCancel`;
+               mentorship_token = :mentorship_token`;
       break;
 
     default:

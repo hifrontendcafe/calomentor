@@ -1,8 +1,8 @@
 mentorshipCreateAPI:
-  handler: index.mentorshipCreate
+  handler: index.mentorshipCreateAPI
   events:
     - http:
-        path: mentorship/create
+        path: mentorship
         method: post
         cors: true
         private: true

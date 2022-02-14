@@ -1,4 +1,4 @@
-import type { APIGatewayProxyResult } from "aws-lambda";
+import type { APIGatewayProxyResult, Callback, Handler } from "aws-lambda";
 
 import type { OutgoingHttpHeaders } from "http";
 import { RESPONSE_CODES } from "../constants";
@@ -49,3 +49,7 @@ export function makeErrorResponse(
     },
   };
 }
+
+export const makeLambdaResponse = <T>(callback: Callback, response: T) => {
+  callback(null, response);
+};

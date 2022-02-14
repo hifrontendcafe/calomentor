@@ -67,7 +67,7 @@ export const RESPONSE_CODES = {
   "-310": "Bad Request: Missing params. The required params are id and slot",
   "-311": "Bad Request: Missing params. id is required",
   "-312":
-    "Bad Request: Missing params. The required params are mentee_username, mentee_id and tokenForCancel",
+    "Bad Request: Missing params. The required params are mentee_username, mentee_id and mentorship_token",
   "-313": "There was an error trying to delete the slot",
   "-314": "Time slot not found",
   "-315": "Bad Request: id is required or is not a string.",

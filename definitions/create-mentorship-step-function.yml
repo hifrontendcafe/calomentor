@@ -63,10 +63,10 @@ stateMachines:
         CHECK_CANCEL_CHOICE:
           Type: Choice
           Choices:
-            - Variable: "$.is_cancel"
+            - Variable: "$.isCancel"
               BooleanEquals: true
               Next: END_BY_CANCEL
-            - Variable: "$.is_cancel"
+            - Variable: "$.isCancel"
               BooleanEquals: false
               Next: MENTORSHIP_REMINDER
           Default: MENTORSHIP_REMINDER

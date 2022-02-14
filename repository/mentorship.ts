@@ -1,5 +1,5 @@
 import { TABLE_NAME_MENTORSHIP } from "../constants";
-import { generateUpdateQuery, get, scan, update } from "../utils/dynamoDb";
+import { generateUpdateQuery, get, put, scan, update } from "../utils/dynamoDb";
 import { Mentorship } from "../types";
 
 export function getAllMentorships() {
@@ -20,6 +20,14 @@ export function getMentorshipsByMentorId(id) {
     TableName: TABLE_NAME_MENTORSHIP,
     FilterExpression: "mentor_id = :mentor_id",
     ExpressionAttributeValues: { ":mentor_id": id },
+  });
+}
+
+export function createMentorship(mentorship: Mentorship) {
+  return put<Mentorship>({
+    TableName: TABLE_NAME_MENTORSHIP,
+    Item: mentorship,
+    ConditionExpression: "attribute_not_exists(id)",
   });
 }
 

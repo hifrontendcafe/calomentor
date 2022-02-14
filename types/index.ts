@@ -8,7 +8,7 @@ export interface TimeSlot {
   is_cancelled?: boolean;
   mentee_username: string;
   mentee_id: string;
-  tokenForCancel: string;
+  mentorship_token: string;
 }
 
 export interface Mentorship {
@@ -20,7 +20,7 @@ export interface Mentorship {
   mentor_name: string;
   info: string;
   mentee_name: string;
-  tokenForCancel: string;
+  mentorship_token: string;
   mentee_id: string;
   mentorship_status: STATUS;
   id: string;
@@ -72,4 +72,27 @@ export interface Warning {
   forgive_cause?: string;
   warning_author_id: string;
   warning_author_name: string;
+}
+
+export interface MentorshipStateMachine {
+  mentorId: string;
+  menteeId: string;
+  menteeName: string;
+  menteeEmail: string;
+  menteeTimezone: string;
+  mentorTimezone: string;
+  mentorName: string;
+  mentorEmail: string;
+}
+
+export interface MentorshipResponse {
+  responseMessage: string;
+  responseCode: string;
+  responseData: {
+    mentorship: MentorshipStateMachine;
+    dateToRemind: Date;
+    mentorshipDate: Date;
+    token: string;
+  };
+  isCancel?: boolean
 }
