@@ -12,7 +12,12 @@ import {
   addMenteeToTimeSlot as repositoryAddMenteeToTimeSlot,
   deleteTimeSlot as repositoryDeleteTimeSlot,
 } from "../repository/timeSlot";
-import { isPastDate, isSameDate, addTime } from "../utils/dates";
+import {
+  isPastDate,
+  isSameDate,
+  addTime,
+  dateIsBetween,
+} from "../utils/dates";
 
 export const addTimeSlot: APIGatewayProxyHandler = async (event: any) => {
   const { user_id, slot_date } = JSON.parse(event.body);
@@ -23,20 +28,29 @@ export const addTimeSlot: APIGatewayProxyHandler = async (event: any) => {
 
   const date = new Date(slot_date);
 
-  if(isPastDate(date)) {
+  if (isPastDate(date)) {
     return makeErrorResponse(400, "-114");
   }
 
-  const {Items} = await getTimeSlotsByUserId(user_id)
+  const { Items } = await getTimeSlotsByUserId(user_id);
 
-  const timeslot = Items.find(timeslot => {
-    const isSame = isSameDate(new Date(timeslot.date), date)
-    const timeslotFortyFiveBefore = addTime(new Date(timeslot.date), 45, "minutes")
-    const hasSameFortyFiveBefore = isPastDate(timeslotFortyFiveBefore, date)
-    return !isSame && !hasSameFortyFiveBefore
-  })
+  const timeslot = Items.find((timeslot) => {
+    const isSame = isSameDate(new Date(timeslot.date), date);
+    const timeslotFortyFiveBefore = addTime(
+      new Date(timeslot.date),
+      45,
+      "minutes"
+    );
+    const hasSameBetween = dateIsBetween(
+      date,
+      new Date(timeslot.date),
+      timeslotFortyFiveBefore
+    );
 
-  if(timeslot) {
+    return !isSame && hasSameBetween;
+  });
+
+  if (timeslot) {
     return makeErrorResponse(400, "-115");
   }
 
