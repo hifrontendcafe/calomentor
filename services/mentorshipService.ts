@@ -19,10 +19,15 @@ import { confirmationMail } from "../mails/confirmation";
 import { cancelMail } from "../mails/cancel";
 import { reminderMail } from "../mails/reminder";
 import { feedbackMail } from "../mails/feedback";
-import { substractTime, toDateString, toTimeString } from "../utils/dates";
+import {
+  substractTime,
+  toDateString,
+  toTimeString,
+} from "../utils/dates";
 import { makeErrorResponse, makeSuccessResponse } from "../utils/makeResponses";
 import { getMentorshipById, updateMentorship } from "../repository/mentorship";
 import { Mentorship } from "../types";
+import { createICS } from "../utils/ical";
 
 const jwt = require("jsonwebtoken");
 const axios = require("axios");
@@ -204,7 +209,14 @@ export const createMentorship: Handler<
                   sendEmail(
                     mentorship.mentee_email,
                     `Hola ${mentee_name}!`,
-                    htmlMentee
+                    htmlMentee,
+                    createICS(mentorshipDate, data.Item?.full_name, {
+                      menteeEmail: mentee_email,
+                      menteeName: mentee_name,
+                      mentorEmail: data.Item?.email,
+                      mentorName: data.Item?.full_name,
+                      timezone: "America/Argentina/Buenos_Aires",
+                    })
                   );
                   const htmlMentor = confirmationMail({
                     mentorName: data.Item?.full_name,
@@ -217,7 +229,14 @@ export const createMentorship: Handler<
                   sendEmail(
                     data.Item?.email,
                     `Hola ${data.Item?.full_name}!`,
-                    htmlMentor
+                    htmlMentor,
+                    createICS(mentorshipDate, mentee_name, {
+                      menteeEmail: mentee_email,
+                      menteeName: mentee_name,
+                      mentorEmail: data.Item?.email,
+                      mentorName: data.Item?.full_name,
+                      timezone: "America/Argentina/Buenos_Aires",
+                    })
                   );
                 } catch (error) {
                   return throwLambdaResponse(callback, {
@@ -298,7 +317,18 @@ export const cancelMentorship: APIGatewayProxyHandler = async (event) => {
       time: toTimeString(mentorshipDate),
       forMentor: false,
     });
-    sendEmail(mentee_email, `Hola ${mentee_name}!`, htmlMentee);
+    sendEmail(
+      mentee_email,
+      `Hola ${mentee_name}!`,
+      htmlMentee,
+      createICS(mentorshipDate, mentor_name, {
+        menteeEmail: mentee_email,
+        menteeName: mentee_name,
+        mentorEmail: mentor_email,
+        mentorName: mentor_name,
+        timezone: "America/Argentina/Buenos_Aires",
+      })
+    );
     const htmlMentor = cancelMail({
       mentorName: mentor_name,
       menteeName: mentee_name,
@@ -306,7 +336,18 @@ export const cancelMentorship: APIGatewayProxyHandler = async (event) => {
       time: toTimeString(mentorshipDate),
       forMentor: true,
     });
-    sendEmail(mentor_email, `Hola ${mentor_name}!`, htmlMentor);
+    sendEmail(
+      mentor_email,
+      `Hola ${mentor_name}!`,
+      htmlMentor,
+      createICS(mentorshipDate, mentee_name, {
+        menteeEmail: mentee_email,
+        menteeName: mentee_name,
+        mentorEmail: mentor_email,
+        mentorName: mentor_name,
+        timezone: "America/Argentina/Buenos_Aires",
+      })
+    );
 
     return makeSuccessResponse(mentorshipUpdated.Attributes, "0");
   } catch (error) {
@@ -338,7 +379,18 @@ export const reminderMentorship = async (
     cancelLink: `${process.env.BASE_FRONT_URL}/cancel?token=${token}`,
     confirmationLink: `${process.env.BASE_FRONT_URL}/confirmation?token=${token}`,
   });
-  sendEmail(menteeEmail, `Hola ${menteeName}!`, htmlMentee);
+  sendEmail(
+    menteeEmail,
+    `Hola ${menteeName}!`,
+    htmlMentee,
+    createICS(date, menteeName, {
+      menteeEmail,
+      menteeName,
+      mentorEmail,
+      mentorName,
+      timezone: "America/Argentina/Buenos_Aires",
+    })
+  );
   const htmlMentor = reminderMail({
     mentorName,
     menteeName,
@@ -348,7 +400,18 @@ export const reminderMentorship = async (
     cancelLink: `${process.env.BASE_FRONT_URL}/cancel?token=${token}`,
     confirmationLink: `${process.env.BASE_FRONT_URL}/confirmation?token=${token}`,
   });
-  await sendEmail(mentorEmail, `Hola ${mentorName}!`, htmlMentor);
+  await sendEmail(
+    mentorEmail,
+    `Hola ${mentorName}!`,
+    htmlMentor,
+    createICS(date, menteeName, {
+      menteeEmail,
+      menteeName,
+      mentorEmail,
+      mentorName,
+      timezone: "America/Argentina/Buenos_Aires",
+    })
+  );
   const responseCode: keyof typeof RESPONSE_CODES = "0";
   return throwLambdaResponse(callback, {
     responseMessage: RESPONSE_CODES[responseCode],

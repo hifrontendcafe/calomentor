@@ -1,5 +1,4 @@
-import { createTransport } from "nodemailer";
-import { TransportOptions } from "nodemailer";
+import { createTransport, TransportOptions } from "nodemailer";
 
 const config: TransportOptions = {
   host: "smtp.gmail.com",
@@ -16,15 +15,28 @@ const config: TransportOptions = {
   },
 } as TransportOptions;
 
-export const sendEmail = async (to: string, subject: string, html: string) => {
+export const sendEmail = async (
+  to: string,
+  subject: string,
+  html: string,
+  icalContent?: string
+) => {
   const transporter = createTransport(config);
 
-  const options = {
+  const options: any = {
     from: `"Calomentor" <frontendcafe@gmail.com>`,
     to,
     subject,
     html,
   };
+
+  if (icalContent) {
+    options.icalEvent = {
+      filename: "mentorship.ics",
+      method: "requpublishest",
+      content: icalContent,
+    };
+  }
 
   return await transporter.sendMail(options);
 };
