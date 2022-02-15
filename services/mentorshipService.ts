@@ -27,7 +27,7 @@ import {
 } from "../utils/dates";
 import { makeErrorResponse, makeSuccessResponse } from "../utils/makeResponses";
 import { getMentorshipById, updateMentorship } from "../repository/mentorship";
-import { createICS } from "../utils/ical";
+import { createICS, ICalStatus } from "../utils/ical";
 
 const axios = require("axios");
 
@@ -348,7 +348,7 @@ export const reminderMentorship = async (
 ): Promise<void> => {
   const {
     responseData: {
-      mentorship: { mentorEmail, menteeEmail, mentorName, menteeName },
+      mentorship: { mentorEmail, menteeEmail, mentorName, menteeName, mentorshipId },
       token,
       mentorshipDate,
     },
@@ -367,7 +367,8 @@ export const reminderMentorship = async (
     menteeEmail,
     `Hola ${menteeName}!`,
     htmlMentee,
-    createICS(date, menteeName, {
+    createICS(date, menteeName, ICalStatus.CANCEL, {
+      mentorshipId,
       menteeEmail,
       menteeName,
       mentorEmail,
@@ -388,7 +389,8 @@ export const reminderMentorship = async (
     mentorEmail,
     `Hola ${mentorName}!`,
     htmlMentor,
-    createICS(date, menteeName, {
+    createICS(date, menteeName, ICalStatus.CANCEL, {
+      mentorshipId: "123123-ij9kok",
       menteeEmail,
       menteeName,
       mentorEmail,

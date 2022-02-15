@@ -32,8 +32,7 @@ export const sendEmail = async (
 
   if (icalContent) {
     options.icalEvent = {
-      filename: "mentorship.ics",
-      method: "requpublishest",
+      filename: "invite.ics",
       content: icalContent,
     };
   }
