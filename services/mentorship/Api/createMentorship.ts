@@ -1,24 +1,23 @@
 import { APIGatewayProxyHandler } from "aws-lambda";
-import { STATUS } from "../../../constants";
-import { Mentorship } from "../../../types";
-import { makeErrorResponse, makeSuccessResponse } from "../../../utils/makeResponses";
 import { v4 as uuidv4 } from "uuid";
+import { STATUS } from "../../../constants";
+import { confirmationMail } from "../../../mails/confirmation";
+import { createMentorship } from "../../../repository/mentorship";
 import {
   addMenteeToTimeSlot,
   fillTimeSlot,
   getTimeSlotById,
 } from "../../../repository/timeSlot";
-import {
-  substractTime,
-  toDateString,
-  toTimeString,
-} from "../../../utils/dates";
 import { getUserById } from "../../../repository/user";
-import { getToken } from "../../../utils/token";
-import { createMentorship } from "../../../repository/mentorship";
-import { confirmationMail } from "../../../mails/confirmation";
-import { sendEmail } from "../../../utils/sendEmail";
+import { Mentorship } from "../../../types";
+import { toDateString, toTimeString } from "../../../utils/dates";
 import { createICS } from "../../../utils/ical";
+import {
+  makeErrorResponse,
+  makeSuccessResponse,
+} from "../../../utils/makeResponses";
+import { sendEmail } from "../../../utils/sendEmail";
+import { getToken } from "../../../utils/token";
 
 const createMentorshipAPI: APIGatewayProxyHandler = async (event) => {
   const {
@@ -87,7 +86,7 @@ const createMentorshipAPI: APIGatewayProxyHandler = async (event) => {
 
     await createMentorship(mentorship);
 
-    // update timeslot selected
+    // Update timeslot selected
     await fillTimeSlot(mentorship.time_slot_id);
     await addMenteeToTimeSlot(mentorship.time_slot_id, {
       id: mentee_id,
@@ -95,7 +94,7 @@ const createMentorshipAPI: APIGatewayProxyHandler = async (event) => {
       mentorship_token: mentorship.mentorship_token,
     });
 
-    // send communications
+    // Send communications
     const htmlMentee = confirmationMail({
       mentorName: full_name,
       menteeName: mentee_name,
@@ -140,9 +139,9 @@ const createMentorshipAPI: APIGatewayProxyHandler = async (event) => {
     const AWS = require("aws-sdk");
     const stepfunctions = new AWS.StepFunctions();
     const params = {
-      // Este string lo podemos manejar por envs, es la forma de llamar servicios externos a la lambda o cualquier otro servicio de aws
+      // This string is the address where we call the init of the createMentorship state machine.
       stateMachineArn: process.env.STATE_MACHINE_ARN,
-      // el input son los datos que le tenemos que pasar a la state machine para que vaya pasando de paso a paso
+      // This is the input that grab the init of the state machine for work from there
       input: JSON.stringify({
         mentorId: mentor_id,
         menteeId: mentee_id,
@@ -156,12 +155,12 @@ const createMentorshipAPI: APIGatewayProxyHandler = async (event) => {
         token: mentorship.mentorship_token,
       }),
     };
-    // inicio de la state machine con los parametros que definimos antes
+    // The actual execution with the paramaters that we declare before
     stepfunctions.startExecution(params, (err, data) => {
-      if(err) {
+      if (err) {
         return makeErrorResponse(500, "-102", err);
       }
-      return makeSuccessResponse(data, "100")
+      return makeSuccessResponse(data, "100");
     });
   } catch (error) {
     return makeErrorResponse(500, "-102", error);

@@ -1,7 +1,13 @@
 import { APIGatewayProxyHandler } from "aws-lambda";
 import { STATUS } from "../../../constants";
-import { getMentorshipById, updateMentorship } from "../../../repository/mentorship";
-import { makeErrorResponse, makeSuccessResponse } from "../../../utils/makeResponses";
+import {
+  getMentorshipById,
+  updateMentorship,
+} from "../../../repository/mentorship";
+import {
+  makeErrorResponse,
+  makeSuccessResponse,
+} from "../../../utils/makeResponses";
 import { verifyToken } from "../../../utils/token";
 
 const confirmationMentorship: APIGatewayProxyHandler = async (event) => {

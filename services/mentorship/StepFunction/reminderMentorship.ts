@@ -61,7 +61,7 @@ const reminderMentorship: Handler = async (event, _, callback) => {
   return makeLambdaResponse<MentorshipResponse>(callback, {
     responseMessage: RESPONSE_CODES["0"],
     responseCode: "0",
-    responseData: event.responseData
+    responseData: event.responseData,
   });
 };
 

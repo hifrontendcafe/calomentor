@@ -1,10 +1,10 @@
 import { TABLE_NAME_MENTORSHIP } from "../constants";
-import { generateUpdateQuery, get, put, scan, update } from "../utils/dynamoDb";
 import { Mentorship } from "../types";
+import { generateUpdateQuery, get, put, scan, update } from "../utils/dynamoDb";
 
 export function getAllMentorships() {
   return scan<Mentorship>({
-    TableName: TABLE_NAME_MENTORSHIP
+    TableName: TABLE_NAME_MENTORSHIP,
   });
 }
 
@@ -31,8 +31,11 @@ export function createMentorship(mentorship: Mentorship) {
   });
 }
 
-export function updateMentorship(id: string, data: Partial<Mentorship>,
-  allowedToUpdate: (keyof Mentorship)[] = null) {
+export function updateMentorship(
+  id: string,
+  data: Partial<Mentorship>,
+  allowedToUpdate: (keyof Mentorship)[] = null
+) {
   let updateExpression: ReturnType<typeof generateUpdateQuery>;
   try {
     updateExpression = generateUpdateQuery<Partial<Mentorship>>(
@@ -42,7 +45,7 @@ export function updateMentorship(id: string, data: Partial<Mentorship>,
   } catch (err) {
     throw err;
   }
-  
+
   return update<Mentorship>({
     TableName: TABLE_NAME_MENTORSHIP,
     Key: { id },

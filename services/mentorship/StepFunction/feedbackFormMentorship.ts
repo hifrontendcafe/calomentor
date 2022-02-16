@@ -5,11 +5,7 @@ import { MentorshipResponse } from "../../../types";
 import { makeLambdaResponse } from "../../../utils/makeResponses";
 import { sendEmail } from "../../../utils/sendEmail";
 
-const sendFeedbackFormMentorship: Handler = (
-  event,
-  _,
-  callback
-): void => {
+const sendFeedbackFormMentorship: Handler = (event, _, callback): void => {
   const {
     responseData: {
       mentorship: { menteeEmail, mentorName, menteeName },
@@ -30,4 +26,4 @@ const sendFeedbackFormMentorship: Handler = (
   });
 };
 
-export default sendFeedbackFormMentorship
+export default sendFeedbackFormMentorship;

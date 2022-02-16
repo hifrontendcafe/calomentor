@@ -94,5 +94,5 @@ export interface MentorshipResponse {
     mentorshipDate: Date;
     token: string;
   };
-  isCancel?: boolean
+  isCancel?: boolean;
 }

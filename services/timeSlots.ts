@@ -1,18 +1,17 @@
 import type { APIGatewayProxyHandler } from "aws-lambda";
-
 import { v4 as uuidv4 } from "uuid";
-import { makeErrorResponse, makeSuccessResponse } from "../utils/makeResponses";
-import { TimeSlot } from "../types";
 import {
+  addMenteeToTimeSlot as repositoryAddMenteeToTimeSlot,
   createTimeSlot,
-  getTimeSlotsByUserId,
-  getTimeSlotById as repositoryGetTimeSlotById,
+  deleteTimeSlot as repositoryDeleteTimeSlot,
   fillTimeSlot,
   freeTimeSlot,
-  addMenteeToTimeSlot as repositoryAddMenteeToTimeSlot,
-  deleteTimeSlot as repositoryDeleteTimeSlot,
+  getTimeSlotById as repositoryGetTimeSlotById,
+  getTimeSlotsByUserId,
 } from "../repository/timeSlot";
-import { isPastDate, isSameDate, addTime } from "../utils/dates";
+import { TimeSlot } from "../types";
+import { addTime, isPastDate, isSameDate } from "../utils/dates";
+import { makeErrorResponse, makeSuccessResponse } from "../utils/makeResponses";
 
 export const addTimeSlot: APIGatewayProxyHandler = async (event) => {
   const { user_id, slot_date } = JSON.parse(event.body);
@@ -23,20 +22,24 @@ export const addTimeSlot: APIGatewayProxyHandler = async (event) => {
 
   const date = new Date(slot_date);
 
-  if(isPastDate(date)) {
+  if (isPastDate(date)) {
     return makeErrorResponse(400, "-114");
   }
 
-  const {Items} = await getTimeSlotsByUserId(user_id)
+  const { Items } = await getTimeSlotsByUserId(user_id);
 
-  const timeslot = Items.find(timeslot => {
-    const isSame = isSameDate(new Date(timeslot.date), date)
-    const timeslotFortyFiveBefore = addTime(new Date(timeslot.date), 45, "minutes")
-    const hasSameFortyFiveBefore = isPastDate(timeslotFortyFiveBefore, date)
-    return !isSame && !hasSameFortyFiveBefore
-  })
+  const timeslot = Items.find((timeslot) => {
+    const isSame = isSameDate(new Date(timeslot.date), date);
+    const timeslotFortyFiveBefore = addTime(
+      new Date(timeslot.date),
+      45,
+      "minutes"
+    );
+    const hasSameFortyFiveBefore = isPastDate(timeslotFortyFiveBefore, date);
+    return !isSame && !hasSameFortyFiveBefore;
+  });
 
-  if(timeslot) {
+  if (timeslot) {
     return makeErrorResponse(400, "-115");
   }
 
@@ -131,7 +134,9 @@ export const addMenteeToTimeSlot: APIGatewayProxyHandler = async (event) => {
     return makeErrorResponse(400, "-311");
   }
 
-  const { mentee_username, mentee_id, mentorship_token } = JSON.parse(event.body);
+  const { mentee_username, mentee_id, mentorship_token } = JSON.parse(
+    event.body
+  );
 
   if (!mentee_username || !mentee_id || !mentorship_token) {
     return makeErrorResponse(400, "-311");

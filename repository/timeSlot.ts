@@ -1,8 +1,6 @@
 import { TABLE_NAME_TIME_SLOT } from "../constants";
-
-import { get, put, scan, update, deleteItem } from "../utils/dynamoDb";
-
 import type { TimeSlot } from "../types";
+import { deleteItem, get, put, scan, update } from "../utils/dynamoDb";
 import { toInt } from "../utils/toInt";
 
 export function getTimeSlotById(id: string) {
