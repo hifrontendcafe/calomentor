@@ -2,11 +2,13 @@ import * as dayjs from "dayjs";
 import * as timezone from "dayjs/plugin/timezone";
 import * as utc from "dayjs/plugin/utc";
 import * as localizedFormat from "dayjs/plugin/localizedFormat";
+import * as isBetween from "dayjs/plugin/isBetween";
 import "dayjs/locale/es-mx";
 
 dayjs.extend(localizedFormat);
 dayjs.extend(utc);
 dayjs.extend(timezone);
+dayjs.extend(isBetween);
 
 const timeZone: string = "America/Montevideo";
 const locale: string = "es-mx";
@@ -29,6 +31,14 @@ export const isFutureDate = (date: Date, dateToCompare?: Date): boolean => {
 
 export const isSameDate = (dateOne: Date, dateTwo: Date): boolean => {
   return dayjs(dateOne).isSame(dayjs(dateTwo));
+};
+
+export const dateIsBetween = (
+  dateToCompare: Date,
+  dateOne: Date,
+  dateTwo: Date
+): boolean => {
+  return dayjs(dateToCompare).isBetween(dateOne, dateTwo);
 };
 
 export const addTime = (

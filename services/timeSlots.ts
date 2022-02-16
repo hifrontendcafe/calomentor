@@ -7,10 +7,10 @@ import {
   fillTimeSlot,
   freeTimeSlot,
   getTimeSlotById as repositoryGetTimeSlotById,
-  getTimeSlotsByUserId,
+  getTimeSlotsByUserId
 } from "../repository/timeSlot";
 import { TimeSlot } from "../types";
-import { addTime, isPastDate, isSameDate } from "../utils/dates";
+import { addTime, dateIsBetween, isPastDate, isSameDate } from "../utils/dates";
 import { makeErrorResponse, makeSuccessResponse } from "../utils/makeResponses";
 
 export const addTimeSlot: APIGatewayProxyHandler = async (event) => {
@@ -35,8 +35,13 @@ export const addTimeSlot: APIGatewayProxyHandler = async (event) => {
       45,
       "minutes"
     );
-    const hasSameFortyFiveBefore = isPastDate(timeslotFortyFiveBefore, date);
-    return !isSame && !hasSameFortyFiveBefore;
+    const hasSameBetween = dateIsBetween(
+      date,
+      new Date(timeslot.date),
+      timeslotFortyFiveBefore
+    );
+
+    return !isSame && hasSameBetween;
   });
 
   if (timeslot) {
