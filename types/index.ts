@@ -55,7 +55,7 @@ export interface User {
   skills?: string[];
   isActive: boolean;
   lastActivateBy: string; // discord id
-  timezone: string;
+  user_timezone: string;
   userToken: string;
 }
 
@@ -68,7 +68,7 @@ export interface Warning {
   warn_type: WARN;
   warn_cause: string;
   mentorship_id: string;
-  status: WARNSTATE;
+  warning_status: WARNSTATE;
   forgive_cause?: string;
   warning_author_id: string;
   warning_author_name: string;
