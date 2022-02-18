@@ -49,6 +49,7 @@ export const RESPONSE_CODES = {
     "Bad Request: already has a timeslot with this date or has another slot in the next 45 minutes.",
   "-116": "Bad Request: user is not an admin",
   "-117": "Bad Request: must to provide a valid userToken",
+  "-118": "Mentee has warnigns",
   "-200": "Unable to create user. User already exists.",
   "-201": "Unable to create user.",
   "-202": "There is no mentors",

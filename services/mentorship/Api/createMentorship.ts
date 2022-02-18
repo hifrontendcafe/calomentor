@@ -9,6 +9,7 @@ import {
   getTimeSlotById,
 } from "../../../repository/timeSlot";
 import { getUserById } from "../../../repository/user";
+import { getWarningsData } from "../../../repository/warning";
 import { Mentorship } from "../../../types";
 import { toDateString, toTimeString } from "../../../utils/dates";
 import { createICS } from "../../../utils/ical";
@@ -33,6 +34,12 @@ const createMentorshipAPI: APIGatewayProxyHandler = async (event) => {
 
   if (!mentor_id || !mentee_id || !mentee_email || !time_slot_id) {
     return makeErrorResponse(500, "-100");
+  }
+
+  const warning = await getWarningsData(mentee_id);
+
+  if (warning.Items.length > 0) {
+    return makeErrorResponse(500, "-118");
   }
 
   const mentorship: Mentorship = {
@@ -69,7 +76,7 @@ const createMentorshipAPI: APIGatewayProxyHandler = async (event) => {
     const mentorshipDate = new Date(date);
 
     const {
-      Item: { email, full_name, timezone },
+      Item: { email, full_name, user_timezone },
     } = await getUserById(mentor_id);
 
     if (!email && !full_name) {
@@ -148,7 +155,7 @@ const createMentorshipAPI: APIGatewayProxyHandler = async (event) => {
         menteeName: mentee_name,
         menteeEmail: mentee_email,
         menteeTimezone: mentee_timezone,
-        mentorTimezone: timezone,
+        mentorTimezone: user_timezone,
         mentorName: full_name,
         mentorEmail: email,
         mentorshipDate,
