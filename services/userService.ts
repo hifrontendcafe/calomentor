@@ -49,7 +49,7 @@ export const createUserService: APIGatewayProxyHandler = async (event) => {
     skills,
     isActive: false,
     lastActivateBy: "",
-    timezone,
+    user_timezone: timezone,
     userToken: uuidv4(),
   };
 
@@ -157,7 +157,7 @@ export const updateUserByIdService: APIGatewayProxyHandler = async (event) => {
       "role",
       "links",
       "skills",
-      "timezone",
+      "user_timezone",
     ]);
   } catch (err) {
     return makeErrorResponse(400, "-317", err);

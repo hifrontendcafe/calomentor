@@ -7,7 +7,7 @@ import { createMentorship } from "../../../repository/mentorship";
 import {
   addMenteeToTimeSlot,
   fillTimeSlot,
-  getTimeSlotById,
+  getTimeSlotById
 } from "../../../repository/timeSlot";
 import { getUserById } from "../../../repository/user";
 import { getWarningsData } from "../../../repository/warning";
@@ -16,7 +16,7 @@ import { toDateString, toTimeString } from "../../../utils/dates";
 import { createICS } from "../../../utils/ical";
 import {
   makeErrorResponse,
-  makeSuccessResponse,
+  makeSuccessResponse
 } from "../../../utils/makeResponses";
 import { sendEmail } from "../../../utils/sendEmail";
 import { getToken } from "../../../utils/token";
@@ -64,16 +64,20 @@ const createMentorshipAPI: APIGatewayProxyHandler = async (event) => {
     feedback_stars: null,
     feedback_mentee_private: null,
     warning_info: null,
-    mentor_timezone: null
+    mentor_timezone: null,
   };
 
   try {
     const {
-      Item: { date },
+      Item: { date, is_occupied },
     } = await getTimeSlotById(mentorship.time_slot_id);
 
     if (!date) {
       return makeErrorResponse(500, "-103");
+    }
+
+    if (is_occupied) {
+      return makeErrorResponse(403, "-119");
     }
 
     const mentorshipDate = new Date(date);
@@ -93,7 +97,7 @@ const createMentorshipAPI: APIGatewayProxyHandler = async (event) => {
       mentorshipId: mentorship.id,
       date: mentorshipDate.getTime(),
     });
-    mentorship.mentor_timezone = user_timezone
+    mentorship.mentor_timezone = user_timezone;
 
     await createMentorship(mentorship);
 
@@ -151,7 +155,7 @@ const createMentorshipAPI: APIGatewayProxyHandler = async (event) => {
 
     const AWS = require("aws-sdk");
     const stepfunctions: StepFunctions = new AWS.StepFunctions();
-    const params = {
+    const params: StepFunctions.StartExecutionInput = {
       // This string is the address where we call the init of the createMentorship state machine.
       stateMachineArn: process.env.STATE_MACHINE_ARN,
       // This is the input that grab the init of the state machine for work from there
@@ -171,14 +175,12 @@ const createMentorshipAPI: APIGatewayProxyHandler = async (event) => {
     };
 
     // The actual execution with the paramaters that we declare before
-    stepfunctions.startExecution(params, (err, data) => {
-      if (err) {
-        return makeErrorResponse(500, "-102", err);
-      }
-      return makeSuccessResponse(data, "100");
-    });
+    const startSateMachine = await stepfunctions
+      .startExecution(params)
+      .promise();
+    return makeSuccessResponse(startSateMachine, "100");
   } catch (error) {
-    return makeErrorResponse(500, "-102", error);
+    return makeErrorResponse(500, "-102", error.stack);
   }
 };
 
