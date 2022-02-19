@@ -1,5 +1,5 @@
 import { TABLE_NAME_USER } from "../constants";
-
+import type { Role, User } from "../types";
 import {
   deleteItem,
   generateUpdateQuery,
@@ -8,8 +8,6 @@ import {
   scan,
   update,
 } from "../utils/dynamoDb";
-
-import type { User, Role } from "../types";
 
 export function createUser(user: User) {
   return put<User>({
@@ -28,7 +26,7 @@ export function getUsers(filters: UserFilters = {}) {
     TableName: TABLE_NAME_USER,
     ExpressionAttributeNames: { "#role": "role" },
     ProjectionExpression:
-      "id, discord_username, full_name, about_me, email, url_photo, #role, links, skills, isActive, timezone, userToken, lastActivateBy",
+      "id, discord_username, full_name, about_me, email, url_photo, #role, links, skills, isActive, user_timezone, userToken, lastActivateBy",
   };
 
   if (filters.role) {

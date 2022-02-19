@@ -45,9 +45,11 @@ export const RESPONSE_CODES = {
   "-112": "The mentorship already has a feedback",
   "-113": "Bad Request: user_id, date y slots are required",
   "-114": "Bad Request: date is past",
-  "-115": "Bad Request: already has a timeslot with this date or has another slot in the next 45 minutes.",
+  "-115":
+    "Bad Request: already has a timeslot with this date or has another slot in the next 45 minutes.",
   "-116": "Bad Request: user is not an admin",
   "-117": "Bad Request: must to provide a valid userToken",
+  "-118": "Mentee has warnigns",
   "-200": "Unable to create user. User already exists.",
   "-201": "Unable to create user.",
   "-202": "There is no mentors",
@@ -67,7 +69,7 @@ export const RESPONSE_CODES = {
   "-310": "Bad Request: Missing params. The required params are id and slot",
   "-311": "Bad Request: Missing params. id is required",
   "-312":
-    "Bad Request: Missing params. The required params are mentee_username, mentee_id and tokenForCancel",
+    "Bad Request: Missing params. The required params are mentee_username, mentee_id and mentorship_token",
   "-313": "There was an error trying to delete the slot",
   "-314": "Time slot not found",
   "-315": "Bad Request: id is required or is not a string.",
@@ -91,4 +93,4 @@ export const RESPONSE_CODES = {
   "301": "There is no warnings for this mentee",
   "302": "Warnings",
   "303": "Warning deleted",
-};
+} as const;

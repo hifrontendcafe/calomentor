@@ -1,19 +1,18 @@
 import { APIGatewayProxyHandler } from "aws-lambda";
+import { FILTERDATES } from "../../../constants";
 import {
   getAllMentorships,
   getMentorshipsByMentorId,
-} from "../../repository/mentorship";
-import { getTimeSlotById } from "../../repository/timeSlot";
+} from "../../../repository/mentorship";
+import { getTimeSlotById } from "../../../repository/timeSlot";
+import { getUserByToken } from "../../../repository/user";
+import { Mentorship } from "../../../types";
+import { isFutureDate, isPastDate } from "../../../utils/dates";
 import {
   makeErrorResponse,
   makeSuccessResponse,
-} from "../../utils/makeResponses";
-import { Mentorship } from "../../types";
-
-import { FILTERDATES } from "../../constants";
-import { isAdmin } from "../../utils/validations";
-import { getUserByToken } from "../../repository/user";
-import { isFutureDate, isPastDate } from "../../utils/dates";
+} from "../../../utils/makeResponses";
+import { isAdmin } from "../../../utils/validations";
 
 const getMentorships: APIGatewayProxyHandler = async (event) => {
   const { pathParameters, queryStringParameters } = event;

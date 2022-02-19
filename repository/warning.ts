@@ -1,6 +1,5 @@
 import { TABLE_NAME_WARNINGS } from "../constants";
 import { Warning } from "../types";
-
 import { generateUpdateQuery, put, scan, update } from "../utils/dynamoDb";
 
 export function addWarning(warning: Warning) {
@@ -22,7 +21,7 @@ export function getWarningsData(id?: string) {
     };
   } else {
     query.ProjectionExpression =
-      "id, mentee_id, warn_type, warn_cause, mentorship_id, warning_date, forgive_cause, mentor_name, mentee_name, status, warning_author_id, warning_author_name";
+      "id, mentee_id, warn_type, warn_cause, mentorship_id, warning_date, forgive_cause, mentor_name, mentee_name, warning_status, warning_author_id, warning_author_name";
   }
 
   return scan<Warning>(query);

@@ -19,24 +19,24 @@ import {
 } from "./services/userService";
 
 import {
-  cancelMentorship,
-  createMentorship,
-  feedbackFormMentorship,
-  reminderMentorship,
-  updateRoleMentorship,
-  checkCancelFunction,
-  confirmationMentorship,
-  sendFeedbackFormMentorship,
-} from "./services/mentorshipService";
-
-import {
   addWarningService,
   forgiveWarning,
   getAllWarnings,
   getWarnings,
 } from "./services/warningsService";
 
-import { getMentorships } from "./services/mentorship";
+import {
+  getMentorships,
+  confirmMentorship,
+  cancelMentorship,
+  feedbackMentorship,
+  createMentorshipApi,
+  createMentorship,
+  addRoleMentorship,
+  reminderMentorship,
+  feedbackFormMentorship,
+  checkCancelMentorship
+} from "./services/mentorship";
 
 // User functions handlers
 
@@ -78,6 +78,12 @@ export const updateUserById: Handler = (
 
 // Mentorships functions handlers
 
+export const mentorshipCreateAPI: Handler = (
+  event: any,
+  context: Context,
+  callback: Callback<any>
+) => createMentorshipApi(event, context, callback);
+
 export const mentorshipCreate: Handler = (
   event: any,
   context: Context,
@@ -94,7 +100,7 @@ export const checkCancel: Handler = (
   event: any,
   context: Context,
   callback: Callback<any>
-) => checkCancelFunction(event, context, callback);
+) => checkCancelMentorship(event, context, callback);
 
 export const mentorshipReminder: Handler = (
   event: any,
@@ -102,29 +108,29 @@ export const mentorshipReminder: Handler = (
   callback: Callback<any>
 ) => reminderMentorship(event, context, callback);
 
-export const mentorshipUpdateRole: Handler = (
+export const mentorshipAddRole: Handler = (
   event: any,
   context: Context,
   callback: Callback<any>
-) => updateRoleMentorship(event, context, callback);
+) => addRoleMentorship(event, context, callback);
 
 export const mentorshipFeedbackForm: Handler = (
   event: any,
   context: Context,
   callback: Callback<any>
-) => feedbackFormMentorship(event, context, callback);
+) => feedbackMentorship(event, context, callback);
 
 export const mentorshipFeedbackSend: Handler = (
   event: any,
   context: Context,
   callback: Callback<any>
-) => sendFeedbackFormMentorship(event, context, callback);
+) => feedbackFormMentorship(event, context, callback);
 
 export const mentorshipConfirmation: Handler = (
   event: any,
   context: Context,
   callback: Callback<any>
-) => confirmationMentorship(event, context, callback);
+) => confirmMentorship(event, context, callback);
 
 export const getAllMentorships: Handler = (
   event: any,

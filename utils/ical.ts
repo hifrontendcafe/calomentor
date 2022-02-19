@@ -64,8 +64,8 @@ export function createICS(
       email: "frontendcafe@gmail.com",
       mailto: "frontendcafe@gmail.com"
     },
-    status: mentorshipStatus,
-    timezone: data.timezone,
+    priority: 1,
+    timezone: data.timezone ?? "America/Buenos_Aires",
     start: date,
     end: addTime(date, 1, "hours"),
     summary: `Mentoría con ${mentorshipWith}`,
