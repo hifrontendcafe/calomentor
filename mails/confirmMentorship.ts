@@ -1,12 +1,22 @@
-interface FeedbackMailParams {
+interface ConfirmMentorshipMailParams {
+  mentorName: string;
   menteeName: string;
-  feedbackLink: string;
+  date: string;
+  time: string;
+  forMentor: boolean;
+  cancelLink: string;
+  confirmationLink: string;
 }
 
-export const feedbackMail = ({
+export const confirmMentorshipMail = ({
+  mentorName,
   menteeName,
-  feedbackLink,
-}: FeedbackMailParams) => {
+  date,
+  time,
+  forMentor,
+  cancelLink,
+  confirmationLink,
+}: ConfirmMentorshipMailParams) => {
   return `<!doctype html>
   <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
   <head>
@@ -134,7 +144,12 @@ export const feedbackMail = ({
                       <tr>
                         <td align="left" style="font-size:0px;padding:0px 20px;word-break:break-word;">
                           <div style="font-family:Lexend Deca, sans-serif;font-size:18px;font-weight:500;line-height:1.5;text-align:left;color:#27272A;">
-                            Hola ${menteeName}, una vez finalizada tu mentoria te pedimos que comentes tu experiencia sobre la misma, podés hacerlo en el siguiente formulario.
+                          Hola ${
+                            forMentor ? mentorName : menteeName
+                          }, te recordamos que tenés una
+                          mentoría con ${
+                            forMentor ? menteeName : mentorName
+                          }. La misma se llevara a cabo en el servidor de FrontendCafé.
                           </div>
                         </td>
                       </tr>
@@ -149,12 +164,39 @@ export const feedbackMail = ({
                         </td>
                       </tr>
                       <tr>
+                      <td align="left" style="font-size:0px;padding:0px 20px;word-break:break-word;">
+                        <div style="font-family:Lexend Deca, sans-serif;font-size:18px;font-weight:700;line-height:1;text-align:left;color:#27272A;">Día: ${date}.</div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="font-size:0px;word-break:break-word;">
+                        <div style="height:10px;line-height:10px;">&#8202;</div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td align="left" style="font-size:0px;padding:0px 20px;word-break:break-word;">
+                        <div style="font-family:Lexend Deca, sans-serif;font-size:18px;font-weight:700;line-height:1;text-align:left;color:#27272A;">Hora: ${time}.</div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="font-size:0px;word-break:break-word;">
+                        <div style="height:60px;line-height:60px;">&#8202;</div>
+                      </td>
+                    </tr>
+                      <tr>
                         <td align="left" vertical-align="middle" class="btn" style="font-size:0px;word-break:break-word;">
                           <table border="0" cellpadding="0" cellspacing="20px" role="presentation" style="border-collapse:separate;line-height:100%;">
+                          <tr>
+                          <td align="center" bgcolor="#CC4A4A" role="presentation" style="border:0;border-radius:3px;cursor:auto;mso-padding-alt:10px 25px;background:#CC4A4A;vertical-align: middle;" valign="middle">
+                            <a style="display:inline-block;background:#CC4A4A;color:#fff;font-family:Lexend Deca, sans-serif;font-size:18px;font-weight:500;line-height:100%;margin:0;text-decoration:none;text-transform:none;padding:10px 25px;mso-padding-alt:0px;border-radius:3px;width: 150px;height: 20px;text-decoration: none;color: #fff" href="${cancelLink}">Cancelar</a>
+                          </td>
+                        </tr>
+                        <tr>
+                        <td align="center" bgcolor="#00876D" role="presentation" style="border:0;border-radius:3px;cursor:auto;mso-padding-alt:10px 25px;background:#00876D;vertical-align: middle;" valign="middle">
+                          <a style="display:inline-block;background:#00876D;color:#fff;font-family:Lexend Deca, sans-serif;font-size:18px;font-weight:500;line-height:100%;margin:0;text-decoration:none;text-transform:none;padding:10px 25px;mso-padding-alt:0px;border-radius:3px;width: 150px;height: 20px;text-decoration: none;color: #fff" href="${confirmationLink}">Confirmar</a>
+                        </td>
+                      </tr>
                             <tr>
-                              <td align="center" bgcolor="#00876D" role="presentation" style="border:none;border-radius:3px;cursor:auto;mso-padding-alt:10px 25px;background:#00876D; vertical-align: middle;" valign="middle">
-                                <a style=";display:inline-block;background:#00876D;color:#ffffff;font-family:Lexend Deca, sans-serif;font-size:18px;font-weight:500;line-height:100%;margin:0;text-decoration:none;text-transform:none;padding:10px 25px;mso-padding-alt:0px;border-radius:3px;width: 150px;height: 20px;text-decoration: none;color: #ffffff;" href="${feedbackLink}">Déjanos feedback</a>
-                              </td>
                               <td align="center" bgcolor="#ffffff" role="presentation" style="border:1px solid rgba(0, 0, 0, 0.2);border-radius:3px;cursor:auto;mso-padding-alt:10px 25px;background:#ffffff;vertical-align: middle;" valign="middle">
                                 <a style="display:inline-block;background:#ffffff;color:#27272A;font-family:Lexend Deca, sans-serif;font-size:18px;font-weight:500;line-height:100%;margin:0;text-decoration:none;text-transform:none;padding:10px 25px;mso-padding-alt:0px;border-radius:3px;width: 150px;height: 20px;text-decoration: none;color: #27272A" href="https://discord.gg/frontendcafe">Ingresá a Discord</a>
                               </td>
