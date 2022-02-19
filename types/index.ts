@@ -84,6 +84,7 @@ export interface MentorshipStateMachine {
   mentorTimezone: string;
   mentorName: string;
   mentorEmail: string;
+  mentorshipId: string;
 }
 
 export interface MentorshipResponse {

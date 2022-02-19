@@ -10,7 +10,7 @@ import {
   removeMenteeFromTimeSlot,
 } from "../../../repository/timeSlot";
 import { toDateString, toTimeString } from "../../../utils/dates";
-import { createICS } from "../../../utils/ical";
+import { createICS, ICalStatus } from "../../../utils/ical";
 import {
   makeErrorResponse,
   makeSuccessResponse,
@@ -43,8 +43,15 @@ const cancelMentorship: APIGatewayProxyHandler = async (event) => {
       ["mentorship_status", "cancel_cause", "who_cancel"]
     );
 
-    const { mentee_name, mentee_email, mentor_name, mentor_email, mentee_timezone, mentor_timezone } =
-      mentorshipUpdated.Attributes;
+    const {
+      mentee_name,
+      mentee_email,
+      mentor_name,
+      mentor_email,
+      mentee_timezone,
+      mentor_timezone,
+      id,
+    } = mentorshipUpdated.Attributes;
 
     const mentorshipDate = new Date(tokenData.date);
 
@@ -60,12 +67,13 @@ const cancelMentorship: APIGatewayProxyHandler = async (event) => {
       `Hola ${mentee_name}!`,
       htmlMentee,
       createICS(mentorshipDate, mentor_name, {
+        mentorshipId: id,
         menteeEmail: mentee_email,
         menteeName: mentee_name,
         mentorEmail: mentor_email,
         mentorName: mentor_name,
         timezone: mentee_timezone,
-      })
+      }, ICalStatus.CANCEL)
     );
     const htmlMentor = cancelMail({
       mentorName: mentor_name,
@@ -79,12 +87,13 @@ const cancelMentorship: APIGatewayProxyHandler = async (event) => {
       `Hola ${mentor_name}!`,
       htmlMentor,
       createICS(mentorshipDate, mentee_name, {
+        mentorshipId: id,
         menteeEmail: mentee_email,
         menteeName: mentee_name,
         mentorEmail: mentor_email,
         mentorName: mentor_name,
         timezone: mentor_timezone,
-      })
+      }, ICalStatus.CANCEL)
     );
 
     return makeSuccessResponse(mentorshipUpdated.Attributes, "0");

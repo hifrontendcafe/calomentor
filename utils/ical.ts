@@ -1,7 +1,14 @@
-import ical from "ical-generator";
+import ical, {
+  ICalAttendeeRole,
+  ICalAttendeeStatus,
+  ICalAttendeeType,
+  ICalCalendarMethod,
+  ICalEventStatus,
+} from "ical-generator";
 import { addTime } from "./dates";
 
 interface IcalData {
+  mentorshipId: string;
   mentorName: string;
   menteeName: string;
   mentorEmail: string;
@@ -9,26 +16,49 @@ interface IcalData {
   timezone: string;
 }
 
+export enum ICalStatus {
+  REQUEST = ICalCalendarMethod.REQUEST,
+  CANCEL = ICalCalendarMethod.CANCEL,
+}
+
 export function createICS(
   date: Date,
   mentorshipWith: string,
-  data: IcalData
+  data: IcalData,
+  type: ICalStatus = ICalStatus.REQUEST
 ): string {
+  const attendeeStatus =
+    type === ICalStatus.CANCEL
+      ? ICalAttendeeStatus.DECLINED
+      : ICalAttendeeStatus.ACCEPTED;
   const calendar = ical();
+  calendar.method(ICalCalendarMethod.REQUEST);
   calendar.createEvent({
+    id: data.mentorshipId,
     attendees: [
       {
         name: data.mentorName,
         email: data.mentorEmail,
+        mailto: data.mentorEmail,
+        role: ICalAttendeeRole.REQ,
+        rsvp: true,
+        type: ICalAttendeeType.INDIVIDUAL,
+        status: attendeeStatus,
       },
       {
         name: data.menteeName,
-        email: data.mentorEmail,
+        email: data.menteeEmail,
+        mailto: data.menteeEmail,
+        role: ICalAttendeeRole.REQ,
+        rsvp: true,
+        type: ICalAttendeeType.INDIVIDUAL,
+        status: attendeeStatus,
       },
     ],
     organizer: {
-      name: "FrontendCafé",
-      email: "frontendcafe@gmail.com",
+      name: data.mentorName,
+      email: data.mentorEmail,
+      mailto: data.mentorEmail,
     },
     priority: 1,
     timezone: data.timezone ?? "America/Buenos_Aires",
