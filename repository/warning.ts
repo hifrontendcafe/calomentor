@@ -1,6 +1,5 @@
 import { TABLE_NAME_WARNINGS } from "../constants";
 import { Warning } from "../types";
-
 import { generateUpdateQuery, put, scan, update } from "../utils/dynamoDb";
 
 export function addWarning(warning: Warning) {

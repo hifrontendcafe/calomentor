@@ -1,5 +1,5 @@
 import { TABLE_NAME_USER } from "../constants";
-
+import type { Role, User } from "../types";
 import {
   deleteItem,
   generateUpdateQuery,
@@ -8,8 +8,6 @@ import {
   scan,
   update,
 } from "../utils/dynamoDb";
-
-import type { User, Role } from "../types";
 
 export function createUser(user: User) {
   return put<User>({

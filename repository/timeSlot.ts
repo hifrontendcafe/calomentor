@@ -1,8 +1,6 @@
 import { TABLE_NAME_TIME_SLOT } from "../constants";
-
-import { get, put, scan, update, deleteItem } from "../utils/dynamoDb";
-
 import type { TimeSlot } from "../types";
+import { deleteItem, get, put, scan, update } from "../utils/dynamoDb";
 import { toInt } from "../utils/toInt";
 
 export function getTimeSlotById(id: string) {
@@ -62,7 +60,7 @@ interface UpdateIsOccupiedParams {
 interface Mentee {
   id: string;
   username: string;
-  tokenForCancel: string;
+  mentorship_token: string;
 }
 
 interface UpdateMenteeParams {
@@ -92,24 +90,24 @@ function updateTimeSlot(id: string, payload: UpdateParams) {
       params.ExpressionAttributeValues = {
         ":mentee_id": payload.mentee.id,
         ":mentee_username": payload.mentee.username,
-        ":tokenForCancel": payload.mentee.tokenForCancel,
+        ":mentorship_token": payload.mentee.mentorship_token,
       };
 
       params.UpdateExpression = `SET mentee_id = :mentee_id,
              mentee_username = :mentee_username,
-             tokenForCancel = :tokenForCancel`;
+             mentorship_token = :mentorship_token`;
       break;
 
     case "REMOVE_MENTEE":
       params.ExpressionAttributeValues = {
         ":mentee_id": "",
         ":mentee_username": "",
-        ":tokenForCancel": "",
+        ":mentorship_token": "",
       };
 
       params.UpdateExpression = `SET mentee_id = :mentee_id,
                mentee_username = :mentee_username,
-               tokenForCancel = :tokenForCancel`;
+               mentorship_token = :mentorship_token`;
       break;
 
     default:

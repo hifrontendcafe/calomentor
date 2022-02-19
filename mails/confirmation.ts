@@ -1,4 +1,20 @@
-export const feedbackMail = ({ menteeName, mentorName, feedbackLink }) => {
+interface ConfirmationMailParams {
+  mentorName: string;
+  menteeName: string;
+  date: string;
+  time: string;
+  cancelLink: string;
+  forMentor: boolean;
+}
+
+export const confirmationMail = ({
+  mentorName,
+  menteeName,
+  date,
+  time,
+  cancelLink,
+  forMentor,
+}: ConfirmationMailParams) => {
   return `<!DOCTYPE html>
   <html
     xmlns="http://www.w3.org/1999/xhtml"
@@ -285,8 +301,17 @@ export const feedbackMail = ({ menteeName, mentorName, feedbackLink }) => {
                                 text-align: justify;
                                 color: #000000;
                               "
-                            >
-                            Hola ${menteeName}, tuviste una mentoría con ${mentorName} que se llevara a cabo en el servidor de FrontendCafé, te pedimos tomarte unos minutos y dejarnos feedback sobre la misma <a href="${feedbackLink}">aquí</a>.
+                            > ${
+                              forMentor
+                                ? `Hola ${mentorName}, ${menteeName} ha agendado una
+                            mentoría para el día ${date} a las ${time} hs
+                            (hora Argentina). La misma se
+                            llevará a cabo en el servidor de FrontendCafé.`
+                                : `Hola ${menteeName}, muchas gracias por agendar una
+                            mentoría el día ${date} a las ${time} hs
+                            (hora Argentina) con ${mentorName}. La misma se
+                            llevará a cabo en el servidor de FrontendCafé.`
+                            }
                             </div>
                           </td>
                         </tr>
@@ -308,7 +333,30 @@ export const feedbackMail = ({ menteeName, mentorName, feedbackLink }) => {
                                 color: #000000;
                               "
                             >
-                            Podés acceder al discord <a href="https://discord.gg/frontendcafe">aquí</a>.
+                              Podés acceder al discord <a href="https://discord.gg/frontendcafe">aquí</a>.
+                            </div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td
+                            align="justify"
+                            style="
+                              font-size: 0px;
+                              padding: 10px 40px;
+                              word-break: break-word;
+                            "
+                          >
+                            <div
+                              style="
+                                font-family: Roboto, sans-serif;
+                                font-size: 15px;
+                                line-height: 22px;
+                                text-align: justify;
+                                color: #000000;
+                              "
+                            >
+                              Si no podés asistir podés cancelar tu mentoría desde
+                              <a href="${cancelLink}">aquí</a>.
                             </div>
                           </td>
                         </tr>

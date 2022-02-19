@@ -1,15 +1,15 @@
 import { APIGatewayProxyHandler } from "aws-lambda";
-import { STATUS, WARNSTATE, WARN } from "../constants";
 import { v4 as uuidv4 } from "uuid";
-import { Warning } from "../types";
+import { STATUS, WARN, WARNSTATE } from "../constants";
+import { getMentorshipById, updateMentorship } from "../repository/mentorship";
+import { getUserById } from "../repository/user";
 import {
   addWarning,
   getWarningsData,
   updateWarning,
 } from "../repository/warning";
-import { getMentorshipById, updateMentorship } from "../repository/mentorship";
+import { Warning } from "../types";
 import { makeErrorResponse, makeSuccessResponse } from "../utils/makeResponses";
-import { getUserById } from "../repository/user";
 
 export const addWarningService: APIGatewayProxyHandler = async (event) => {
   const { mentee_id, warn_type, warn_cause, mentorship_id, warning_author_id } =

@@ -1,11 +1,22 @@
-export const confirmationMail = ({
+interface ReminderMailParams {
+  mentorName: string;
+  menteeName: string;
+  date: string;
+  time: string;
+  cancelLink: string;
+  confirmationLink: string;
+  forMentor: boolean;
+}
+
+export const reminderMail = ({
   mentorName,
   menteeName,
   date,
   time,
   cancelLink,
+  confirmationLink,
   forMentor,
-}) => {
+}: ReminderMailParams) => {
   return `<!DOCTYPE html>
   <html
     xmlns="http://www.w3.org/1999/xhtml"
@@ -292,17 +303,14 @@ export const confirmationMail = ({
                                 text-align: justify;
                                 color: #000000;
                               "
-                            > ${
-                              forMentor
-                                ? `Hola ${mentorName}, ${menteeName} ha agendado una
-                            mentoría para el día ${date} a las ${time} hs
-                            (hora Argentina). La misma se
-                            llevará a cabo en el servidor de FrontendCafé.`
-                                : `Hola ${menteeName}, muchas gracias por agendar una
+                            >
+                            Hola ${
+                              forMentor ? mentorName : menteeName
+                            }, te recordamos que tenés una
                             mentoría el día ${date} a las ${time} hs
-                            (hora Argentina) con ${mentorName}. La misma se
-                            llevará a cabo en el servidor de FrontendCafé.`
-                            }
+                            (hora Argentina) con ${
+                              forMentor ? menteeName : mentorName
+                            }. La misma se llevara a cabo en el servidor de FrontendCafé.
                             </div>
                           </td>
                         </tr>
@@ -324,10 +332,36 @@ export const confirmationMail = ({
                                 color: #000000;
                               "
                             >
-                              Podés acceder al discord <a href="https://discord.gg/frontendcafe">aquí</a>.
+                            Podés acceder al discord <a href="https://discord.gg/frontendcafe">aquí</a>.
                             </div>
                           </td>
                         </tr>
+                        ${
+                          !forMentor &&
+                          `<tr>
+                          <td
+                            align="justify"
+                            style="
+                              font-size: 0px;
+                              padding: 10px 40px;
+                              word-break: break-word;
+                            "
+                          >
+                            <div
+                              style="
+                                font-family: Roboto, sans-serif;
+                                font-size: 15px;
+                                line-height: 22px;
+                                text-align: justify;
+                                color: #000000;
+                              "
+                            >
+                            Debes confirmar la asistencia a tu mentoría desde
+                            <a href="${confirmationLink}">aquí</a>.
+                            </div>
+                          </td>
+                        </tr>`
+                        }
                         <tr>
                           <td
                             align="justify"
@@ -346,8 +380,8 @@ export const confirmationMail = ({
                                 color: #000000;
                               "
                             >
-                              Si no podés asistir podés cancelar tu mentoría desde
-                              <a href="${cancelLink}">aquí</a>.
+                            Si no podés asistir podés cancelar tu mentoría desde
+                            <a href="${cancelLink}">aquí</a>.
                             </div>
                           </td>
                         </tr>

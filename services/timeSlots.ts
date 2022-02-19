@@ -1,25 +1,19 @@
 import type { APIGatewayProxyHandler } from "aws-lambda";
-
 import { v4 as uuidv4 } from "uuid";
-import { makeErrorResponse, makeSuccessResponse } from "../utils/makeResponses";
-import { TimeSlot } from "../types";
 import {
+  addMenteeToTimeSlot as repositoryAddMenteeToTimeSlot,
   createTimeSlot,
-  getTimeSlotsByUserId,
-  getTimeSlotById as repositoryGetTimeSlotById,
+  deleteTimeSlot as repositoryDeleteTimeSlot,
   fillTimeSlot,
   freeTimeSlot,
-  addMenteeToTimeSlot as repositoryAddMenteeToTimeSlot,
-  deleteTimeSlot as repositoryDeleteTimeSlot,
+  getTimeSlotById as repositoryGetTimeSlotById,
+  getTimeSlotsByUserId
 } from "../repository/timeSlot";
-import {
-  isPastDate,
-  isSameDate,
-  addTime,
-  dateIsBetween,
-} from "../utils/dates";
+import { TimeSlot } from "../types";
+import { addTime, dateIsBetween, isPastDate, isSameDate } from "../utils/dates";
+import { makeErrorResponse, makeSuccessResponse } from "../utils/makeResponses";
 
-export const addTimeSlot: APIGatewayProxyHandler = async (event: any) => {
+export const addTimeSlot: APIGatewayProxyHandler = async (event) => {
   const { user_id, slot_date } = JSON.parse(event.body);
 
   if (!user_id && !slot_date) {
@@ -61,7 +55,7 @@ export const addTimeSlot: APIGatewayProxyHandler = async (event: any) => {
     is_occupied: false,
     mentee_username: "",
     mentee_id: "",
-    tokenForCancel: "",
+    mentorship_token: "",
   };
 
   try {
@@ -145,9 +139,11 @@ export const addMenteeToTimeSlot: APIGatewayProxyHandler = async (event) => {
     return makeErrorResponse(400, "-311");
   }
 
-  const { mentee_username, mentee_id, tokenForCancel } = JSON.parse(event.body);
+  const { mentee_username, mentee_id, mentorship_token } = JSON.parse(
+    event.body
+  );
 
-  if (!mentee_username || !mentee_id || !tokenForCancel) {
+  if (!mentee_username || !mentee_id || !mentorship_token) {
     return makeErrorResponse(400, "-311");
   }
 
@@ -157,7 +153,7 @@ export const addMenteeToTimeSlot: APIGatewayProxyHandler = async (event) => {
     const timeSlotData = await repositoryAddMenteeToTimeSlot(id, {
       id: mentee_id,
       username: mentee_username,
-      tokenForCancel,
+      mentorship_token,
     });
 
     timeSlot = timeSlotData.Attributes;
