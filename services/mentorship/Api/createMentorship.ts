@@ -119,6 +119,7 @@ const createMentorshipAPI: APIGatewayProxyHandler = async (event) => {
       `Hola ${mentee_name}!`,
       htmlMentee,
       createICS(mentorshipDate, full_name, {
+        mentorshipId: mentorship.id,
         menteeEmail: mentee_email,
         menteeName: mentee_name,
         mentorEmail: email,
@@ -139,6 +140,7 @@ const createMentorshipAPI: APIGatewayProxyHandler = async (event) => {
       `Hola ${full_name}!`,
       htmlMentor,
       createICS(mentorshipDate, mentee_name, {
+        mentorshipId: mentorship.id,
         menteeEmail: mentee_email,
         menteeName: mentee_name,
         mentorEmail: email,
@@ -154,6 +156,7 @@ const createMentorshipAPI: APIGatewayProxyHandler = async (event) => {
       stateMachineArn: process.env.STATE_MACHINE_ARN,
       // This is the input that grab the init of the state machine for work from there
       input: JSON.stringify({
+        mentorshipId: mentorship.id,
         mentorId: mentor_id,
         menteeId: mentee_id,
         menteeName: mentee_name,

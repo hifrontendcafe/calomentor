@@ -10,7 +10,15 @@ import { sendEmail } from "../../../utils/sendEmail";
 const reminderMentorship: Handler = async (event, _, callback) => {
   const {
     responseData: {
-      mentorship: { mentorEmail, menteeEmail, mentorName, menteeName, menteeTimezone, mentorTimezone },
+      mentorship: {
+        mentorEmail,
+        menteeEmail,
+        mentorName,
+        menteeName,
+        menteeTimezone,
+        mentorTimezone,
+        mentorshipId,
+      },
       token,
       mentorshipDate,
     },
@@ -30,6 +38,7 @@ const reminderMentorship: Handler = async (event, _, callback) => {
     `Hola ${menteeName}!`,
     htmlMentee,
     createICS(date, menteeName, {
+      mentorshipId,
       menteeEmail,
       menteeName,
       mentorEmail,
@@ -51,6 +60,7 @@ const reminderMentorship: Handler = async (event, _, callback) => {
     `Hola ${mentorName}!`,
     htmlMentor,
     createICS(date, menteeName, {
+      mentorshipId,
       menteeEmail,
       menteeName,
       mentorEmail,

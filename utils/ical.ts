@@ -24,13 +24,9 @@ export enum ICalStatus {
 export function createICS(
   date: Date,
   mentorshipWith: string,
-  type: ICalStatus,
-  data: IcalData
+  data: IcalData,
+  type: ICalStatus = ICalStatus.REQUEST
 ): string {
-  const mentorshipStatus =
-    type === ICalStatus.CANCEL
-      ? ICalEventStatus.CANCELLED
-      : ICalEventStatus.CONFIRMED;
   const attendeeStatus =
     type === ICalStatus.CANCEL
       ? ICalAttendeeStatus.DECLINED
@@ -60,9 +56,9 @@ export function createICS(
       },
     ],
     organizer: {
-      name: "FrontendCafé",
-      email: "frontendcafe@gmail.com",
-      mailto: "frontendcafe@gmail.com"
+      name: data.mentorName,
+      email: data.mentorEmail,
+      mailto: data.mentorEmail,
     },
     priority: 1,
     timezone: data.timezone ?? "America/Buenos_Aires",
@@ -71,7 +67,7 @@ export function createICS(
     summary: `Mentoría con ${mentorshipWith}`,
     description: `Mentoría con ${mentorshipWith}`,
     location: "FrontendCafé Discord",
-    url: "https://discord.com/channels/594363964499165194/897162165272842240"
+    url: "https://discord.com/channels/594363964499165194/897162165272842240",
   });
 
   return calendar.toString();

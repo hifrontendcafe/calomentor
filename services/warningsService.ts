@@ -31,7 +31,7 @@ export const addWarningService: APIGatewayProxyHandler = async (event) => {
     warn_type,
     warn_cause,
     mentorship_id,
-    status: WARNSTATE.ACTIVE,
+    warning_status: WARNSTATE.ACTIVE,
     forgive_cause: null,
     warning_author_id,
     mentee_name: null,
@@ -96,8 +96,8 @@ export const forgiveWarning: APIGatewayProxyHandler = async (event) => {
   try {
     const warningUpdate = await updateWarning(
       id,
-      { status: WARNSTATE.FORGIVE, forgive_cause },
-      ["forgive_cause", "status"]
+      { warning_status: WARNSTATE.FORGIVE, forgive_cause },
+      ["forgive_cause", "warning_status"]
     );
 
     await updateMentorship(
