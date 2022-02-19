@@ -43,7 +43,7 @@ const cancelMentorship: APIGatewayProxyHandler = async (event) => {
       ["mentorship_status", "cancel_cause", "who_cancel"]
     );
 
-    const { mentee_name, mentee_email, mentor_name, mentor_email } =
+    const { mentee_name, mentee_email, mentor_name, mentor_email, mentee_timezone, mentor_timezone } =
       mentorshipUpdated.Attributes;
 
     const mentorshipDate = new Date(tokenData.date);
@@ -51,8 +51,8 @@ const cancelMentorship: APIGatewayProxyHandler = async (event) => {
     const htmlMentee = cancelMail({
       mentorName: mentor_name,
       menteeName: mentee_name,
-      date: toDateString(mentorshipDate),
-      time: toTimeString(mentorshipDate),
+      date: toDateString(mentorshipDate, mentee_timezone),
+      time: toTimeString(mentorshipDate, mentee_timezone),
       forMentor: false,
     });
     sendEmail(
@@ -64,14 +64,14 @@ const cancelMentorship: APIGatewayProxyHandler = async (event) => {
         menteeName: mentee_name,
         mentorEmail: mentor_email,
         mentorName: mentor_name,
-        timezone: "America/Argentina/Buenos_Aires",
+        timezone: mentee_timezone,
       })
     );
     const htmlMentor = cancelMail({
       mentorName: mentor_name,
       menteeName: mentee_name,
-      date: toDateString(mentorshipDate),
-      time: toTimeString(mentorshipDate),
+      date: toDateString(mentorshipDate, mentor_timezone),
+      time: toTimeString(mentorshipDate, mentor_timezone),
       forMentor: true,
     });
     sendEmail(
@@ -83,7 +83,7 @@ const cancelMentorship: APIGatewayProxyHandler = async (event) => {
         menteeName: mentee_name,
         mentorEmail: mentor_email,
         mentorName: mentor_name,
-        timezone: "America/Argentina/Buenos_Aires",
+        timezone: mentor_timezone,
       })
     );
 

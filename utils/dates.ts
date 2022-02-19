@@ -10,14 +10,19 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.extend(isBetween);
 
-const timeZone: string = "America/Montevideo";
-const locale: string = "es-mx";
-
-export const toDateString: (date: Date) => string = (date) => {
+export const toDateString: (
+  date: Date,
+  timeZone?: string,
+  locale?: string
+) => string = (date, timeZone = "America/Buenos_Aires", locale = "es-mx") => {
   return dayjs(date).tz(timeZone).locale(locale).format("LL");
 };
 
-export const toTimeString: (date: Date) => string = (date) => {
+export const toTimeString: (
+  date: Date,
+  timeZone?: string,
+  locale?: string
+) => string = (date, timeZone = "America/Buenos_Aires", locale = "es-mx") => {
   return dayjs(date).tz(timeZone).locale(locale).format("LT");
 };
 

@@ -10,7 +10,7 @@ import { sendEmail } from "../../../utils/sendEmail";
 const reminderMentorship: Handler = async (event, _, callback) => {
   const {
     responseData: {
-      mentorship: { mentorEmail, menteeEmail, mentorName, menteeName },
+      mentorship: { mentorEmail, menteeEmail, mentorName, menteeName, menteeTimezone, mentorTimezone },
       token,
       mentorshipDate,
     },
@@ -19,8 +19,8 @@ const reminderMentorship: Handler = async (event, _, callback) => {
   const htmlMentee = reminderMail({
     mentorName,
     menteeName,
-    date: toDateString(mentorshipDate),
-    time: toTimeString(mentorshipDate),
+    date: toDateString(mentorshipDate, menteeTimezone),
+    time: toTimeString(mentorshipDate, menteeTimezone),
     forMentor: false,
     cancelLink: `${process.env.BASE_FRONT_URL}/cancel?token=${token}`,
     confirmationLink: `${process.env.BASE_FRONT_URL}/confirmation?token=${token}`,
@@ -34,14 +34,14 @@ const reminderMentorship: Handler = async (event, _, callback) => {
       menteeName,
       mentorEmail,
       mentorName,
-      timezone: "America/Argentina/Buenos_Aires",
+      timezone: menteeTimezone,
     })
   );
   const htmlMentor = reminderMail({
     mentorName,
     menteeName,
-    date: toDateString(mentorshipDate),
-    time: toTimeString(mentorshipDate),
+    date: toDateString(mentorshipDate, mentorTimezone),
+    time: toTimeString(mentorshipDate, mentorTimezone),
     forMentor: true,
     cancelLink: `${process.env.BASE_FRONT_URL}/cancel?token=${token}`,
     confirmationLink: `${process.env.BASE_FRONT_URL}/confirmation?token=${token}`,
@@ -55,7 +55,7 @@ const reminderMentorship: Handler = async (event, _, callback) => {
       menteeName,
       mentorEmail,
       mentorName,
-      timezone: "America/Argentina/Buenos_Aires",
+      timezone: mentorTimezone,
     })
   );
   return makeLambdaResponse<MentorshipResponse>(callback, {

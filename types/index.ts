@@ -32,6 +32,7 @@ export interface Mentorship {
   feedback_mentee_private?: string;
   warning_info?: Warning;
   mentee_timezone: string;
+  mentor_timezone?: string;
 }
 
 interface UserLinks {

@@ -64,6 +64,7 @@ const createMentorshipAPI: APIGatewayProxyHandler = async (event) => {
     feedback_stars: null,
     feedback_mentee_private: null,
     warning_info: null,
+    mentor_timezone: null
   };
 
   try {
@@ -92,6 +93,7 @@ const createMentorshipAPI: APIGatewayProxyHandler = async (event) => {
       mentorshipId: mentorship.id,
       date: mentorshipDate.getTime(),
     });
+    mentorship.mentor_timezone = user_timezone
 
     await createMentorship(mentorship);
 
@@ -107,8 +109,8 @@ const createMentorshipAPI: APIGatewayProxyHandler = async (event) => {
     const htmlMentee = confirmationMail({
       mentorName: full_name,
       menteeName: mentee_name,
-      date: toDateString(mentorshipDate),
-      time: toTimeString(mentorshipDate),
+      date: toDateString(mentorshipDate, mentee_timezone),
+      time: toTimeString(mentorshipDate, mentee_timezone),
       cancelLink: `${process.env.BASE_FRONT_URL}/cancel?token=${mentorship.mentorship_token}`,
       forMentor: false,
     });
@@ -121,14 +123,14 @@ const createMentorshipAPI: APIGatewayProxyHandler = async (event) => {
         menteeName: mentee_name,
         mentorEmail: email,
         mentorName: full_name,
-        timezone: "America/Argentina/Buenos_Aires",
+        timezone: mentee_timezone,
       })
     );
     const htmlMentor = confirmationMail({
       mentorName: full_name,
       menteeName: mentee_name,
-      date: toDateString(mentorshipDate),
-      time: toTimeString(mentorshipDate),
+      date: toDateString(mentorshipDate, user_timezone),
+      time: toTimeString(mentorshipDate, user_timezone),
       cancelLink: `${process.env.BASE_FRONT_URL}/cancel?token=${mentorship.mentorship_token}`,
       forMentor: true,
     });
@@ -141,7 +143,7 @@ const createMentorshipAPI: APIGatewayProxyHandler = async (event) => {
         menteeName: mentee_name,
         mentorEmail: email,
         mentorName: full_name,
-        timezone: "America/Argentina/Buenos_Aires",
+        timezone: user_timezone,
       })
     );
 
