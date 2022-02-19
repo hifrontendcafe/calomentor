@@ -1,4 +1,5 @@
 import { APIGatewayProxyHandler } from "aws-lambda";
+import { StepFunctions } from "aws-sdk";
 import { v4 as uuidv4 } from "uuid";
 import { STATUS } from "../../../constants";
 import { confirmationMail } from "../../../mails/confirmation";
@@ -36,6 +37,7 @@ const createMentorshipAPI: APIGatewayProxyHandler = async (event) => {
     return makeErrorResponse(500, "-100");
   }
 
+  // check if the mentee has any warning, if it has the system reject the mentorship request
   const warning = await getWarningsData(mentee_id);
 
   if (warning.Items.length > 0) {
@@ -144,7 +146,7 @@ const createMentorshipAPI: APIGatewayProxyHandler = async (event) => {
     );
 
     const AWS = require("aws-sdk");
-    const stepfunctions = new AWS.StepFunctions();
+    const stepfunctions: StepFunctions = new AWS.StepFunctions();
     const params = {
       // This string is the address where we call the init of the createMentorship state machine.
       stateMachineArn: process.env.STATE_MACHINE_ARN,
@@ -162,6 +164,7 @@ const createMentorshipAPI: APIGatewayProxyHandler = async (event) => {
         token: mentorship.mentorship_token,
       }),
     };
+
     // The actual execution with the paramaters that we declare before
     stepfunctions.startExecution(params, (err, data) => {
       if (err) {
