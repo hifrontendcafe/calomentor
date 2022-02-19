@@ -92,20 +92,19 @@ export function updateUser(
 export function activateUser(id: string, lastActivateBy: string) {
   return updateUser(id, {
     isActive: true,
-    lastActivateBy: lastActivateBy,
+    lastActivateBy,
   });
 }
 
 export function deactivateUser(id: string, lastActivateBy: string) {
   return updateUser(id, {
     isActive: false,
-    lastActivateBy: lastActivateBy,
+    lastActivateBy,
   });
 }
 
 export function addTokenToUser(id: string, userToken: string) {
   return updateUser(id, {
-    isActive: false,
     userToken,
   });
 }

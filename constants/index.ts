@@ -50,6 +50,7 @@ export const RESPONSE_CODES = {
   "-116": "Bad Request: user is not an admin",
   "-117": "Bad Request: must to provide a valid userToken",
   "-118": "Mentee has warnigns",
+  "-119": "Time slot is occupied",
   "-200": "Unable to create user. User already exists.",
   "-201": "Unable to create user.",
   "-202": "There is no mentors",
