@@ -1,4 +1,4 @@
-interface CancelMailParams {
+export interface CancelMailParams {
   mentorName: string;
   menteeName: string;
   date: string;
@@ -143,8 +143,8 @@ export const cancelMail = ({
                             Hola ${
                               forMentor ? mentorName : menteeName
                             }, tu mentoria con ${
-                              forMentor ? menteeName : mentorName
-                            } ha sido cancelada. Si tenés alguna consulta mandanos un mail a frontendcafe@gmail.com.
+    forMentor ? menteeName : mentorName
+  } ha sido cancelada. Si tenés alguna consulta mandanos un mail a frontendcafe@gmail.com.
                           </div>
                         </td>
                       </tr>
