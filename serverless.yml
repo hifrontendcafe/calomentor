@@ -34,6 +34,7 @@ provider:
             - dynamodb:*
             - s3:*
             - ses:*
+            - states:StartExecution
           Resource: "*"
 
 plugins:

@@ -15,6 +15,7 @@ interface MentorshipRequestBody {
   mentorEmail: string;
   mentorshipDate: Date;
   token: string;
+  mentorshipId: string;
 }
 
 const createMentorship: Handler<MentorshipRequestBody, MentorshipResponse> = (
@@ -32,6 +33,7 @@ const createMentorship: Handler<MentorshipRequestBody, MentorshipResponse> = (
     mentorName,
     mentorEmail,
     mentorshipDate,
+    mentorshipId,
     token,
   } = event;
 
@@ -50,6 +52,7 @@ const createMentorship: Handler<MentorshipRequestBody, MentorshipResponse> = (
         menteeName,
         menteeTimezone,
         mentorTimezone,
+        mentorshipId
       },
       dateToRemind,
       mentorshipDate,

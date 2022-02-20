@@ -1,4 +1,4 @@
-import { STATUS, WARN, WARNSTATE } from "../constants";
+import { STATUS, WARN, WARNSTATE, WHOCANCEL } from "../constants";
 
 export interface TimeSlot {
   id: string;
@@ -25,7 +25,7 @@ export interface Mentorship {
   mentorship_status: STATUS;
   id: string;
   cancel_cause: string;
-  who_cancel: "MENTOR" | "MENTEE";
+  who_cancel: WHOCANCEL;
   time_slot_info?: TimeSlot;
   time_slot_id?: string;
   feedback_stars: 1 | 2 | 3 | 4 | 5;

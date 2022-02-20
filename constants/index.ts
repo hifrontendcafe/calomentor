@@ -26,6 +26,11 @@ export enum WARN {
   "COC_WARN" = "COC_WARN",
 }
 
+export enum WHOCANCEL {
+  "MENTOR" = "MENTOR",
+  "MENTEE" = "MENTEE",
+}
+
 export const RESPONSE_CODES = {
   "0": "OK.",
   "-1": "Unexpected error.",
@@ -39,7 +44,7 @@ export const RESPONSE_CODES = {
   "-106": "Unable to get the timezone.",
   "-107": "Unable to get mentorships.",
   "-108": "There is no mentorships.",
-  "-109": "The Mentorship is confirmed or cancelled.",
+  "-109": "The Mentorship is cancelled.",
   "-110": "There was a problem with the confirmation",
   "-111": "The mentorship is not confirmed",
   "-112": "The mentorship already has a feedback",
@@ -51,6 +56,7 @@ export const RESPONSE_CODES = {
   "-117": "Bad Request: must to provide a valid userToken",
   "-118": "Mentee has warnigns",
   "-119": "Time slot is occupied",
+  "-120": "Bad Request: must to provide a cancel cause and who canel.",
   "-200": "Unable to create user. User already exists.",
   "-201": "Unable to create user.",
   "-202": "There is no mentors",

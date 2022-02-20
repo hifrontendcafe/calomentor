@@ -35,7 +35,7 @@ mentorshipConfirmation:
   events:
     - http:
         path: mentorship/confirmation
-        method: patch
+        method: post
         cors: true
         private: true
 mentorshipFeedback:
@@ -43,6 +43,6 @@ mentorshipFeedback:
   events:
     - http:
         path: mentorship/feedback
-        method: patch
+        method: post
         cors: true
         private: true

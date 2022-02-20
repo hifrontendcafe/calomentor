@@ -1,5 +1,5 @@
 import { APIGatewayProxyHandler } from "aws-lambda";
-import { STATUS } from "../../../constants";
+import { STATUS, WHOCANCEL } from "../../../constants";
 import { cancelMail } from "../../../mails/cancel";
 import {
   getMentorshipById,
@@ -19,13 +19,16 @@ import { sendEmail } from "../../../utils/sendEmail";
 import { verifyToken } from "../../../utils/token";
 
 const cancelMentorship: APIGatewayProxyHandler = async (event) => {
-  const { cancelCause, whoCancel } = JSON.parse(event.body);
-  const { token } = event.queryStringParameters;
+  const { cancelCause, whoCancel, token } = JSON.parse(event.body);
   const tokenData = verifyToken(token);
+
+  if (!cancelCause || !Object.values(WHOCANCEL).includes(whoCancel)) {
+    return makeErrorResponse(400, "-120");
+  }
 
   try {
     const mentorship = await getMentorshipById(tokenData.mentorshipId);
-
+    
     if (mentorship.Item?.mentorship_status === STATUS.CANCEL) {
       return makeErrorResponse(400, "-109");
     }
@@ -66,14 +69,19 @@ const cancelMentorship: APIGatewayProxyHandler = async (event) => {
       mentee_email,
       `Hola ${mentee_name}!`,
       htmlMentee,
-      createICS(mentorshipDate, mentor_name, {
-        mentorshipId: id,
-        menteeEmail: mentee_email,
-        menteeName: mentee_name,
-        mentorEmail: mentor_email,
-        mentorName: mentor_name,
-        timezone: mentee_timezone,
-      }, ICalStatus.CANCEL)
+      createICS(
+        mentorshipDate,
+        mentor_name,
+        {
+          mentorshipId: id,
+          menteeEmail: mentee_email,
+          menteeName: mentee_name,
+          mentorEmail: mentor_email,
+          mentorName: mentor_name,
+          timezone: mentee_timezone,
+        },
+        ICalStatus.CANCEL
+      )
     );
     const htmlMentor = cancelMail({
       mentorName: mentor_name,
@@ -86,14 +94,19 @@ const cancelMentorship: APIGatewayProxyHandler = async (event) => {
       mentor_email,
       `Hola ${mentor_name}!`,
       htmlMentor,
-      createICS(mentorshipDate, mentee_name, {
-        mentorshipId: id,
-        menteeEmail: mentee_email,
-        menteeName: mentee_name,
-        mentorEmail: mentor_email,
-        mentorName: mentor_name,
-        timezone: mentor_timezone,
-      }, ICalStatus.CANCEL)
+      createICS(
+        mentorshipDate,
+        mentee_name,
+        {
+          mentorshipId: id,
+          menteeEmail: mentee_email,
+          menteeName: mentee_name,
+          mentorEmail: mentor_email,
+          mentorName: mentor_name,
+          timezone: mentor_timezone,
+        },
+        ICalStatus.CANCEL
+      )
     );
 
     return makeSuccessResponse(mentorshipUpdated.Attributes, "0");
