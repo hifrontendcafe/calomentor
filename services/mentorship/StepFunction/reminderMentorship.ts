@@ -19,7 +19,6 @@ const reminderMentorship: Handler = async (event, _, callback) => {
         mentorTimezone,
         mentorshipId,
       },
-      token,
       mentorshipDate,
     },
   } = event;
@@ -30,8 +29,6 @@ const reminderMentorship: Handler = async (event, _, callback) => {
     date: toDateString(mentorshipDate, menteeTimezone),
     time: toTimeString(mentorshipDate, menteeTimezone),
     forMentor: false,
-    cancelLink: `${process.env.BASE_FRONT_URL}/cancel?token=${token}`,
-    confirmationLink: `${process.env.BASE_FRONT_URL}/confirmation?token=${token}`,
   });
   sendEmail(
     menteeEmail,
@@ -52,10 +49,8 @@ const reminderMentorship: Handler = async (event, _, callback) => {
     date: toDateString(mentorshipDate, mentorTimezone),
     time: toTimeString(mentorshipDate, mentorTimezone),
     forMentor: true,
-    cancelLink: `${process.env.BASE_FRONT_URL}/cancel?token=${token}`,
-    confirmationLink: `${process.env.BASE_FRONT_URL}/confirmation?token=${token}`,
   });
-  await sendEmail(
+  sendEmail(
     mentorEmail,
     `Hola ${mentorName}!`,
     htmlMentor,

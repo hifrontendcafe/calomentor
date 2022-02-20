@@ -8,13 +8,12 @@ import { sendEmail } from "../../../utils/sendEmail";
 const sendFeedbackFormMentorship: Handler = (event, _, callback): void => {
   const {
     responseData: {
-      mentorship: { menteeEmail, mentorName, menteeName },
+      mentorship: { menteeEmail, menteeName },
       token,
     },
   } = event;
 
   const htmlMentee = feedbackMail({
-    mentorName,
     menteeName,
     feedbackLink: `${process.env.BASE_FRONT_URL}/feedback?token=${token}`,
   });
