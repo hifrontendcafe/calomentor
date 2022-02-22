@@ -3,12 +3,14 @@ import * as timezone from "dayjs/plugin/timezone";
 import * as utc from "dayjs/plugin/utc";
 import * as localizedFormat from "dayjs/plugin/localizedFormat";
 import * as isBetween from "dayjs/plugin/isBetween";
+import * as  relativeTime from 'dayjs/plugin/relativeTime';
 import "dayjs/locale/es-mx";
 
 dayjs.extend(localizedFormat);
 dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.extend(isBetween);
+dayjs.extend(relativeTime);
 
 export const toDateString: (
   date: Date,
@@ -61,3 +63,15 @@ export const substractTime = (
 ): Date => {
   return dayjs(date).subtract(timeToAdd, unit).toDate();
 };
+
+export const getUnixTime = (date: Date): number => {
+  return dayjs(date).unix();
+}
+
+export const distanceFromNow = (date: Date, timeZone = "America/Buenos_Aires", locale = "es-mx"): string => {
+  return dayjs(date).tz(timeZone).locale(locale).fromNow();
+}
+
+export const distanceToNow = (date: Date, timeZone = "America/Buenos_Aires", locale = "es-mx"): string => {
+  return dayjs(date).tz(timeZone).locale(locale).fromNow();
+}
