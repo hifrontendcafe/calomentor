@@ -73,5 +73,5 @@ export const distanceFromNow = (date: Date, timeZone = "America/Buenos_Aires", l
 }
 
 export const distanceToNow = (date: Date, timeZone = "America/Buenos_Aires", locale = "es-mx"): string => {
-  return dayjs(date).tz(timeZone).locale(locale).fromNow();
+  return dayjs(date).tz(timeZone).locale(locale).toNow();
 }
