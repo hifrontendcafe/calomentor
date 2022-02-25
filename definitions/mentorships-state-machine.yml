@@ -4,7 +4,13 @@ mentorshipCancel:
   handler: index.mentorshipCancel
 checkCancel:
   handler: index.checkCancel
+checkConfirmation:
+  handler: index.checkConfirmation
 mentorshipReminder:
   handler: index.mentorshipReminder
 mentorshipFeedbackSend:
   handler: index.mentorshipFeedbackSend
+confirmationAttempt:
+  handler: index.confirmationAttempt
+mentorshipCatch:
+  handler: index.mentorshipCatch

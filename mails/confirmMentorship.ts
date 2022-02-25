@@ -5,7 +5,7 @@ interface ConfirmMentorshipMailParams {
   time: string;
   forMentor: boolean;
   cancelLink: string;
-  confirmationLink: string;
+  confirmationLink?: string;
 }
 
 export const confirmMentorshipMail = ({
@@ -192,9 +192,12 @@ export const confirmMentorshipMail = ({
                           </td>
                         </tr>
                         <tr>
-                        <td align="center" bgcolor="#00876D" role="presentation" style="border:0;border-radius:3px;cursor:auto;mso-padding-alt:10px 25px;background:#00876D;vertical-align: middle;" valign="middle">
+                        ${
+                          !forMentor &&
+                          `<td align="center" bgcolor="#00876D" role="presentation" style="border:0;border-radius:3px;cursor:auto;mso-padding-alt:10px 25px;background:#00876D;vertical-align: middle;" valign="middle">
                           <a style="display:inline-block;background:#00876D;color:#fff;font-family:Lexend Deca, sans-serif;font-size:18px;font-weight:500;line-height:100%;margin:0;text-decoration:none;text-transform:none;padding:10px 25px;mso-padding-alt:0px;border-radius:3px;width: 150px;height: 20px;text-decoration: none;color: #fff" href="${confirmationLink}">Confirmar</a>
-                        </td>
+                        </td>`
+                        }
                       </tr>
                             <tr>
                               <td align="center" bgcolor="#ffffff" role="presentation" style="border:1px solid rgba(0, 0, 0, 0.2);border-radius:3px;cursor:auto;mso-padding-alt:10px 25px;background:#ffffff;vertical-align: middle;" valign="middle">
