@@ -28,82 +28,295 @@ stateMachines:
       States:
         MENTORSHIP_INITIAL:
           Type: Task
-          Resource:
-            {
-              "Fn::Join":
-                [
-                  ":",
-                  [
-                    "arn:aws:lambda:sa-east-1",
-                    { "Ref": "AWS::AccountId" },
-                    "function:${self:service}-${self:provider.stage}-mentorshipCreate",
-                  ],
-                ],
-            }
-          Next: MENTORSHIP_REMINDER_WAIT
-        MENTORSHIP_REMINDER_WAIT:
+          Resource: arn:aws:lambda:sa-east-1:822886109108:function:server-dev-mentorshipCreate
+          Next: CONFIRMATION_ATTEMPT_ONE_WAIT
+          Retry:
+            - ErrorEquals:
+                - States.ALL
+              BackoffRate: 1
+              IntervalSeconds: 10
+              MaxAttempts: 2
+          Catch:
+            - ErrorEquals:
+                - States.ALL
+              Next: MENTORSHIP_INITIAL
+        CONFIRMATION_ATTEMPT_ONE_WAIT:
           Type: Wait
-          TimestampPath: "$.responseData.dateToRemind"
-          Next: CHECK_CANCEL_TASK
-        CHECK_CANCEL_TASK:
+          TimestampPath: $.responseData.dateToRemindConfirmationAttemptOne
+          Next: CHECK_CANCEL_TASK_ONE
+        CHECK_CANCEL_TASK_ONE:
           Type: Task
-          Resource:
-            {
-              "Fn::Join":
-                [
-                  ":",
-                  [
-                    "arn:aws:lambda:sa-east-1",
-                    { "Ref": "AWS::AccountId" },
-                    "function:${self:service}-${self:provider.stage}-checkCancel",
-                  ],
-                ],
-            }
-          Next: CHECK_CANCEL_CHOICE
-        CHECK_CANCEL_CHOICE:
+          Resource: arn:aws:lambda:sa-east-1:822886109108:function:server-dev-checkCancel
+          Next: CHECK_CANCEL_CHOICE_ONE
+          Retry:
+            - ErrorEquals:
+                - States.ALL
+              BackoffRate: 1
+              IntervalSeconds: 10
+              MaxAttempts: 2
+          Catch:
+            - ErrorEquals:
+                - States.ALL
+              Next: MENTORSHIP_CATCHER
+        CHECK_CANCEL_CHOICE_ONE:
           Type: Choice
           Choices:
-            - Variable: "$.isCancel"
+            - Variable: $.isCancel
               BooleanEquals: true
               Next: END_BY_CANCEL
-            - Variable: "$.isCancel"
+            - Variable: $.isCancel
               BooleanEquals: false
-              Next: MENTORSHIP_REMINDER
-          Default: MENTORSHIP_REMINDER
+              Next: CONFIRMATION_ATTEMPT_ONE
+        CONFIRMATION_ATTEMPT_ONE:
+          Type: Task
+          Resource: arn:aws:states:::lambda:invoke
+          OutputPath: $.Payload
+          Parameters:
+            Payload.$: $
+            FunctionName: >-
+              arn:aws:lambda:sa-east-1:822886109108:function:server-dev-confirmationAttempt:$LATEST
+          Retry:
+            - ErrorEquals:
+                - States.TaskFailed
+              IntervalSeconds: 10
+              MaxAttempts: 5
+              BackoffRate: 1
+            - ErrorEquals:
+                - States.Timeout
+              BackoffRate: 1
+              IntervalSeconds: 10
+              MaxAttempts: 5
+            - ErrorEquals:
+                - States.ALL
+              BackoffRate: 1
+              IntervalSeconds: 10
+              MaxAttempts: 2
+          Catch:
+            - ErrorEquals:
+                - States.ALL
+              Next: MENTORSHIP_CATCHER
+          Next: CONFIRMATION_ATTEMPT_TWO_WAIT
+        CONFIRMATION_ATTEMPT_TWO_WAIT:
+          Type: Wait
+          Next: CHECK_CONFIRMATION_ONE
+          TimestampPath: $.responseData.dateToRemindConfirmationAttemptTwo
+        CHECK_CONFIRMATION_ONE:
+          Type: Task
+          Resource: arn:aws:states:::lambda:invoke
+          OutputPath: $.Payload
+          Parameters:
+            Payload.$: $
+            FunctionName: >-
+              arn:aws:lambda:sa-east-1:822886109108:function:server-dev-checkConfirmation:$LATEST
+          Retry:
+            - ErrorEquals:
+                - States.ALL
+              IntervalSeconds: 10
+              MaxAttempts: 2
+              BackoffRate: 1
+          Catch:
+            - ErrorEquals:
+                - States.ALL
+              Next: MENTORSHIP_CATCHER
+          Next: CHECK_CONFIRMATION_ONE_CHOICE
+        CHECK_CONFIRMATION_ONE_CHOICE:
+          Type: Choice
+          Choices:
+            - Variable: $.isConfirm
+              BooleanEquals: true
+              Next: CHECK_CANCEL_TASK_THREE
+            - Variable: $.isConfirm
+              BooleanEquals: false
+              Next: CHECK_CANCEL_TASK_TWO
+        CHECK_CANCEL_TASK_TWO:
+          Type: Task
+          Resource: arn:aws:lambda:sa-east-1:822886109108:function:server-dev-checkCancel
+          Next: CHECK_CANCEL_CHOICE_TWO
+          Retry:
+            - ErrorEquals:
+                - States.ALL
+              BackoffRate: 1
+              IntervalSeconds: 10
+              MaxAttempts: 2
+          Catch:
+            - ErrorEquals:
+                - States.ALL
+              Next: MENTORSHIP_CATCHER
+        CHECK_CANCEL_CHOICE_TWO:
+          Type: Choice
+          Choices:
+            - Variable: $.isCancel
+              BooleanEquals: true
+              Next: END_BY_CANCEL_TWO
+            - Variable: $.isCancel
+              BooleanEquals: false
+              Next: CONFIRMATION_ATTEMPT_TWO
         END_BY_CANCEL:
           Type: Fail
-          Cause: "Mentorship cancelled"
-        MENTORSHIP_REMINDER:
+          Cause: Mentorship cancelled
+        END_BY_CANCEL_TWO:
+          Type: Fail
+          Cause: Mentorship cancelled
+        CONFIRMATION_ATTEMPT_TWO:
           Type: Task
-          Resource:
-            {
-              "Fn::Join":
-                [
-                  ":",
-                  [
-                    "arn:aws:lambda:sa-east-1",
-                    { "Ref": "AWS::AccountId" },
-                    "function:${self:service}-${self:provider.stage}-mentorshipReminder",
-                  ],
-                ],
-            }
+          Resource: arn:aws:states:::lambda:invoke
+          OutputPath: $.Payload
+          Parameters:
+            Payload.$: $
+            FunctionName: >-
+              arn:aws:lambda:sa-east-1:822886109108:function:server-dev-confirmationAttempt:$LATEST
+          Retry:
+            - ErrorEquals:
+                - Lambda.ServiceException
+                - Lambda.AWSLambdaException
+                - Lambda.SdkClientException
+              IntervalSeconds: 10
+              MaxAttempts: 2
+              BackoffRate: 2
+            - ErrorEquals:
+                - States.Timeout
+              BackoffRate: 1
+              IntervalSeconds: 10
+              MaxAttempts: 5
+            - ErrorEquals:
+                - States.ALL
+              BackoffRate: 1
+              IntervalSeconds: 10
+              MaxAttempts: 2
+          Catch:
+            - ErrorEquals:
+                - States.ALL
+              Next: MENTORSHIP_CATCHER
+          Next: CONFIRMATION_ATTEMPT_LAST_WAIT
+        CONFIRMATION_ATTEMPT_LAST_WAIT:
+          Type: Wait
+          TimestampPath: $.responseData.dateToRemindConfirmationAttemptTwo
+          Next: CHECK_CONFIRMATION_TWO
+        CHECK_CONFIRMATION_TWO:
+          Type: Task
+          Resource: arn:aws:states:::lambda:invoke
+          OutputPath: $.Payload
+          Parameters:
+            Payload.$: $
+            FunctionName: >-
+              arn:aws:lambda:sa-east-1:822886109108:function:server-dev-checkConfirmation:$LATEST
+          Retry:
+            - ErrorEquals:
+                - States.ALL
+              IntervalSeconds: 10
+              MaxAttempts: 2
+              BackoffRate: 2
+          Catch:
+            - ErrorEquals:
+                - States.ALL
+              Next: MENTORSHIP_CATCHER
+          Next: CHECK_CONFIRMATION_CHOICE_TWO
+        CHECK_CONFIRMATION_CHOICE_TWO:
+          Type: Choice
+          Choices:
+            - Variable: $.isConfirm
+              BooleanEquals: true
+              Next: CHECK_CANCEL_TASK_THREE
+            - Variable: $.isConfirm
+              BooleanEquals: false
+              Next: END_BY_NOT_CONFIRMED
+        CHECK_CANCEL_TASK_THREE:
+          Type: Task
+          Resource: arn:aws:lambda:sa-east-1:822886109108:function:server-dev-checkCancel
+          Next: CHECK_CANCEL_TASK_THREE_CHOICE
+          Retry:
+            - ErrorEquals:
+                - States.ALL
+              BackoffRate: 1
+              IntervalSeconds: 10
+              MaxAttempts: 2
+          Catch:
+            - ErrorEquals:
+                - States.ALL
+              Next: MENTORSHIP_CATCHER
+        CHECK_CANCEL_TASK_THREE_CHOICE:
+          Type: Choice
+          Choices:
+            - Variable: $.isCancel
+              BooleanEquals: true
+              Next: END_BY_CANCEL_THREE
+            - Variable: $.isCancel
+              BooleanEquals: false
+              Next: MENTORSHIP_REMINDER_ATTEMPT_ONE
+        END_BY_CANCEL_THREE:
+          Type: Fail
+          Cause: Mentorship cancelled
+        END_BY_NOT_CONFIRMED:
+          Type: Fail
+          Cause: Mentorship cancelled
+        MENTORSHIP_REMINDER_ATTEMPT_ONE:
+          Type: Task
+          Resource: >-
+            arn:aws:lambda:sa-east-1:822886109108:function:server-dev-mentorshipReminder
+          Next: MENTORSHIP_REMINDER_ATTEMPT_TWO_WAIT
+          Retry:
+            - ErrorEquals:
+                - States.Timeout
+              BackoffRate: 1
+              IntervalSeconds: 10
+              MaxAttempts: 5
+            - ErrorEquals:
+                - States.ALL
+              BackoffRate: 1
+              IntervalSeconds: 10
+              MaxAttempts: 2
+          Catch:
+            - ErrorEquals:
+                - States.ALL
+              Next: MENTORSHIP_CATCHER
+        MENTORSHIP_REMINDER_ATTEMPT_TWO_WAIT:
+          Type: Wait
+          TimestampPath: $.responseData.dateToRemindAttemptOne
+          Next: MENTORSHIP_REMINDER_ATTEMPT_TWO
+        MENTORSHIP_REMINDER_ATTEMPT_TWO:
+          Type: Task
+          Resource: arn:aws:states:::lambda:invoke
+          OutputPath: $.Payload
+          Parameters:
+            Payload.$: $
+            FunctionName: >-
+              arn:aws:lambda:sa-east-1:822886109108:function:server-dev-mentorshipReminder:$LATEST
+          Retry:
+            - ErrorEquals:
+                - States.ALL
+              IntervalSeconds: 10
+              MaxAttempts: 2
+              BackoffRate: 1
+          Catch:
+            - ErrorEquals:
+                - States.ALL
+              Next: MENTORSHIP_CATCHER
           Next: MENTORSHIP_FEEDBACK_WAIT
         MENTORSHIP_FEEDBACK_WAIT:
           Type: Wait
-          TimestampPath: "$.responseData.mentorshipDate"
+          SecondsPath: $.responseData.dateToSendFeedback
           Next: SEND_FEEDBACK
         SEND_FEEDBACK:
           Type: Task
-          Resource:
-            {
-              "Fn::Join":
-                [
-                  ":",
-                  [
-                    "arn:aws:lambda:sa-east-1",
-                    { "Ref": "AWS::AccountId" },
-                    "function:${self:service}-${self:provider.stage}-mentorshipFeedbackSend",
-                  ],
-                ],
-            }
+          Resource: >-
+            arn:aws:lambda:sa-east-1:822886109108:function:server-dev-mentorshipFeedbackSend
           End: true
+          Retry:
+            - ErrorEquals:
+                - States.ALL
+              BackoffRate: 1
+              IntervalSeconds: 10
+              MaxAttempts: 2
+          Catch:
+            - ErrorEquals:
+                - States.ALL
+              Next: MENTORSHIP_CATCHER
+        MENTORSHIP_CATCHER:
+          Type: Task
+          Resource: arn:aws:states:::lambda:invoke
+          OutputPath: $.Payload
+          Parameters:
+            Payload.$: $
+            FunctionName: >-
+              arn:aws:lambda:sa-east-1:822886109108:function:server-dev-mentorshipCatch:$LATEST
+          End: True

@@ -35,7 +35,10 @@ import {
   addRoleMentorship,
   reminderMentorship,
   feedbackFormMentorship,
-  checkCancelMentorship
+  checkCancelMentorship,
+  checkConfirmMentorship,
+  confirmationAttemptMentorship,
+  catchMentorship
 } from "./services/mentorship";
 
 // User functions handlers
@@ -137,6 +140,24 @@ export const getAllMentorships: Handler = (
   context: Context,
   callback: Callback<any>
 ) => getMentorships(event, context, callback);
+
+export const checkConfirmation: Handler = (
+  event: any,
+  context: Context,
+  callback: Callback<any>
+) => checkConfirmMentorship(event, context, callback);
+
+export const confirmationAttempt: Handler = (
+  event: any,
+  context: Context,
+  callback: Callback<any>
+) => confirmationAttemptMentorship(event, context, callback);
+
+export const mentorshipCatch: Handler = (
+  event: any,
+  context: Context,
+  callback: Callback<any>
+) => catchMentorship(event, context, callback);
 
 // Warnings functions handlers
 

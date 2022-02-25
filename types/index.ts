@@ -92,9 +92,16 @@ export interface MentorshipResponse {
   responseCode: string;
   responseData: {
     mentorship: MentorshipStateMachine;
-    dateToRemind: Date;
+    dateToRemindConfirmationAttemptOne?: Date;
+    dateToRemindConfirmationAttemptTwo?: Date;
+    dateToRemindAttemptOne?: Date;
+    dateToRemindAttemptTwo?: Date;
+    dateToSendFeedback?: Date;
     mentorshipDate: Date;
     token: string;
   };
   isCancel?: boolean;
+  isConfirm?: boolean;
+  confirmationAttempt?: number;
+  reminderAttempt?: number
 }

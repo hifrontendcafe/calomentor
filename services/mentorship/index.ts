@@ -8,3 +8,6 @@ export { default as checkCancelMentorship } from "./StepFunction/checkCancelMent
 export { default as createMentorship } from "./StepFunction/createMentorship";
 export { default as feedbackFormMentorship } from "./StepFunction/feedbackFormMentorship";
 export { default as reminderMentorship } from "./StepFunction/reminderMentorship";
+export { default as checkConfirmMentorship } from "./StepFunction/checkConfirmMentorship";
+export { default as confirmationAttemptMentorship } from "./StepFunction/confirmationAttemptMentorship";
+export { default as catchMentorship } from "./StepFunction/catcherMentorship";
