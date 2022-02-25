@@ -2,7 +2,7 @@ import { APIGatewayProxyHandler } from "aws-lambda";
 import { v4 as uuidv4 } from "uuid";
 import { STATUS, WARN, WARNSTATE } from "../constants";
 import { getMentorshipById, updateMentorship } from "../repository/mentorship";
-import { getUserById } from "../repository/user";
+import { getUserById, getUserByToken } from "../repository/user";
 import {
   addWarning,
   getWarningsData,
@@ -10,6 +10,7 @@ import {
 } from "../repository/warning";
 import { Warning } from "../types";
 import { makeErrorResponse, makeSuccessResponse } from "../utils/makeResponses";
+import { isAdmin } from "../utils/validations";
 
 export const addWarningService: APIGatewayProxyHandler = async (event) => {
   const { mentee_id, warn_type, warn_cause, mentorship_id, warning_author_id } =
@@ -87,6 +88,13 @@ export const getAllWarnings: APIGatewayProxyHandler = async () => {
 };
 
 export const forgiveWarning: APIGatewayProxyHandler = async (event) => {
+  const userToken = event.headers["user-token"];
+  if (!userToken || (await getUserByToken(userToken)).Count === 0) {
+    return makeErrorResponse(401, "-117");
+  }
+  if (!(await isAdmin(userToken))) {
+    return makeErrorResponse(403, "-116");
+  }
   const { forgive_cause } = JSON.parse(event.body);
   const { id } = event.pathParameters;
   if (!id) {
