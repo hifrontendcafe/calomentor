@@ -6,7 +6,7 @@
   "scripts": {
     "deploy-dev": "serverless deploy -s dev",
     "deploy-prod": "serverless deploy -s prod",
-    "start-offline": "serverless offline --printOutput",
+    "start-offline": "serverless offline --printOutput --config serverless-dev.yml",
     "lint": "tsc --noEmit index.ts"
   },
   "author": "",
