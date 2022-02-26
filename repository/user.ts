@@ -26,7 +26,7 @@ export function getUsers(filters: UserFilters = {}) {
     TableName: TABLE_NAME_USER,
     ExpressionAttributeNames: { "#role": "role" },
     ProjectionExpression:
-      "id, discord_username, full_name, about_me, email, url_photo, #role, links, skills, isActive, user_timezone, userToken, lastActivateBy",
+      "id, discord_username, full_name, about_me, email, url_photo, #role, links, skills, is_active, user_timezone, user_token, last_active_by",
   };
 
   if (filters.role) {
@@ -47,12 +47,12 @@ export function getUserById(id: string) {
 export function getUserByToken(token: string) {
   return scan<User>({
     TableName: TABLE_NAME_USER,
-    FilterExpression: "#token = :userToken",
+    FilterExpression: "#token = :user_token",
     ExpressionAttributeNames: {
-      "#token": "userToken",
+      "#token": "user_token",
     },
     ExpressionAttributeValues: {
-      ":userToken": token,
+      ":user_token": token,
     },
   });
 }
@@ -89,22 +89,22 @@ export function updateUser(
   });
 }
 
-export function activateUser(id: string, lastActivateBy: string) {
+export function activateUser(id: string, last_active_by: string) {
   return updateUser(id, {
-    isActive: true,
-    lastActivateBy,
+    is_active: true,
+    last_active_by,
   });
 }
 
-export function deactivateUser(id: string, lastActivateBy: string) {
+export function deactivateUser(id: string, last_active_by: string) {
   return updateUser(id, {
-    isActive: false,
-    lastActivateBy,
+    is_active: false,
+    last_active_by,
   });
 }
 
-export function addTokenToUser(id: string, userToken: string) {
+export function addTokenToUser(id: string, user_token: string) {
   return updateUser(id, {
-    userToken,
+    user_token,
   });
 }

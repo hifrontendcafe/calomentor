@@ -1,18 +1,12 @@
-interface ReminderMailParams {
-  mentorName: string;
+interface WarningMailParams {
   menteeName: string;
-  date: string;
-  time: string;
-  forMentor: boolean;
+  isNotAssist: boolean;
 }
 
-export const reminderMail = ({
-  mentorName,
+export const warningMail = ({
   menteeName,
-  date,
-  time,
-  forMentor,
-}: ReminderMailParams) => {
+  isNotAssist = true,
+}: WarningMailParams) => {
   return `<!doctype html>
   <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
   <head>
@@ -140,13 +134,13 @@ export const reminderMail = ({
                       <tr>
                         <td align="left" style="font-size:0px;padding:0px 20px;word-break:break-word;">
                           <div style="font-family:Lexend Deca, sans-serif;font-size:18px;font-weight:500;line-height:1.5;text-align:left;color:#27272A;">
-                            ${
-                              forMentor
-                                ? `
-                            Hola ${mentorName}. Te recordamos que tenes una mentoria confirmada con ${menteeName}. La misma se llevará a cabo en una de las salas de voz del servidor de Discord de FrontendCafé.
-                            `
-                                : `Hola ${menteeName}. Te recordamos que confirmaste una mentoria con ${mentorName}. La misma se llevará a cabo en una de las salas de voz del servidor de Discord de FrontendCafé.`
-                            }
+
+                            Hola ${menteeName} has sido penalizado, debido a que ${
+    isNotAssist
+      ? "no has asistido a la mentoria confirmada con anterioridad."
+      : "has incumplido con alguna norma del Código de conducta de FrontendCafé."
+  } 
+                            
                           </div>
                         </td>
                       </tr>
@@ -183,13 +177,16 @@ export const reminderMail = ({
                       <tr>
                         <td align="left" vertical-align="middle" class="btn" style="font-size:0px;word-break:break-word;">
                           <table border="0" cellpadding="0" cellspacing="20px" role="presentation" style="border-collapse:separate;line-height:100%;">
-                            <tr>
-                              <td align="center" bgcolor="#ffffff" role="presentation" style="border:1px solid rgba(0, 0, 0, 0.2);border-radius:3px;cursor:auto;mso-padding-alt:10px 25px;background:#ffffff;vertical-align: middle;" valign="middle">
-                                <a style="display:inline-block;background:#ffffff;color:#27272A;font-family:Lexend Deca, sans-serif;font-size:18px;font-weight:500;line-height:100%;margin:0;text-decoration:none;text-transform:none;padding:10px 25px;mso-padding-alt:0px;border-radius:3px;width: 150px;height: 20px;text-decoration: none;color: #27272A" href="${
-                                  process.env.CHANNEL_CONSULTANTS
-                                }">Ingresá a Discord</a>
-                              </td>
-                            </tr>
+                          <tr>
+                          <td align="center" bgcolor="#00876D" role="presentation" style="border:none;border-radius:3px;cursor:auto;mso-padding-alt:10px 25px;background:#00876D; vertical-align: middle;" valign="middle">
+                            <a style=";display:inline-block;background:#00876D;color:#ffffff;font-family:Lexend Deca, sans-serif;font-size:18px;font-weight:500;line-height:100%;margin:0;text-decoration:none;text-transform:none;padding:10px 25px;mso-padding-alt:0px;border-radius:3px;width: 150px;height: 20px;text-decoration: none;color: #ffffff;" href="mailto:frontendcafe@gmail.com">Contáctanos</a>
+                          </td>
+                          <td align="center" bgcolor="#ffffff" role="presentation" style="border:1px solid rgba(0, 0, 0, 0.2);border-radius:3px;cursor:auto;mso-padding-alt:10px 25px;background:#ffffff;vertical-align: middle;" valign="middle">
+                            <a style="display:inline-block;background:#ffffff;color:#27272A;font-family:Lexend Deca, sans-serif;font-size:18px;font-weight:500;line-height:100%;margin:0;text-decoration:none;text-transform:none;padding:10px 25px;mso-padding-alt:0px;border-radius:3px;width: 150px;height: 20px;text-decoration: none;color: #27272A" href="${
+                              process.env.CHANNEL_CONSULTANTS
+                            }">Ingresá a Discord</a>
+                          </td>
+                        </tr>
                           </table>
                         </td>
                       </tr>

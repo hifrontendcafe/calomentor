@@ -19,14 +19,14 @@ const getMentorships: APIGatewayProxyHandler = async (event) => {
 
   const id = pathParameters?.id;
   const filter = queryStringParameters?.filter;
-  const filterDates = queryStringParameters?.filterDates;
+  const filter_dates = queryStringParameters?.filter_dates;
 
-  if (filterDates === FILTERDATES.ALL) {
-    const userToken = event.headers["user-token"];
-    if (!userToken || (await getUserByToken(userToken)).Count === 0) {
+  if (filter_dates === FILTERDATES.ALL) {
+    const user_token = event.headers["user-token"];
+    if (!user_token || (await getUserByToken(user_token)).Count === 0) {
       return makeErrorResponse(401, "-117");
     }
-    if (!(await isAdmin(userToken))) {
+    if (!(await isAdmin(user_token))) {
       return makeErrorResponse(403, "-116");
     }
   }
@@ -65,9 +65,9 @@ const getMentorships: APIGatewayProxyHandler = async (event) => {
 
     const date = new Date(timeSlotResult.Item.date);
     const checkDateFilter =
-      (filterDates === FILTERDATES.PAST && isPastDate(date)) ||
-      (filterDates === FILTERDATES.FUTURE && isFutureDate(date)) ||
-      !filterDates;
+      (filter_dates === FILTERDATES.PAST && isPastDate(date)) ||
+      (filter_dates === FILTERDATES.FUTURE && isFutureDate(date)) ||
+      !filter_dates;
 
     if (!checkDateFilter) {
       continue;

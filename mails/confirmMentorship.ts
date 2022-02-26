@@ -13,7 +13,6 @@ export const confirmMentorshipMail = ({
   menteeName,
   date,
   time,
-  forMentor,
   cancelLink,
   confirmationLink,
 }: ConfirmMentorshipMailParams) => {
@@ -145,11 +144,11 @@ export const confirmMentorshipMail = ({
                         <td align="left" style="font-size:0px;padding:0px 20px;word-break:break-word;">
                           <div style="font-family:Lexend Deca, sans-serif;font-size:18px;font-weight:500;line-height:1.5;text-align:left;color:#27272A;">
                           Hola ${
-                            forMentor ? mentorName : menteeName
-                          }, te recordamos que tenés una
+                            menteeName
+                          }, te recordamos que registraste una
                           mentoría con ${
-                            forMentor ? menteeName : mentorName
-                          }. La misma se llevara a cabo en el servidor de FrontendCafé.
+                            mentorName
+                          } que aún se encuentra sin confirmar. Deberás confirmar la sesión vía correo electrónico con un tiempo límite de 24hs antes del día y la hora agendadas. En caso contrario, la mentoría se cancelará automáticamente.
                           </div>
                         </td>
                       </tr>
@@ -192,16 +191,13 @@ export const confirmMentorshipMail = ({
                           </td>
                         </tr>
                         <tr>
-                        ${
-                          !forMentor &&
-                          `<td align="center" bgcolor="#00876D" role="presentation" style="border:0;border-radius:3px;cursor:auto;mso-padding-alt:10px 25px;background:#00876D;vertical-align: middle;" valign="middle">
+                          <td align="center" bgcolor="#00876D" role="presentation" style="border:0;border-radius:3px;cursor:auto;mso-padding-alt:10px 25px;background:#00876D;vertical-align: middle;" valign="middle">
                           <a style="display:inline-block;background:#00876D;color:#fff;font-family:Lexend Deca, sans-serif;font-size:18px;font-weight:500;line-height:100%;margin:0;text-decoration:none;text-transform:none;padding:10px 25px;mso-padding-alt:0px;border-radius:3px;width: 150px;height: 20px;text-decoration: none;color: #fff" href="${confirmationLink}">Confirmar</a>
-                        </td>`
-                        }
+                        </td>
                       </tr>
                             <tr>
                               <td align="center" bgcolor="#ffffff" role="presentation" style="border:1px solid rgba(0, 0, 0, 0.2);border-radius:3px;cursor:auto;mso-padding-alt:10px 25px;background:#ffffff;vertical-align: middle;" valign="middle">
-                                <a style="display:inline-block;background:#ffffff;color:#27272A;font-family:Lexend Deca, sans-serif;font-size:18px;font-weight:500;line-height:100%;margin:0;text-decoration:none;text-transform:none;padding:10px 25px;mso-padding-alt:0px;border-radius:3px;width: 150px;height: 20px;text-decoration: none;color: #27272A" href="https://discord.gg/frontendcafe">Ingresá a Discord</a>
+                                <a style="display:inline-block;background:#ffffff;color:#27272A;font-family:Lexend Deca, sans-serif;font-size:18px;font-weight:500;line-height:100%;margin:0;text-decoration:none;text-transform:none;padding:10px 25px;mso-padding-alt:0px;border-radius:3px;width: 150px;height: 20px;text-decoration: none;color: #27272A" href="${process.env.CHANNEL_CONSULTANTS}">Ingresá a Discord</a>
                               </td>
                             </tr>
                           </table>

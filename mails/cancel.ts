@@ -1,17 +1,15 @@
 export interface CancelMailParams {
   mentorName: string;
   menteeName: string;
-  date: string;
-  time: string;
   forMentor: boolean;
+  isNotConfirmed?: boolean;
 }
 
 export const cancelMail = ({
   mentorName,
   menteeName,
-  date,
-  time,
   forMentor,
+  isNotConfirmed = false
 }: CancelMailParams) => {
   return `<!doctype html>
   <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
@@ -140,37 +138,17 @@ export const cancelMail = ({
                       <tr>
                         <td align="left" style="font-size:0px;padding:0px 20px;word-break:break-word;">
                           <div style="font-family:Lexend Deca, sans-serif;font-size:18px;font-weight:500;line-height:1.5;text-align:left;color:#27272A;">
-                            Hola ${
-                              forMentor ? mentorName : menteeName
-                            }, tu mentoria con ${
-    forMentor ? menteeName : mentorName
-  } ha sido cancelada. Si tenés alguna consulta mandanos un mail a frontendcafe@gmail.com.
+                            ${
+                              forMentor
+                                ? `Hola ${menteeName}, ${mentorName} ha cancelado una mentoria previamente agendada. ${isNotConfirmed && (`Debido a que no confirmaste tu mentoria.`)}`
+                                : `Hola ${mentorName}. Tu mentoria con ${menteeName} ha sido cancelada una mentoria previamente agendada. En caso de error o por cualquier consulta relacionada a la mentoría, podés comunicarte vía correo electrónico con el staff a frontendcafe@gmail.com.`
+                            }
                           </div>
                         </td>
                       </tr>
                       <tr>
                         <td style="font-size:0px;word-break:break-word;">
                           <div style="height:10px;line-height:10px;">&#8202;</div>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td style="font-size:0px;word-break:break-word;">
-                          <div style="height:30px;line-height:30px;">&#8202;</div>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td align="left" style="font-size:0px;padding:0px 20px;word-break:break-word;">
-                          <div style="font-family:Lexend Deca, sans-serif;font-size:18px;font-weight:700;line-height:1;text-align:left;color:#27272A;">Día: ${date}.</div>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td style="font-size:0px;word-break:break-word;">
-                          <div style="height:10px;line-height:10px;">&#8202;</div>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td align="left" style="font-size:0px;padding:0px 20px;word-break:break-word;">
-                          <div style="font-family:Lexend Deca, sans-serif;font-size:18px;font-weight:700;line-height:1;text-align:left;color:#27272A;">Hora: ${time}.</div>
                         </td>
                       </tr>
                       <tr>
@@ -186,7 +164,9 @@ export const cancelMail = ({
                                 <a style=";display:inline-block;background:#00876D;color:#ffffff;font-family:Lexend Deca, sans-serif;font-size:18px;font-weight:500;line-height:100%;margin:0;text-decoration:none;text-transform:none;padding:10px 25px;mso-padding-alt:0px;border-radius:3px;width: 150px;height: 20px;text-decoration: none;color: #ffffff;" href="mailto:frontendcafe@gmail.com">Contáctanos</a>
                               </td>
                               <td align="center" bgcolor="#ffffff" role="presentation" style="border:1px solid rgba(0, 0, 0, 0.2);border-radius:3px;cursor:auto;mso-padding-alt:10px 25px;background:#ffffff;vertical-align: middle;" valign="middle">
-                                <a style="display:inline-block;background:#ffffff;color:#27272A;font-family:Lexend Deca, sans-serif;font-size:18px;font-weight:500;line-height:100%;margin:0;text-decoration:none;text-transform:none;padding:10px 25px;mso-padding-alt:0px;border-radius:3px;width: 150px;height: 20px;text-decoration: none;color: #27272A" href="https://discord.gg/frontendcafe">Ingresá a Discord</a>
+                                <a style="display:inline-block;background:#ffffff;color:#27272A;font-family:Lexend Deca, sans-serif;font-size:18px;font-weight:500;line-height:100%;margin:0;text-decoration:none;text-transform:none;padding:10px 25px;mso-padding-alt:0px;border-radius:3px;width: 150px;height: 20px;text-decoration: none;color: #27272A" href="${
+                                  process.env.CHANNEL_CONSULTANTS
+                                }">Ingresá a Discord</a>
                               </td>
                             </tr>
                           </table>

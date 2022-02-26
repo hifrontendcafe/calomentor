@@ -11,8 +11,8 @@ import {
 import { verifyToken } from "../../../utils/token";
 
 const confirmationMentorship: APIGatewayProxyHandler = async (event) => {
-  const { token } = JSON.parse(event.body);
-  const tokenData = verifyToken(token);
+  const { mentorship_token } = JSON.parse(event.body);
+  const tokenData = verifyToken(mentorship_token);
 
   try {
     const mentorship = await getMentorshipById(tokenData.mentorshipId);

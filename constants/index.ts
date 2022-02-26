@@ -23,10 +23,10 @@ export enum WARNSTATE {
 
 export enum WARN {
   "NO_ASSIST" = "NO_ASSIST",
-  "COC_WARN" = "COC_WARN",
+  "COC_WARN" = "COC_WARN"
 }
 
-export enum WHOCANCEL {
+export enum WHOCANCELED {
   "MENTOR" = "MENTOR",
   "MENTEE" = "MENTEE",
 }
@@ -53,10 +53,10 @@ export const RESPONSE_CODES = {
   "-115":
     "Bad Request: already has a timeslot with this date or has another slot in the next 45 minutes.",
   "-116": "Bad Request: user is not an admin",
-  "-117": "Bad Request: must to provide a valid userToken",
+  "-117": "Bad Request: must provide a valid user_token",
   "-118": "Mentee has warnigns",
   "-119": "Time slot is occupied",
-  "-120": "Bad Request: must to provide a cancel cause and who canel.",
+  "-120": "Bad Request: must provide a cancel cause and who cancel.",
   "-200": "Unable to create user. User already exists.",
   "-201": "Unable to create user.",
   "-202": "There is no mentors",
@@ -84,7 +84,7 @@ export const RESPONSE_CODES = {
   "-317": "There was an error trying to update the user",
   "-318": "There was an error trying to update the user. Id not found",
   "-319":
-    "Bad Request: isActive property is missing or is not allowable option.",
+    "Bad Request: is_active property is missing or is not allowable option.",
   "-320": "There was an error trying to update the user. Token not updated",
   "100": "Succesfully mentorship created.",
   "101": "Mentorship confirmed",

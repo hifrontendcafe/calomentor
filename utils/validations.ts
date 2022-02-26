@@ -82,16 +82,16 @@ export const isUserRoleUpdated = async (
   return true;
 };
 
-export const hasRole = async (userToken: string, role: Role) => {
-  const { Items } = await getUserByToken(userToken);
+export const hasRole = async (user_token: string, role: Role) => {
+  const { Items } = await getUserByToken(user_token);
   const [user] = Items;
   return user.role.includes(role);
 };
 
-export const isAdmin = async (userToken: string) => {
-  return await hasRole(userToken, "admin");
+export const isAdmin = async (user_token: string) => {
+  return await hasRole(user_token, "admin");
 };
 
-export const isMentor = async (userToken: string) => {
-  return await hasRole(userToken, "mentor");
+export const isMentor = async (user_token: string) => {
+  return await hasRole(user_token, "mentor");
 };

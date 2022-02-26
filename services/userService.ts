@@ -7,13 +7,14 @@ import {
   deactivateUser,
   deleteUserById,
   getUserById,
+  getUserByToken,
   getUsers,
   updateUser,
 } from "../repository/user";
 import type { User } from "../types";
 import { isAWSError } from "../utils/dynamoDb";
 import { makeErrorResponse, makeSuccessResponse } from "../utils/makeResponses";
-import { isUserRoleUpdated } from "../utils/validations";
+import { isAdmin, isUserRoleUpdated } from "../utils/validations";
 
 function isConditionalCheckFailedError(error: any) {
   return isAWSError(error) && error?.code === "ConditionalCheckFailedException";
@@ -47,10 +48,10 @@ export const createUserService: APIGatewayProxyHandler = async (event) => {
     role,
     links,
     skills,
-    isActive: false,
-    lastActivateBy: "",
+    is_active: false,
+    last_active_by: "",
     user_timezone: timezone,
-    userToken: uuidv4(),
+    user_token: uuidv4(),
   };
 
   try {
@@ -139,8 +140,8 @@ export const updateUserByIdService: APIGatewayProxyHandler = async (event) => {
   try {
     const isRoleUpdated = await isUserRoleUpdated(id, data.role);
     if (isRoleUpdated) {
-      const userToken = uuidv4();
-      await addTokenToUser(id, userToken);
+      const user_token = uuidv4();
+      await addTokenToUser(id, user_token);
     }
   } catch (error) {
     return makeErrorResponse(400, "-320", error);
@@ -177,24 +178,31 @@ export const updateUserByIdService: APIGatewayProxyHandler = async (event) => {
 };
 
 export const activateUserService: APIGatewayProxyHandler = async (event) => {
+  const user_token = event.headers["user-token"];
+  if (!user_token || (await getUserByToken(user_token)).Count === 0) {
+    return makeErrorResponse(401, "-117");
+  }
+  if (!(await isAdmin(user_token))) {
+    return makeErrorResponse(403, "-116");
+  }
   const id = event?.pathParameters?.id;
 
   if (!id) {
     return makeErrorResponse(400, "-311");
   }
 
-  const { isActive, lastActivateBy } = JSON.parse(event.body);
+  const { is_active, last_active_by } = JSON.parse(event.body);
 
-  if (typeof isActive !== "boolean" || !lastActivateBy) {
+  if (typeof is_active !== "boolean" || !last_active_by) {
     return makeErrorResponse(400, "-319");
   }
 
   let result: Awaited<ReturnType<typeof updateUser>>;
   try {
-    if (isActive) {
-      result = await activateUser(id, lastActivateBy);
+    if (is_active) {
+      result = await activateUser(id, last_active_by);
     } else {
-      result = await deactivateUser(id, lastActivateBy);
+      result = await deactivateUser(id, last_active_by);
     }
   } catch (error) {
     return makeErrorResponse(400, "-317", error);

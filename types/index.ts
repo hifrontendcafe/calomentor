@@ -1,4 +1,4 @@
-import { STATUS, WARN, WARNSTATE, WHOCANCEL } from "../constants";
+import { STATUS, WARN, WARNSTATE, WHOCANCELED } from "../constants";
 
 export interface TimeSlot {
   id: string;
@@ -9,6 +9,7 @@ export interface TimeSlot {
   mentee_username: string;
   mentee_id: string;
   mentorship_token: string;
+  duration: 30 | 45 | 60;
 }
 
 export interface Mentorship {
@@ -25,7 +26,7 @@ export interface Mentorship {
   mentorship_status: STATUS;
   id: string;
   cancel_cause: string;
-  who_cancel: WHOCANCEL;
+  who_canceled: WHOCANCELED;
   time_slot_info?: TimeSlot;
   time_slot_id?: string;
   feedback_stars: 1 | 2 | 3 | 4 | 5;
@@ -54,10 +55,10 @@ export interface User {
   role?: Role[];
   links?: UserLinks;
   skills?: string[];
-  isActive: boolean;
-  lastActivateBy: string; // discord id
+  is_active: boolean;
+  last_active_by: string; // discord id
   user_timezone: string;
-  userToken: string;
+  user_token: string;
 }
 
 export interface Warning {
@@ -96,12 +97,13 @@ export interface MentorshipResponse {
     dateToRemindConfirmationAttemptTwo?: Date;
     dateToRemindAttemptOne?: Date;
     dateToRemindAttemptTwo?: Date;
+    dateToRemindAttemptThree?: Date;
     dateToSendFeedback?: Date;
     mentorshipDate: Date;
-    token: string;
+    mentorship_token: string;
   };
   isCancel?: boolean;
   isConfirm?: boolean;
   confirmationAttempt?: number;
-  reminderAttempt?: number
+  reminderAttempt?: number;
 }

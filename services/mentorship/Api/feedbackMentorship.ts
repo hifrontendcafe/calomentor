@@ -11,10 +11,13 @@ import {
 import { verifyToken } from "../../../utils/token";
 
 const feedbackFormMentorship: APIGatewayProxyHandler = async (event) => {
-  const { token, feedback, privateFeedback, starsFeedback } = JSON.parse(
-    event.body
-  );
-  const tokenData = verifyToken(token);
+  const {
+    mentorship_token,
+    feedback_mentee: feedback,
+    feedback_mentee_private,
+    feedback_stars: feedbackStars,
+  } = JSON.parse(event.body);
+  const tokenData = verifyToken(mentorship_token);
 
   try {
     const {
@@ -33,8 +36,8 @@ const feedbackFormMentorship: APIGatewayProxyHandler = async (event) => {
       tokenData.mentorshipId,
       {
         feedback_mentee: feedback,
-        feedback_mentee_private: privateFeedback,
-        feedback_stars: starsFeedback,
+        feedback_mentee_private,
+        feedback_stars: feedbackStars,
       },
       ["feedback_mentee", "feedback_mentee_private", "feedback_stars"]
     );

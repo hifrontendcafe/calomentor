@@ -124,10 +124,14 @@ stateMachines:
           Choices:
             - Variable: $.isConfirm
               BooleanEquals: true
-              Next: CHECK_CANCEL_TASK_THREE
+              Next: MENTORSHIP_REMINDER_ATTEMPT_ONE_WAIT
             - Variable: $.isConfirm
               BooleanEquals: false
               Next: CHECK_CANCEL_TASK_TWO
+        MENTORSHIP_REMINDER_ATTEMPT_ONE_WAIT:
+          Type: Wait
+          Next: CHECK_CANCEL_TASK_THREE
+          SecondsPath: $.responseData.dateToRemindAttemptTwo
         CHECK_CANCEL_TASK_TWO:
           Type: Task
           Resource: arn:aws:lambda:sa-east-1:822886109108:function:server-dev-checkCancel
@@ -190,7 +194,7 @@ stateMachines:
           Next: CONFIRMATION_ATTEMPT_LAST_WAIT
         CONFIRMATION_ATTEMPT_LAST_WAIT:
           Type: Wait
-          TimestampPath: $.responseData.dateToRemindConfirmationAttemptTwo
+          TimestampPath: $.responseData.dateToRemindAttemptOne
           Next: CHECK_CONFIRMATION_TWO
         CHECK_CONFIRMATION_TWO:
           Type: Task
@@ -216,10 +220,14 @@ stateMachines:
           Choices:
             - Variable: $.isConfirm
               BooleanEquals: true
-              Next: CHECK_CANCEL_TASK_THREE
+              Next: MENTORSHIP_REMINDER_ATTEMPT_ONE_WAIT_AFTER
             - Variable: $.isConfirm
               BooleanEquals: false
               Next: END_BY_NOT_CONFIRMED
+        MENTORSHIP_REMINDER_ATTEMPT_ONE_WAIT_AFTER:
+          Type: Wait
+          Next: CHECK_CANCEL_TASK_THREE
+          SecondsPath: $.responseData.dateToRemindAttemptTwo
         CHECK_CANCEL_TASK_THREE:
           Type: Task
           Resource: arn:aws:lambda:sa-east-1:822886109108:function:server-dev-checkCancel
@@ -271,7 +279,7 @@ stateMachines:
               Next: MENTORSHIP_CATCHER
         MENTORSHIP_REMINDER_ATTEMPT_TWO_WAIT:
           Type: Wait
-          TimestampPath: $.responseData.dateToRemindAttemptOne
+          TimestampPath: $.responseData.dateToRemindAttemptThree
           Next: MENTORSHIP_REMINDER_ATTEMPT_TWO
         MENTORSHIP_REMINDER_ATTEMPT_TWO:
           Type: Task
@@ -281,6 +289,25 @@ stateMachines:
             Payload.$: $
             FunctionName: >-
               arn:aws:lambda:sa-east-1:822886109108:function:server-dev-mentorshipReminder:$LATEST
+          Retry:
+            - ErrorEquals:
+                - States.ALL
+              IntervalSeconds: 10
+              MaxAttempts: 2
+              BackoffRate: 1
+          Catch:
+            - ErrorEquals:
+                - States.ALL
+              Next: MENTORSHIP_CATCHER
+          Next: MENTORSHIP_ADD_ROLE
+        MENTORSHIP_ADD_ROLE:
+          Type: Task
+          Resource: arn:aws:states:::lambda:invoke
+          OutputPath: $.Payload
+          Parameters:
+            Payload.$: $
+            FunctionName: >-
+              arn:aws:lambda:sa-east-1:822886109108:function:server-dev-addRole:$LATEST
           Retry:
             - ErrorEquals:
                 - States.ALL
@@ -319,4 +346,4 @@ stateMachines:
             Payload.$: $
             FunctionName: >-
               arn:aws:lambda:sa-east-1:822886109108:function:server-dev-mentorshipCatch:$LATEST
-          End: True
+          End: true

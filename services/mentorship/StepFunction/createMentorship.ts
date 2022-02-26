@@ -14,7 +14,7 @@ interface MentorshipRequestBody {
   mentorName: string;
   mentorEmail: string;
   mentorshipDate: Date;
-  token: string;
+  mentorship_token: string;
   mentorshipId: string;
 }
 
@@ -34,15 +34,16 @@ const createMentorship: Handler<MentorshipRequestBody, MentorshipResponse> = (
     mentorEmail,
     mentorshipDate,
     mentorshipId,
-    token,
+    mentorship_token,
   } = event;
 
   const date = new Date(mentorshipDate);
 
   const dateToRemindConfirmationAttemptOne = substractTime(date, 3, "days");
   const dateToRemindConfirmationAttemptTwo = substractTime(date, 2, "days");
-  const dateToRemindAttemptOne = substractTime(date, 1, "hours");
-  const dateToRemindAttemptTwo = substractTime(date, 10, "minutes");
+  const dateToRemindAttemptOne = substractTime(date, 1, "day");
+  const dateToRemindAttemptTwo = substractTime(date, 1, "hour");
+  const dateToRemindAttemptThree = substractTime(date, 10, "minutes");
   const dateToSendFeedback = addTime(date, 1, "hours");
 
   return makeLambdaResponse<MentorshipResponse>(callback, {
@@ -64,10 +65,13 @@ const createMentorship: Handler<MentorshipRequestBody, MentorshipResponse> = (
       dateToRemindConfirmationAttemptTwo,
       dateToRemindAttemptOne,
       dateToRemindAttemptTwo,
+      dateToRemindAttemptThree,
       dateToSendFeedback,
       mentorshipDate,
-      token,
+      mentorship_token,
     },
+    confirmationAttempt: 0,
+    reminderAttempt: 0,
   });
 };
 
