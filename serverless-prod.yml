@@ -1,0 +1,61 @@
+org: frontendcafe
+app: server
+service: server
+frameworkVersion: "3"
+useDotenv: true
+provider:
+  name: aws
+  environment:
+    CALOMENTOR_MAIL: ${file(./config.prod.json):CALOMENTOR_MAIL}
+    CALOMENTOR_MAIL_CLIENT_ID: ${file(./config.prod.json):CALOMENTOR_MAIL_CLIENT_ID}
+    CALOMENTOR_MAIL_CLIENT_SECRET: ${file(./config.prod.json):CALOMENTOR_MAIL_CLIENT_SECRET}
+    CALOMENTOR_MAIL_REFRESH_TOKEN: ${file(./config.prod.json):CALOMENTOR_MAIL_REFRESH_TOKEN}
+    CALOMENTOR_MAIL_ACCESS_TOKEN: ${file(./config.prod.json):CALOMENTOR_MAIL_ACCESS_TOKEN}
+    BASE_URL: ${file(./config.prod.json):BASE_URL}
+    BASE_FRONT_URL: ${file(./config.prod.json):BASE_FRONT_URL}
+    BASE_BOT_URL: ${file(./config.prod.json):BASE_BOT_URL}
+    MENTORISHIP_NOTIFICATIONS_CHANNEL_ID: ${file(./config.prod.json):MENTORISHIP_NOTIFICATIONS_CHANNEL_ID}
+    MENTEE_ROLE_ID: ${file(./config.prod.json):MENTEE_ROLE_ID}
+    API_KEY_PHRASE: ${file(./config.prod.json):API_KEY_PHRASE}
+    JWT_KEY: ${file(./config.prod.json):JWT_KEY}
+    API_KEY: ${file(./config.prod.json):API_KEY}
+    STATE_MACHINE_ARN: ${file(./config.prod.json):STATE_MACHINE_ARN}
+  runtime: nodejs14.x
+  region: sa-east-1
+  stackName: calomentor
+  apiName: calomentor-api
+  apiGateway:
+    apiKeys:
+      - ${file(./config.prod.json):API_KEY_PHRASE}
+  stage: prod
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:*
+            - s3:*
+            - ses:*
+            - states:StartExecution
+          Resource: "*"
+
+plugins:
+  - serverless-plugin-typescript
+  - serverless-offline
+  - serverless-step-functions
+functions:
+  - ${file(definitions/timeslots.yml)}
+  - ${file(definitions/users.yml)}
+  - ${file(definitions/warnings.yml)}
+  - ${file(definitions/mentorships-api.yml)}
+  - ${file(definitions/mentorships-state-machine.yml)}
+
+stepFunctions:
+  ${file(definitions/create-mentorship-step-function.yml)}
+
+resources:
+  - ${file(definitions/db-tables.yml)}
+
+custom:
+  serverless-offline:
+    httpPort: 3001
