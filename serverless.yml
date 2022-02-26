@@ -27,7 +27,7 @@ provider:
   apiGateway:
     apiKeys:
       - ${param:API_KEY_PHRASE}
-  stage: ${param:CALOMENTOR_STAGE}
+  stage: dev
   iam:
     role:
       statements:
