@@ -27,7 +27,7 @@ provider:
   apiGateway:
     apiKeys:
       - ${param:API_KEY_PHRASE}
-  stage: prod
+  stage: ${param:STAGE}
   iam:
     role:
       statements:
