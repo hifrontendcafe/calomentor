@@ -1,5 +1,5 @@
 import { APIGatewayProxyHandler } from "aws-lambda";
-import { STATUS, WHOCANCEL } from "../../../constants";
+import { STATUS, WHOCANCELED } from "../../../constants";
 import { cancelMail, CancelMailParams } from "../../../mails/cancel";
 import {
   getMentorshipById,
@@ -9,7 +9,10 @@ import {
   freeTimeSlot,
   removeMenteeFromTimeSlot,
 } from "../../../repository/timeSlot";
-import { toDateString, toTimeString } from "../../../utils/dates";
+import {
+  sendMessageUserToCalobot,
+} from "../../../utils/bot";
+import { getUnixTime, toDateString, toTimeString } from "../../../utils/dates";
 import { createICS, ICalStatus } from "../../../utils/ical";
 import {
   makeErrorResponse,
@@ -45,10 +48,12 @@ function sendEmails(
 }
 
 const cancelMentorship: APIGatewayProxyHandler = async (event) => {
-  const { cancelCause, whoCancel, token } = JSON.parse(event.body);
-  const tokenData = verifyToken(token);
+  const { cancel_cause, who_canceled, mentorship_token } = JSON.parse(
+    event.body
+  );
+  const tokenData = verifyToken(mentorship_token);
 
-  if (!cancelCause || !Object.values(WHOCANCEL).includes(whoCancel)) {
+  if (!cancel_cause || !Object.values(WHOCANCELED).includes(who_canceled)) {
     return makeErrorResponse(400, "-120");
   }
 
@@ -66,10 +71,10 @@ const cancelMentorship: APIGatewayProxyHandler = async (event) => {
       tokenData.mentorshipId,
       {
         mentorship_status: STATUS.CANCEL,
-        cancel_cause: cancelCause,
-        who_cancel: whoCancel,
+        cancel_cause: cancel_cause,
+        who_canceled: who_canceled,
       },
-      ["mentorship_status", "cancel_cause", "who_cancel"]
+      ["mentorship_status", "cancel_cause", "who_canceled"]
     );
 
     const {
@@ -79,6 +84,8 @@ const cancelMentorship: APIGatewayProxyHandler = async (event) => {
       mentor_email,
       mentee_timezone,
       mentor_timezone,
+      mentee_id,
+      mentor_id,
       id,
     } = mentorshipUpdated.Attributes;
 
@@ -131,6 +138,20 @@ const cancelMentorship: APIGatewayProxyHandler = async (event) => {
     };
 
     sendEmails(emailData, sendMenteeData, sendMentorData);
+
+    await sendMessageUserToCalobot(mentee_id, {
+      description: `¡Hola! <@${mentee_id}>. Tu mentoria con <@${mentor_id}>. En caso de error o por cualquier consulta relacionada a la mentoría, podés comunicarte vía correo electrónico con el staff a frontendcafe@gmail.com.`,
+      footer: "Cancelación de la Mentoria",
+      title: "Cancelación de la Mentoria",
+      timestamp: getUnixTime(mentorshipDate),
+    });
+
+    await sendMessageUserToCalobot(mentor_id, {
+      description: `¡Hola! <@${mentor_id}>. <@${mentee_id}> ha cancelado una mentoria previamente agendada.`,
+      footer: "Cancelación de la Mentoria",
+      title: "Cancelación de la Mentoria",
+      timestamp: getUnixTime(mentorshipDate),
+    });
 
     return makeSuccessResponse(mentorshipUpdated.Attributes);
   } catch (error) {

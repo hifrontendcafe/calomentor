@@ -14,7 +14,7 @@ import { addTime, dateIsBetween, isPastDate, isSameDate } from "../utils/dates";
 import { makeErrorResponse, makeSuccessResponse } from "../utils/makeResponses";
 
 export const addTimeSlot: APIGatewayProxyHandler = async (event) => {
-  const { user_id, slot_date } = JSON.parse(event.body);
+  const { user_id, slot_date, duration = 60 } = JSON.parse(event.body);
 
   if (!user_id && !slot_date) {
     return makeErrorResponse(400, "-113");
@@ -56,6 +56,7 @@ export const addTimeSlot: APIGatewayProxyHandler = async (event) => {
     mentee_username: "",
     mentee_id: "",
     mentorship_token: "",
+    duration
   };
 
   try {

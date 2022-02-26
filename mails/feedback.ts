@@ -1,9 +1,11 @@
 interface FeedbackMailParams {
+  mentorName: string;
   menteeName: string;
   feedbackLink: string;
 }
 
 export const feedbackMail = ({
+  mentorName,
   menteeName,
   feedbackLink,
 }: FeedbackMailParams) => {
@@ -134,7 +136,7 @@ export const feedbackMail = ({
                       <tr>
                         <td align="left" style="font-size:0px;padding:0px 20px;word-break:break-word;">
                           <div style="font-family:Lexend Deca, sans-serif;font-size:18px;font-weight:500;line-height:1.5;text-align:left;color:#27272A;">
-                            Hola ${menteeName}, una vez finalizada tu mentoria te pedimos que comentes tu experiencia sobre la misma, podés hacerlo en el siguiente formulario.
+                          Hola ${menteeName}. Como parte del proceso de mejora continua de la iniciativa Mentorías, te solicitamos que, una vez finalizada tu sesión con ${mentorName}, completes la siguiente encuesta de feedback, en la que podrás puntuar la sesión y dejarnos tus sugerencias y comentarios. 
                           </div>
                         </td>
                       </tr>
@@ -156,7 +158,7 @@ export const feedbackMail = ({
                                 <a style=";display:inline-block;background:#00876D;color:#ffffff;font-family:Lexend Deca, sans-serif;font-size:18px;font-weight:500;line-height:100%;margin:0;text-decoration:none;text-transform:none;padding:10px 25px;mso-padding-alt:0px;border-radius:3px;width: 150px;height: 20px;text-decoration: none;color: #ffffff;" href="${feedbackLink}">Déjanos feedback</a>
                               </td>
                               <td align="center" bgcolor="#ffffff" role="presentation" style="border:1px solid rgba(0, 0, 0, 0.2);border-radius:3px;cursor:auto;mso-padding-alt:10px 25px;background:#ffffff;vertical-align: middle;" valign="middle">
-                                <a style="display:inline-block;background:#ffffff;color:#27272A;font-family:Lexend Deca, sans-serif;font-size:18px;font-weight:500;line-height:100%;margin:0;text-decoration:none;text-transform:none;padding:10px 25px;mso-padding-alt:0px;border-radius:3px;width: 150px;height: 20px;text-decoration: none;color: #27272A" href="https://discord.gg/frontendcafe">Ingresá a Discord</a>
+                                <a style="display:inline-block;background:#ffffff;color:#27272A;font-family:Lexend Deca, sans-serif;font-size:18px;font-weight:500;line-height:100%;margin:0;text-decoration:none;text-transform:none;padding:10px 25px;mso-padding-alt:0px;border-radius:3px;width: 150px;height: 20px;text-decoration: none;color: #27272A" href="${process.env.CHANNEL_CONSULTANTS}">Ingresá a Discord</a>
                               </td>
                             </tr>
                           </table>

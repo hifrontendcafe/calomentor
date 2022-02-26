@@ -12,7 +12,8 @@ import {
 import { getUserById } from "../../../repository/user";
 import { getWarningsData } from "../../../repository/warning";
 import { Mentorship } from "../../../types";
-import { toDateString, toTimeString } from "../../../utils/dates";
+import { sendMessageToCalobot, sendMessageUserToCalobot } from "../../../utils/bot";
+import { getUnixTime, toDateString, toTimeString } from "../../../utils/dates";
 import { createICS } from "../../../utils/ical";
 import {
   makeErrorResponse,
@@ -59,7 +60,7 @@ const createMentorshipAPI: APIGatewayProxyHandler = async (event) => {
     mentorship_status: STATUS.ACTIVE,
     time_slot_id,
     cancel_cause: null,
-    who_cancel: null,
+    who_canceled: null,
     feedback_mentee: null,
     feedback_stars: null,
     feedback_mentee_private: null,
@@ -115,7 +116,7 @@ const createMentorshipAPI: APIGatewayProxyHandler = async (event) => {
       menteeName: mentee_name,
       date: toDateString(mentorshipDate, mentee_timezone),
       time: toTimeString(mentorshipDate, mentee_timezone),
-      cancelLink: `${process.env.BASE_FRONT_URL}/cancel?token=${mentorship.mentorship_token}`,
+      cancelLink: `${process.env.BASE_FRONT_URL}/cancel?mentorship_token=${mentorship.mentorship_token}`,
       forMentor: false,
     });
     sendEmail(
@@ -131,12 +132,13 @@ const createMentorshipAPI: APIGatewayProxyHandler = async (event) => {
         timezone: mentee_timezone,
       })
     );
+    
     const htmlMentor = confirmationMail({
       mentorName: full_name,
       menteeName: mentee_name,
       date: toDateString(mentorshipDate, user_timezone),
       time: toTimeString(mentorshipDate, user_timezone),
-      cancelLink: `${process.env.BASE_FRONT_URL}/cancel?token=${mentorship.mentorship_token}`,
+      cancelLink: `${process.env.BASE_FRONT_URL}/cancel?mentorship_token=${mentorship.mentorship_token}`,
       forMentor: true,
     });
     sendEmail(
@@ -152,6 +154,28 @@ const createMentorshipAPI: APIGatewayProxyHandler = async (event) => {
         timezone: user_timezone,
       })
     );
+
+    await sendMessageToCalobot({
+      description: `¡Hola! <@${mentee_id}> tu solicitud para una sesión de mentoria con <@${mentor_id}> ha sido registrada exitosamente. Deberás confirmar la misma vía correo electrónico con un tiempo límite 24hs antes de la fecha y hora de registración. En caso contrario se cancelará automáticamente la mentoría.`,
+      footer: "✅ Solicitud de mentoria exitosa",
+      title: "✅ Solicitud de mentoria exitosa",
+      timestamp: getUnixTime(mentorshipDate),
+      mentions: [mentee_id, mentor_id],
+    });
+
+    await sendMessageUserToCalobot(mentee_id, {
+      description: `¡Hola! <@${mentee_id}>, tu mentoría con <@${mentor_id}> fue registrada correctamente. Para llevar adelante la sesión, es obligatorio que envíes una confirmación con un plazo máximo de 24 antes de que se desarrolle la misma.`,
+      footer: "✅ Solicitud de mentoria exitosa",
+      title: "✅ Solicitud de mentoria exitosa",
+      timestamp: getUnixTime(mentorshipDate),
+    });
+
+    await sendMessageUserToCalobot(mentor_id, {
+      description: `¡Hola! <@${mentor_id}>, <@${mentee_id}> te ha agendado una mentoría.`,
+      footer: "✅ Solicitud de mentoria exitosa",
+      title: "✅ Solicitud de mentoria exitosa",
+      timestamp: getUnixTime(mentorshipDate),
+    });
 
     const AWS = require("aws-sdk");
     const stepfunctions: StepFunctions = new AWS.StepFunctions();
@@ -170,7 +194,7 @@ const createMentorshipAPI: APIGatewayProxyHandler = async (event) => {
         mentorName: full_name,
         mentorEmail: email,
         mentorshipDate,
-        token: mentorship.mentorship_token,
+        mentorship_token: mentorship.mentorship_token,
       }),
     };
 

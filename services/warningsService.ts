@@ -1,6 +1,7 @@
 import { APIGatewayProxyHandler } from "aws-lambda";
 import { v4 as uuidv4 } from "uuid";
 import { STATUS, WARN, WARNSTATE } from "../constants";
+import { warningMail } from "../mails/warning";
 import { getMentorshipById, updateMentorship } from "../repository/mentorship";
 import { getUserById, getUserByToken } from "../repository/user";
 import {
@@ -10,6 +11,7 @@ import {
 } from "../repository/warning";
 import { Warning } from "../types";
 import { makeErrorResponse, makeSuccessResponse } from "../utils/makeResponses";
+import { sendEmail } from "../utils/sendEmail";
 import { isAdmin } from "../utils/validations";
 
 export const addWarningService: APIGatewayProxyHandler = async (event) => {
@@ -42,7 +44,7 @@ export const addWarningService: APIGatewayProxyHandler = async (event) => {
 
   try {
     const {
-      Item: { mentee_name, mentor_name },
+      Item: { mentee_name, mentor_name, mentee_email },
     } = await getMentorshipById(mentorship_id);
     const {
       Item: { full_name },
@@ -59,6 +61,12 @@ export const addWarningService: APIGatewayProxyHandler = async (event) => {
       },
       ["mentorship_status", "warning_info"]
     );
+
+    const htmlMentee = warningMail({
+      menteeName: mentee_name,
+      isNotAssist: warn_type === WARN.NO_ASSIST,
+    });
+    sendEmail(mentee_email, `Hola ${mentee_name}!`, htmlMentee);
 
     return makeSuccessResponse(warningData, "300");
   } catch (error) {
@@ -88,11 +96,11 @@ export const getAllWarnings: APIGatewayProxyHandler = async () => {
 };
 
 export const forgiveWarning: APIGatewayProxyHandler = async (event) => {
-  const userToken = event.headers["user-token"];
-  if (!userToken || (await getUserByToken(userToken)).Count === 0) {
+  const user_token = event.headers["user-token"];
+  if (!user_token || (await getUserByToken(user_token)).Count === 0) {
     return makeErrorResponse(401, "-117");
   }
-  if (!(await isAdmin(userToken))) {
+  if (!(await isAdmin(user_token))) {
     return makeErrorResponse(403, "-116");
   }
   const { forgive_cause } = JSON.parse(event.body);

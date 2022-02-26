@@ -5,9 +5,9 @@ import { MentorshipResponse } from "../../../types";
 import { makeLambdaResponse } from "../../../utils/makeResponses";
 import { verifyToken } from "../../../utils/token";
 
-const checkCancelFunction: Handler = async (event, _, callback) => {
-  const { token } = event.responseData;
-  const tokenData = verifyToken(token);
+const checkCancelFunction: Handler = async ({confirmationAttempt, reminderAttempt, responseData}, _, callback) => {
+  const { mentorship_token } = responseData;
+  const tokenData = verifyToken(mentorship_token);
 
   try {
     const {
@@ -17,14 +17,18 @@ const checkCancelFunction: Handler = async (event, _, callback) => {
     return makeLambdaResponse<MentorshipResponse>(callback, {
       responseMessage: RESPONSE_CODES["0"],
       responseCode: "0",
-      responseData: event.responseData,
+      responseData,
+      confirmationAttempt,
+      reminderAttempt,
       isCancel: mentorship_status === STATUS.CANCEL,
     });
   } catch (error) {
     return makeLambdaResponse<MentorshipResponse>(callback, {
       responseMessage: RESPONSE_CODES["0"],
       responseCode: "0",
-      responseData: event.responseData,
+      responseData,
+      confirmationAttempt,
+      reminderAttempt,
       isCancel: false,
     });
   }

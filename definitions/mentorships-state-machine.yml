@@ -14,3 +14,5 @@ confirmationAttempt:
   handler: index.confirmationAttempt
 mentorshipCatch:
   handler: index.mentorshipCatch
+addRole:
+  handler: index.mentorshipAddRole
