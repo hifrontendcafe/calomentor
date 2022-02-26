@@ -19,17 +19,17 @@ const getMentorships: APIGatewayProxyHandler = async (event) => {
 
   const id = pathParameters?.id;
   const filter = queryStringParameters?.filter;
-  const filter_dates = queryStringParameters?.filter_dates;
+  const filter_dates = queryStringParameters?.filter_dates ?? FILTERDATES.ALL;
 
-  if (filter_dates === FILTERDATES.ALL) {
-    const user_token = event.headers["user-token"];
-    if (!user_token || (await getUserByToken(user_token)).Count === 0) {
-      return makeErrorResponse(401, "-117");
-    }
-    if (!(await isAdmin(user_token))) {
-      return makeErrorResponse(403, "-116");
-    }
-  }
+  // if (filter_dates === FILTERDATES.ALL) {
+  //   const user_token = event.headers["user-token"];
+  //   if (!user_token || (await getUserByToken(user_token)).Count === 0) {
+  //     return makeErrorResponse(401, "-117");
+  //   }
+  //   if (!(await isAdmin(user_token))) {
+  //     return makeErrorResponse(403, "-116");
+  //   }
+  // }
 
   let data: Awaited<ReturnType<typeof getMentorshipsByMentorId>>;
 
@@ -70,23 +70,31 @@ const getMentorships: APIGatewayProxyHandler = async (event) => {
 
     mentorship.time_slot_info = timeSlot;
 
-    if (
-      filter_dates === FILTERDATES.PAST &&
-      mentorship.mentorship_status === STATUS.CANCEL
-    ) {
-      mentorshipsToReturn.push(mentorship);
-    } else {
-      const checkDateFilter =
-        (filter_dates === FILTERDATES.PAST && isPastDate(date)) ||
-        (filter_dates === FILTERDATES.FUTURE &&
-          isFutureDate(date) &&
-          mentorship.mentorship_status !== STATUS.CANCEL) ||
-        !filter_dates;
-
-      if (!checkDateFilter) {
-        continue;
+    /**
+     * When filter_dates is "PAST" we need to show:
+     * - Past mentorships
+     * - Canceled mentorships
+     */
+    if (filter_dates === FILTERDATES.PAST) {
+      if (isPastDate(date) || mentorship.mentorship_status === STATUS.CANCEL) {
+        mentorshipsToReturn.push(mentorship);
       }
+    }
 
+    /**
+     * When filter_dates is "FUTURE" we need to show:
+     * - Future mentorships that aren't canceled
+     */
+    if (filter_dates === FILTERDATES.FUTURE) {
+      if (
+        isFutureDate(date) &&
+        mentorship.mentorship_status !== STATUS.CANCEL
+      ) {
+        mentorshipsToReturn.push(mentorship);
+      }
+    }
+
+    if (filter_dates === FILTERDATES.ALL) {
       mentorshipsToReturn.push(mentorship);
     }
   }
