@@ -1,3 +1,5 @@
+org: frontendcafe
+app: server
 service: server
 frameworkVersion: "3"
 useDotenv: true
