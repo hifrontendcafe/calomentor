@@ -1,5 +1,5 @@
 import { APIGatewayProxyHandler } from "aws-lambda";
-import { FILTERDATES } from "../../../constants";
+import { FILTERDATES, STATUS } from "../../../constants";
 import {
   getAllMentorships,
   getMentorshipsByMentorId,
@@ -64,20 +64,31 @@ const getMentorships: APIGatewayProxyHandler = async (event) => {
     const timeSlot = timeSlotResult.Item;
 
     const date = new Date(timeSlotResult.Item.date);
-    const checkDateFilter =
-      (filter_dates === FILTERDATES.PAST && isPastDate(date)) ||
-      (filter_dates === FILTERDATES.FUTURE && isFutureDate(date)) ||
-      !filter_dates;
-
-    if (!checkDateFilter) {
-      continue;
-    }
 
     delete mentorship?.feedback_mentee_private;
     delete mentorship?.time_slot_id;
 
     mentorship.time_slot_info = timeSlot;
-    mentorshipsToReturn.push(mentorship);
+
+    if (
+      filter_dates === FILTERDATES.PAST &&
+      mentorship.mentorship_status === STATUS.CANCEL
+    ) {
+      mentorshipsToReturn.push(mentorship);
+    } else {
+      const checkDateFilter =
+        (filter_dates === FILTERDATES.PAST && isPastDate(date)) ||
+        (filter_dates === FILTERDATES.FUTURE &&
+          isFutureDate(date) &&
+          mentorship.mentorship_status !== STATUS.CANCEL) ||
+        !filter_dates;
+
+      if (!checkDateFilter) {
+        continue;
+      }
+
+      mentorshipsToReturn.push(mentorship);
+    }
   }
 
   return makeSuccessResponse(mentorshipsToReturn);
