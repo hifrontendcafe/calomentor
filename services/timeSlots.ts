@@ -145,7 +145,7 @@ export const addMenteeToTimeSlot: APIGatewayProxyHandler = async (event) => {
   );
 
   if (!mentee_username || !mentee_id || !mentorship_token) {
-    return makeErrorResponse(400, "-311");
+    return makeErrorResponse(400, "-312");
   }
 
   let timeSlot: TimeSlot | undefined;
