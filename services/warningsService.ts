@@ -96,13 +96,13 @@ export const getAllWarnings: APIGatewayProxyHandler = async () => {
 };
 
 export const forgiveWarning: APIGatewayProxyHandler = async (event) => {
-  const user_token = event.headers["user-token"];
-  if (!user_token || (await getUserByToken(user_token)).Count === 0) {
-    return makeErrorResponse(401, "-117");
-  }
-  if (!(await isAdmin(user_token))) {
-    return makeErrorResponse(403, "-116");
-  }
+  // const user_token = event.headers["user-token"];
+  // if (!user_token || (await getUserByToken(user_token)).Count === 0) {
+  //   return makeErrorResponse(401, "-117");
+  // }
+  // if (!(await isAdmin(user_token))) {
+  //   return makeErrorResponse(403, "-116");
+  // }
   const { forgive_cause } = JSON.parse(event.body);
   const { id } = event.pathParameters;
   if (!id) {

@@ -178,13 +178,13 @@ export const updateUserByIdService: APIGatewayProxyHandler = async (event) => {
 };
 
 export const activateUserService: APIGatewayProxyHandler = async (event) => {
-  const user_token = event.headers["user-token"];
-  if (!user_token || (await getUserByToken(user_token)).Count === 0) {
-    return makeErrorResponse(401, "-117");
-  }
-  if (!(await isAdmin(user_token))) {
-    return makeErrorResponse(403, "-116");
-  }
+  // const user_token = event.headers["user-token"];
+  // if (!user_token || (await getUserByToken(user_token)).Count === 0) {
+  //   return makeErrorResponse(401, "-117");
+  // }
+  // if (!(await isAdmin(user_token))) {
+  //   return makeErrorResponse(403, "-116");
+  // }
   const id = event?.pathParameters?.id;
 
   if (!id) {
