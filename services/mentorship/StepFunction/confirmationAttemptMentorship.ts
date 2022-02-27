@@ -1,7 +1,6 @@
 import { Handler } from "aws-lambda";
 import { RESPONSE_CODES } from "../../../constants";
 import { confirmMentorshipMail } from "../../../mails/confirmMentorship";
-import { getTimeSlotById } from "../../../repository/timeSlot";
 import { MentorshipResponse } from "../../../types";
 import { sendMessageUserToCalobot } from "../../../utils/bot";
 import { getUnixTime, toDateString, toTimeString } from "../../../utils/dates";
@@ -21,13 +20,13 @@ const confirmationAttemptMentorship: Handler = async (event, _, callback) => {
         mentorshipId,
         menteeId,
         mentorId,
-        mentorship_duration
+        mentorship_duration,
       },
       mentorshipDate,
       mentorship_token,
     },
     confirmationAttempt,
-    reminderAttempt
+    reminderAttempt,
   } = event;
   const date = new Date(mentorshipDate);
 
@@ -52,7 +51,7 @@ const confirmationAttemptMentorship: Handler = async (event, _, callback) => {
         mentorEmail,
         mentorName,
         timezone: menteeTimezone,
-        duration: mentorship_duration
+        duration: mentorship_duration,
       })
     );
 
@@ -68,14 +67,14 @@ const confirmationAttemptMentorship: Handler = async (event, _, callback) => {
       responseCode: "0",
       responseData: event.responseData,
       confirmationAttempt: confirmationAttempt + 1,
-      reminderAttempt
+      reminderAttempt,
     });
   } catch (error) {
     return makeLambdaResponse<MentorshipResponse>(callback, {
       responseMessage: RESPONSE_CODES["-1"],
       responseCode: "-1",
       responseData: event.responseData,
-      reminderAttempt
+      reminderAttempt,
     });
   }
 };
