@@ -38,6 +38,19 @@ export enum WHOCANCELED {
 // 400 or -400 => Timeslot service
 // 0 and -1 => Stepfunctions responses
 
+/**
+ * Negative numbers for failed responses
+ * Postiive numbers for success responses
+ * 0 as generic stepFunction success response
+ * -1 as generic stepFunction failed response
+ * 
+ * Codes:
+ *   - 1XX: Mentorships services
+ *   - 2XX: Users services
+ *   - 3XX: Warnings services
+ *   - 4XX: Timeslots services
+ */
+
 export const RESPONSE_CODES = {
   "0": "OK.",
   "-1": "Unexpected error.",
@@ -75,7 +88,6 @@ export const RESPONSE_CODES = {
   "-308": "Time slot not found",
   "-309": "There was an error trying to update the time slot",
   "-310": "Bad Request: Missing params. The required params are id and slot",
-
   "-312":
     "Bad Request: Missing params. The required params are mentee_username, mentee_id and mentorship_token",
   "-313": "There was an error trying to delete the slot",
