@@ -32,7 +32,7 @@ export enum WHOCANCELED {
 }
 
 export const RESPONSE_CODES = {
-  "0": "OK.",
+  "1": "OK.",
   "-1": "Unexpected error.",
   "-100":
     "Bad Request: Missing params. The required params are mentor_id, mentee_id, mentee_email, status, time_slot_id, time_slot_time",
