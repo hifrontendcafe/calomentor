@@ -6,10 +6,10 @@ import {
   updateMentorship,
 } from "../../../repository/mentorship";
 import {
-  freeTimeSlot,
   removeMenteeFromTimeSlot,
+  updateTimeslotStatus,
 } from "../../../repository/timeSlot";
-import { MentorshipResponse } from "../../../types";
+import { MentorshipResponse, TIMESLOT_STATUS } from "../../../types";
 import { sendMessageUserToCalobot } from "../../../utils/bot";
 import { getUnixTime, toDateString, toTimeString } from "../../../utils/dates";
 import { createICS, ICalStatus } from "../../../utils/ical";
@@ -75,7 +75,7 @@ const checkConfirmFunction: Handler = async (
 
       const mentorship = await getMentorshipById(tokenData.mentorshipId);
 
-      await freeTimeSlot(mentorship.Item?.time_slot_id);
+      await updateTimeslotStatus(mentorship.Item?.time_slot_id, TIMESLOT_STATUS.FREE);
       await removeMenteeFromTimeSlot(mentorship.Item?.time_slot_id);
       await updateMentorship(
         tokenData.mentorshipId,

@@ -6,12 +6,12 @@ import { confirmationMail } from "../../../mails/confirmation";
 import { createMentorship } from "../../../repository/mentorship";
 import {
   addMenteeToTimeSlot,
-  fillTimeSlot,
-  getTimeSlotById
+  getTimeSlotById,
+  updateTimeslotStatus
 } from "../../../repository/timeSlot";
 import { getUserById } from "../../../repository/user";
 import { getWarningsData } from "../../../repository/warning";
-import { Mentorship } from "../../../types";
+import { Mentorship, TIMESLOT_STATUS } from "../../../types";
 import { sendMessageToCalobot, sendMessageUserToCalobot } from "../../../utils/bot";
 import { getUnixTime, toDateString, toTimeString } from "../../../utils/dates";
 import { createICS } from "../../../utils/ical";
@@ -70,14 +70,14 @@ const createMentorshipAPI: APIGatewayProxyHandler = async (event) => {
 
   try {
     const {
-      Item: { date, is_occupied },
+      Item: { date, timeslot_status },
     } = await getTimeSlotById(mentorship.time_slot_id);
 
     if (!date) {
       return makeErrorResponse(500, "-103");
     }
 
-    if (is_occupied) {
+    if (timeslot_status !== TIMESLOT_STATUS.FREE) {
       return makeErrorResponse(403, "-119");
     }
 
@@ -103,7 +103,7 @@ const createMentorshipAPI: APIGatewayProxyHandler = async (event) => {
     await createMentorship(mentorship);
 
     // Update timeslot selected
-    await fillTimeSlot(mentorship.time_slot_id);
+    await updateTimeslotStatus(mentorship.time_slot_id, TIMESLOT_STATUS.OCCUPIED);
     await addMenteeToTimeSlot(mentorship.time_slot_id, {
       id: mentee_id,
       username: mentee_username_discord,
