@@ -1,7 +1,7 @@
 import { Handler } from "aws-lambda";
 import { RESPONSE_CODES } from "../../../constants";
 import { reminderMail } from "../../../mails/reminder";
-import { MentorshipResponse } from "../../../types";
+import { MentorshipRequestBody, MentorshipResponse } from "../../../types";
 import {
   toDateString,
   toTimeString,
@@ -29,6 +29,7 @@ const reminderMentorship: Handler = async (event, _, callback) => {
         mentorshipId,
         menteeId,
         mentorId,
+        mentorship_duration
       },
       mentorshipDate,
     },
@@ -56,6 +57,7 @@ const reminderMentorship: Handler = async (event, _, callback) => {
         mentorEmail,
         mentorName,
         timezone: menteeTimezone,
+        duration: mentorship_duration
       })
     );
     const htmlMentor = reminderMail({
@@ -76,6 +78,7 @@ const reminderMentorship: Handler = async (event, _, callback) => {
         mentorEmail,
         mentorName,
         timezone: mentorTimezone,
+        duration: mentorship_duration
       })
     );
 
@@ -86,7 +89,7 @@ const reminderMentorship: Handler = async (event, _, callback) => {
       footer: "⏰ Recordatorio de la Mentoria",
       title: "⏰ Recordatorio de la Mentoria",
       timestamp: getUnixTime(date),
-      mentions: [menteeId, mentorId],
+      mentions: [parseInt(menteeId), parseInt(mentorId)],
     });
 
     await sendMessageUserToCalobot(menteeId, {

@@ -1,6 +1,7 @@
 import { Handler } from "aws-lambda";
 import { RESPONSE_CODES } from "../../../constants";
 import { confirmMentorshipMail } from "../../../mails/confirmMentorship";
+import { getTimeSlotById } from "../../../repository/timeSlot";
 import { MentorshipResponse } from "../../../types";
 import { sendMessageUserToCalobot } from "../../../utils/bot";
 import { getUnixTime, toDateString, toTimeString } from "../../../utils/dates";
@@ -19,7 +20,8 @@ const confirmationAttemptMentorship: Handler = async (event, _, callback) => {
         menteeTimezone,
         mentorshipId,
         menteeId,
-        mentorId
+        mentorId,
+        mentorship_duration
       },
       mentorshipDate,
       mentorship_token,
@@ -50,6 +52,7 @@ const confirmationAttemptMentorship: Handler = async (event, _, callback) => {
         mentorEmail,
         mentorName,
         timezone: menteeTimezone,
+        duration: mentorship_duration
       })
     );
 

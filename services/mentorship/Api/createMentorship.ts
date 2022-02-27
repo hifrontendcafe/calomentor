@@ -70,7 +70,7 @@ const createMentorshipAPI: APIGatewayProxyHandler = async (event) => {
 
   try {
     const {
-      Item: { date, is_occupied },
+      Item: { date, is_occupied, duration },
     } = await getTimeSlotById(mentorship.time_slot_id);
 
     if (!date) {
@@ -130,6 +130,7 @@ const createMentorshipAPI: APIGatewayProxyHandler = async (event) => {
         mentorEmail: email,
         mentorName: full_name,
         timezone: mentee_timezone,
+        duration
       })
     );
     
@@ -152,6 +153,7 @@ const createMentorshipAPI: APIGatewayProxyHandler = async (event) => {
         mentorEmail: email,
         mentorName: full_name,
         timezone: user_timezone,
+        duration
       })
     );
 
@@ -195,6 +197,7 @@ const createMentorshipAPI: APIGatewayProxyHandler = async (event) => {
         mentorEmail: email,
         mentorshipDate,
         mentorship_token: mentorship.mentorship_token,
+        mentroship_duration: duration
       }),
     };
 

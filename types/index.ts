@@ -86,6 +86,22 @@ export interface MentorshipStateMachine {
   mentorName: string;
   mentorEmail: string;
   mentorshipId: string;
+  mentorship_duration: number;
+}
+
+export interface MentorshipRequestBody {
+  mentorId: string;
+  menteeId: string;
+  menteeName: string;
+  menteeEmail: string;
+  menteeTimezone: string;
+  mentorTimezone: string;
+  mentorName: string;
+  mentorEmail: string;
+  mentorshipDate: Date;
+  mentorship_token: string;
+  mentorship_duration: number;
+  mentorshipId: string;
 }
 
 export interface MentorshipResponse {

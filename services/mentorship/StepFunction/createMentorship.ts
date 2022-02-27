@@ -1,22 +1,8 @@
 import { Handler } from "aws-lambda";
 import { RESPONSE_CODES } from "../../../constants";
-import { MentorshipResponse } from "../../../types";
+import { MentorshipRequestBody, MentorshipResponse } from "../../../types";
 import { addTime, substractTime } from "../../../utils/dates";
 import { makeLambdaResponse } from "../../../utils/makeResponses";
-
-interface MentorshipRequestBody {
-  mentorId: string;
-  menteeId: string;
-  menteeName: string;
-  menteeEmail: string;
-  menteeTimezone: string;
-  mentorTimezone: string;
-  mentorName: string;
-  mentorEmail: string;
-  mentorshipDate: Date;
-  mentorship_token: string;
-  mentorshipId: string;
-}
 
 const createMentorship: Handler<MentorshipRequestBody, MentorshipResponse> = (
   event,
@@ -35,6 +21,7 @@ const createMentorship: Handler<MentorshipRequestBody, MentorshipResponse> = (
     mentorshipDate,
     mentorshipId,
     mentorship_token,
+    mentorship_duration
   } = event;
 
   const date = new Date(mentorshipDate);
@@ -60,6 +47,7 @@ const createMentorship: Handler<MentorshipRequestBody, MentorshipResponse> = (
         menteeTimezone,
         mentorTimezone,
         mentorshipId,
+        mentorship_duration
       },
       dateToRemindConfirmationAttemptOne,
       dateToRemindConfirmationAttemptTwo,
