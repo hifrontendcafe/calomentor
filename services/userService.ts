@@ -35,7 +35,7 @@ export const createUserService: APIGatewayProxyHandler = async (event) => {
   } = JSON.parse(event.body);
 
   if (!id || typeof id !== "string") {
-    return makeErrorResponse(400, "-315");
+    return makeErrorResponse(400, "-211");
   }
 
   const user: User = {
@@ -49,7 +49,7 @@ export const createUserService: APIGatewayProxyHandler = async (event) => {
     links,
     skills,
     is_active: false,
-    last_active_by: "",
+    last_activated_by: "",
     user_timezone: timezone,
     user_token: uuidv4(),
   };
@@ -88,7 +88,7 @@ export const getUserByIdService: APIGatewayProxyHandler = async (event) => {
   const id = event?.pathParameters?.id;
 
   if (!id) {
-    return makeErrorResponse(400, "-311");
+    return makeErrorResponse(400, "-212");
   }
 
   let user: User;
@@ -110,7 +110,7 @@ export const deleteUserByIdService: APIGatewayProxyHandler = async (event) => {
   const id = event?.pathParameters?.id;
 
   if (!id) {
-    return makeErrorResponse(400, "-311");
+    return makeErrorResponse(400, "-212");
   }
 
   let user: User;
@@ -118,7 +118,7 @@ export const deleteUserByIdService: APIGatewayProxyHandler = async (event) => {
     const userData = await deleteUserById(event.pathParameters.id);
     user = userData.Attributes;
   } catch (error) {
-    return makeErrorResponse(500, "-316", error);
+    return makeErrorResponse(500, "-206", error);
   }
 
   if (!user) {
@@ -132,7 +132,7 @@ export const updateUserByIdService: APIGatewayProxyHandler = async (event) => {
   const id = event?.pathParameters?.id;
 
   if (!id) {
-    return makeErrorResponse(400, "-311");
+    return makeErrorResponse(400, "-212");
   }
 
   const data = JSON.parse(event.body);
@@ -144,7 +144,7 @@ export const updateUserByIdService: APIGatewayProxyHandler = async (event) => {
       await addTokenToUser(id, user_token);
     }
   } catch (error) {
-    return makeErrorResponse(400, "-320", error);
+    return makeErrorResponse(400, "-210", error);
   }
 
   let result: Awaited<ReturnType<typeof updateUser>>;
@@ -161,17 +161,17 @@ export const updateUserByIdService: APIGatewayProxyHandler = async (event) => {
       "user_timezone",
     ]);
   } catch (err) {
-    return makeErrorResponse(400, "-317", err);
+    return makeErrorResponse(400, "-207", err);
   }
 
   const error = result.$response.error;
   const user: User = result.Attributes;
   if (error || !user) {
     if (isConditionalCheckFailedError(error)) {
-      return makeErrorResponse(400, "-318", error);
+      return makeErrorResponse(400, "-208", error);
     }
 
-    return makeErrorResponse(400, "-317", error);
+    return makeErrorResponse(400, "-207", error);
   }
 
   return makeSuccessResponse(user, "203");
@@ -188,34 +188,34 @@ export const activateUserService: APIGatewayProxyHandler = async (event) => {
   const id = event?.pathParameters?.id;
 
   if (!id) {
-    return makeErrorResponse(400, "-311");
+    return makeErrorResponse(400, "-212");
   }
 
-  const { is_active, last_active_by } = JSON.parse(event.body);
+  const { is_active, last_activated_by } = JSON.parse(event.body);
 
-  if (typeof is_active !== "boolean" || !last_active_by) {
-    return makeErrorResponse(400, "-319");
+  if (typeof is_active !== "boolean" || !last_activated_by) {
+    return makeErrorResponse(400, "-209");
   }
 
   let result: Awaited<ReturnType<typeof updateUser>>;
   try {
     if (is_active) {
-      result = await activateUser(id, last_active_by);
+      result = await activateUser(id, last_activated_by);
     } else {
-      result = await deactivateUser(id, last_active_by);
+      result = await deactivateUser(id, last_activated_by);
     }
   } catch (error) {
-    return makeErrorResponse(400, "-317", error);
+    return makeErrorResponse(400, "-207", error);
   }
 
   const error = result.$response.error;
   const user: User = result.Attributes;
   if (error || !user) {
     if (isConditionalCheckFailedError(error)) {
-      return makeErrorResponse(400, "-318", error);
+      return makeErrorResponse(400, "-208", error);
     }
 
-    return makeErrorResponse(400, "-317", error);
+    return makeErrorResponse(400, "-207", error);
   }
 
   return makeSuccessResponse(user, "203");
