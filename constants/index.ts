@@ -41,7 +41,7 @@ export enum WHOCANCELED {
 /**
  * Negative numbers for failed responses
  * Postiive numbers for success responses
- * 0 as generic stepFunction success response
+ * 1 as generic stepFunction success response
  * -1 as generic stepFunction failed response
  * 
  * Codes:
