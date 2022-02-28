@@ -1,5 +1,4 @@
 const axios = require("axios");
-
 interface IBotData {
   description: string;
   footer: string;
@@ -8,8 +7,9 @@ interface IBotData {
   mentions?: Array<number>;
 }
 
-export const sendMessageToCalobot = (data: IBotData) => {
-  return axios.post(process.env.BASE_BOT_URL + "/message/embed", {
+export const sendMessageToCalobot = async (data: IBotData) => {
+  return;
+  return axios.post("/message/embed", {
     author: {
       name: "Calomentor",
       iconURL:
@@ -38,7 +38,8 @@ export const sendMessageUserToCalobot = (
   data: IBotData,
   isEmbed = true
 ) => {
-  return axios.post(process.env.BASE_BOT_URL + `/message/user/${userId}`, {
+  return;
+  return axios.post(`/message/user/${userId}`, {
     author: {
       name: "Mentorship",
       iconURL:
@@ -63,6 +64,7 @@ export const sendMessageUserToCalobot = (
 };
 
 export const addRoleCalobot = (userId: string) => {
+  return;
   return axios.post(process.env.BASE_BOT_URL + "/mentorship/addRole", {
     user: userId,
     role: process.env.MENTEE_ROLE_ID,
@@ -70,6 +72,7 @@ export const addRoleCalobot = (userId: string) => {
 };
 
 export const removeRoleCalobot = (userId: string) => {
+  return;
   return axios.post(process.env.BASE_BOT_URL + "/mentorship/removeRole", {
     user: userId,
     role: process.env.MENTEE_ROLE_ID,

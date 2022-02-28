@@ -6,6 +6,7 @@ import {
   updateMentorship,
 } from "../../../repository/mentorship";
 import {
+  getTimeSlotById,
   removeMenteeFromTimeSlot,
   updateTimeslotStatus,
 } from "../../../repository/timeSlot";
@@ -58,6 +59,7 @@ const cancelMentorship: APIGatewayProxyHandler = async (event) => {
 
   try {
     const mentorship = await getMentorshipById(tokenData.mentorshipId);
+    const timeslot = await getTimeSlotById(mentorship.Item.time_slot_id);
 
     if (mentorship.Item?.mentorship_status === STATUS.CANCEL) {
       return makeErrorResponse(400, "-109");
@@ -112,6 +114,7 @@ const cancelMentorship: APIGatewayProxyHandler = async (event) => {
         mentorEmail: mentor_email,
         mentorName: mentor_name,
         timezone: mentee_timezone,
+        duration: timeslot.Item.duration
       },
       ICalStatus.CANCEL
     );
@@ -126,6 +129,7 @@ const cancelMentorship: APIGatewayProxyHandler = async (event) => {
         mentorEmail: mentor_email,
         mentorName: mentor_name,
         timezone: mentor_timezone,
+        duration: timeslot.Item.duration
       },
       ICalStatus.CANCEL
     );
