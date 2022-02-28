@@ -23,7 +23,7 @@ export enum WARNSTATE {
 
 export enum WARN {
   "NO_ASSIST" = "NO_ASSIST",
-  "COC_WARN" = "COC_WARN"
+  "COC_WARN" = "COC_WARN",
 }
 
 export enum WHOCANCELED {
@@ -43,7 +43,7 @@ export enum WHOCANCELED {
  * Postiive numbers for success responses
  * 1 as generic stepFunction success response
  * -1 as generic stepFunction failed response
- * 
+ *
  * Codes:
  *   - 1XX: Mentorships services
  *   - 2XX: Users services
@@ -68,10 +68,6 @@ export const RESPONSE_CODES = {
   "-110": "There was a problem with the confirmation",
   "-111": "The mentorship is not confirmed",
   "-112": "The mentorship already has a feedback",
-  "-113": "Bad Request: user_id, date y slots are required",
-  "-114": "Bad Request: date is past",
-  "-115":
-    "Bad Request: already has a timeslot with this date or has another slot in the next 45 minutes.",
   "-116": "Bad Request: user is not an admin",
   "-117": "Bad Request: must provide a valid user_token",
   "-118": "Mentee has warnigns",
@@ -83,6 +79,16 @@ export const RESPONSE_CODES = {
   "-303": "Unable to get warnings",
   "-304": "The mentee id is required",
   "-305": "Unable to delete the warning",
+  "-315": "Bad Request: id is required or is not a string.",
+  "-316": "There was an error trying to delete the user",
+  "-317": "There was an error trying to update the user",
+  "-318": "There was an error trying to update the user. Id not found",
+  "-319":
+    "Bad Request: is_active property is missing or is not allowable option.",
+  "-320": "There was an error trying to update the user. Token not updated",
+  "100": "Succesfully mentorship created.",
+  "101": "Mentorship confirmed",
+  "102": "Update feedback succesfully",
   "-306": "Unable to add a Time Slot",
   "-307": "Unable to get Time Slots",
   "-308": "Time slot not found",
@@ -93,9 +99,6 @@ export const RESPONSE_CODES = {
   "-313": "There was an error trying to delete the slot",
   "-314": "Time slot not found",
   "-311": "Bad Request: Missing params. id is required",
-  "100": "Succesfully mentorship created.",
-  "101": "Mentorship confirmed",
-  "102": "Update feedback succesfully",
   "103": "Time slot added",
   "104": "Time slot updated",
   "105": "Time slot successfully deleted",
@@ -103,6 +106,24 @@ export const RESPONSE_CODES = {
   "301": "There is no warnings for this mentee",
   "302": "Warnings",
   "303": "Warning deleted",
+  "400": "Time slot added",
+  "401": "Time slot updated",
+  "402": "Time slot successfully deleted",
+  "-401": "Bad Request: user_id, date y slots are required",
+  "-402": "Bad Request: date is past",
+  "-403":
+    "Bad Request: already has a timeslot with this date or has another slot in the next 45 minutes.",
+  "-404": "Unable to add a Time Slot",
+  "-405": "Unable to get Time Slots",
+  "-406": "Unable to get the time slot.",
+  "-407": "Time slot not found",
+  "-408": "Bad Request: Missing params. id is required",
+  "-409": "There was an error trying to update the time slot",
+  "-410":
+    "Bad Request: Missing params. The required params are mentee_username, mentee_id and mentorship_token",
+  "-411": "Bad Request: Missing params. The required params are id and slot",
+  "-412": "There was an error trying to delete the slot",
+  "-413": "Time slot not found",
   "200": "User created succesfully",
   "201": "User",
   "202": "User successfully deleted",

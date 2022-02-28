@@ -6,6 +6,7 @@ import {
   updateMentorship,
 } from "../../../repository/mentorship";
 import {
+  getTimeSlotById,
   removeMenteeFromTimeSlot,
   updateTimeslotStatus,
 } from "../../../repository/timeSlot";

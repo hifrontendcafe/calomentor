@@ -16,13 +16,13 @@ export const addTimeSlot: APIGatewayProxyHandler = async (event) => {
   const { user_id, slot_date, duration = 60 } = JSON.parse(event.body);
 
   if (!user_id && !slot_date) {
-    return makeErrorResponse(400, "-113");
+    return makeErrorResponse(400, "-401");
   }
 
   const date = new Date(slot_date);
 
   if (isPastDate(date)) {
-    return makeErrorResponse(400, "-114");
+    return makeErrorResponse(400, "-402");
   }
 
   const { Items } = await getTimeSlotsByUserId(user_id);
@@ -40,11 +40,11 @@ export const addTimeSlot: APIGatewayProxyHandler = async (event) => {
       timeslotFortyFiveBefore
     );
 
-    return !isSame && hasSameBetween;
+    return isSame || hasSameBetween;
   });
 
   if (timeslot) {
-    return makeErrorResponse(400, "-115");
+    return makeErrorResponse(400, "-403");
   }
 
   const timeSlot: TimeSlot = {
@@ -61,10 +61,10 @@ export const addTimeSlot: APIGatewayProxyHandler = async (event) => {
   try {
     await createTimeSlot(timeSlot);
   } catch (error) {
-    return makeErrorResponse(400, "-306", error);
+    return makeErrorResponse(400, "-404", error);
   }
 
-  return makeSuccessResponse(timeSlot, "103");
+  return makeSuccessResponse(timeSlot, "400");
 };
 
 export const getTimeSlotsByUser: APIGatewayProxyHandler = async (event) => {
@@ -78,7 +78,7 @@ export const getTimeSlotsByUser: APIGatewayProxyHandler = async (event) => {
       onlyFree: queryStringParameters?.only_free === "true",
     });
   } catch (error) {
-    return makeErrorResponse(400, "-307", error);
+    return makeErrorResponse(400, "-405", error);
   }
 
   return makeSuccessResponse(timeSlotsData.Items);
@@ -92,11 +92,11 @@ export const getTimeSlotById: APIGatewayProxyHandler = async (event) => {
   try {
     timeSlotData = await repositoryGetTimeSlotById(pathParameters?.id);
   } catch (error) {
-    return makeErrorResponse(400, "-103", error);
+    return makeErrorResponse(400, "-406", error);
   }
 
   if (!timeSlotData?.Item) {
-    return makeErrorResponse(404, "-308");
+    return makeErrorResponse(404, "-407");
   }
 
   return makeSuccessResponse(timeSlotData.Item);
@@ -108,7 +108,7 @@ export const updateTimeSlotState: APIGatewayProxyHandler = async (event) => {
   } = event;
 
   if (!id) {
-    return makeErrorResponse(400, "-311");
+    return makeErrorResponse(400, "-408");
   }
 
   const { timeslot_status } = JSON.parse(event.body);
@@ -118,9 +118,9 @@ export const updateTimeSlotState: APIGatewayProxyHandler = async (event) => {
       Attributes: timeslot,
     }: Awaited<ReturnType<typeof updateTimeslotStatus>> =
       await updateTimeslotStatus(id, timeslot_status);
-    return makeSuccessResponse(timeslot, "104");
+    return makeSuccessResponse(timeslot, "401");
   } catch (err) {
-    return makeErrorResponse(400, "-309", err);
+    return makeErrorResponse(400, "-409", err);
   }
 };
 
@@ -130,7 +130,7 @@ export const addMenteeToTimeSlot: APIGatewayProxyHandler = async (event) => {
   } = event;
 
   if (!id) {
-    return makeErrorResponse(400, "-311");
+    return makeErrorResponse(400, "-408");
   }
 
   const { mentee_username, mentee_id, mentorship_token } = JSON.parse(
@@ -138,7 +138,7 @@ export const addMenteeToTimeSlot: APIGatewayProxyHandler = async (event) => {
   );
 
   if (!mentee_username || !mentee_id || !mentorship_token) {
-    return makeErrorResponse(400, "-312");
+    return makeErrorResponse(400, "-410");
   }
 
   let timeSlot: TimeSlot | undefined;
@@ -152,15 +152,15 @@ export const addMenteeToTimeSlot: APIGatewayProxyHandler = async (event) => {
 
     timeSlot = timeSlotData.Attributes;
   } catch (err) {
-    return makeErrorResponse(400, "-309", err);
+    return makeErrorResponse(400, "-409", err);
   }
 
-  return makeSuccessResponse(timeSlot, "104");
+  return makeSuccessResponse(timeSlot, "401");
 };
 
 export const deleteTimeSlot: APIGatewayProxyHandler = async (event) => {
   if (!event.pathParameters.id) {
-    return makeErrorResponse(400, "-310");
+    return makeErrorResponse(400, "-411");
   }
 
   let deletedTimeSlot: TimeSlot | undefined;
@@ -172,12 +172,12 @@ export const deleteTimeSlot: APIGatewayProxyHandler = async (event) => {
 
     deletedTimeSlot = deletedResponseData.Attributes;
   } catch (err) {
-    return makeErrorResponse(400, "-313", err);
+    return makeErrorResponse(400, "-412", err);
   }
 
   if (deletedTimeSlot === undefined) {
-    return makeErrorResponse(400, "-314");
+    return makeErrorResponse(400, "-413");
   }
 
-  return makeSuccessResponse(deletedTimeSlot, "105");
+  return makeSuccessResponse(deletedTimeSlot, "402");
 };
