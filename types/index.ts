@@ -107,3 +107,50 @@ export interface MentorshipResponse {
   confirmationAttempt?: number;
   reminderAttempt?: number;
 }
+
+
+export enum QUEUETYPES {
+  MENTEE_MAIL = "MENTEE_MAIL",
+  MENTEE_DM = "MENTEE_DM",
+  MENTOR_MAIL = "MENTOR_MAIL",
+  MENTOR_DM = "MENTOR_DM",
+  NOTIFICATION = "NOTIFICATION",
+}
+
+export enum COMMUNICATIONTYPES {
+  CREATE = "CREATE",
+  REMINDER = "REMINDER",
+  FEEDBACK = "FEEDBACK",
+  CANCEL = "CANCEL",
+  CONFIRMATION_REQUEST = "CONFIRMATION_REQUEST",
+  WARNING = "WARNING",
+}
+
+type QueueDataBase = {
+  type: QUEUETYPES;
+  mentee_id: string;
+  mentor_id: string;
+  mentorship_date: Date;
+};
+
+type QueueMail = QueueDataBase & {
+  mentee_email: string;
+  mentee_name: string;
+  mentor_email: string;
+  mentor_name: string;
+  duration: 30 | 45 | 60;
+  mentorship_id: string;
+  mentee_timezone: string;
+  mentor_timezone: string;
+  mail_type: COMMUNICATIONTYPES;
+};
+
+type QueueNotification = QueueDataBase & {
+  notification_type: COMMUNICATIONTYPES;
+};
+
+type QueueDM = QueueDataBase & {
+  dm_type: COMMUNICATIONTYPES;
+};
+
+export type QueueData = QueueDM | QueueMail | QueueNotification;
