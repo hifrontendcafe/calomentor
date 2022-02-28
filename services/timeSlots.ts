@@ -4,12 +4,11 @@ import {
   addMenteeToTimeSlot as repositoryAddMenteeToTimeSlot,
   createTimeSlot,
   deleteTimeSlot as repositoryDeleteTimeSlot,
-  fillTimeSlot,
-  freeTimeSlot,
   getTimeSlotById as repositoryGetTimeSlotById,
-  getTimeSlotsByUserId
+  getTimeSlotsByUserId,
+  updateTimeslotStatus,
 } from "../repository/timeSlot";
-import { TimeSlot } from "../types";
+import { TimeSlot, TIMESLOT_STATUS } from "../types";
 import { addTime, dateIsBetween, isPastDate, isSameDate } from "../utils/dates";
 import { makeErrorResponse, makeSuccessResponse } from "../utils/makeResponses";
 
@@ -52,11 +51,11 @@ export const addTimeSlot: APIGatewayProxyHandler = async (event) => {
     id: uuidv4(),
     user_id,
     date: date.getTime(),
-    is_occupied: false,
+    timeslot_status: TIMESLOT_STATUS.FREE,
     mentee_username: "",
     mentee_id: "",
     mentorship_token: "",
-    duration
+    duration,
   };
 
   try {
@@ -104,37 +103,31 @@ export const getTimeSlotById: APIGatewayProxyHandler = async (event) => {
 };
 
 export const updateTimeSlotState: APIGatewayProxyHandler = async (event) => {
-  const { pathParameters } = event;
-  const id = pathParameters.id;
+  const {
+    pathParameters: { id },
+  } = event;
 
   if (!id) {
     return makeErrorResponse(400, "-311");
   }
 
-  const { is_occupied } = JSON.parse(event.body);
-
-  let timeSlot: TimeSlot;
+  const { timeslot_status } = JSON.parse(event.body);
 
   try {
-    let timeSlotData: Awaited<ReturnType<typeof fillTimeSlot>>;
-
-    if (is_occupied) {
-      timeSlotData = await fillTimeSlot(id);
-    } else {
-      timeSlotData = await freeTimeSlot(id);
-    }
-
-    timeSlot = timeSlotData.Attributes;
+    const {
+      Attributes: timeslot,
+    }: Awaited<ReturnType<typeof updateTimeslotStatus>> =
+      await updateTimeslotStatus(id, timeslot_status);
+    return makeSuccessResponse(timeslot, "104");
   } catch (err) {
     return makeErrorResponse(400, "-309", err);
   }
-
-  return makeSuccessResponse(timeSlot, "104");
 };
 
 export const addMenteeToTimeSlot: APIGatewayProxyHandler = async (event) => {
-  const { pathParameters } = event;
-  const id = pathParameters.id;
+  const {
+    pathParameters: { id },
+  } = event;
 
   if (!id) {
     return makeErrorResponse(400, "-311");

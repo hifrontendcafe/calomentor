@@ -6,13 +6,11 @@ import {
   updateMentorship,
 } from "../../../repository/mentorship";
 import {
-  freeTimeSlot,
-  getTimeSlotById,
   removeMenteeFromTimeSlot,
+  updateTimeslotStatus,
 } from "../../../repository/timeSlot";
-import {
-  sendMessageUserToCalobot,
-} from "../../../utils/bot";
+import { TIMESLOT_STATUS } from "../../../types";
+import { sendMessageUserToCalobot } from "../../../utils/bot";
 import { getUnixTime, toDateString, toTimeString } from "../../../utils/dates";
 import { createICS, ICalStatus } from "../../../utils/ical";
 import {
@@ -66,7 +64,20 @@ const cancelMentorship: APIGatewayProxyHandler = async (event) => {
       return makeErrorResponse(400, "-109");
     }
 
-    await freeTimeSlot(mentorship.Item?.time_slot_id);
+    if (who_canceled === WHOCANCELED.MENTEE) {
+      await updateTimeslotStatus(
+        mentorship.Item?.time_slot_id,
+        TIMESLOT_STATUS.FREE
+      );
+    }
+
+    if (who_canceled === WHOCANCELED.MENTOR) {
+      await updateTimeslotStatus(
+        mentorship.Item?.time_slot_id,
+        TIMESLOT_STATUS.CANCELED_BY_MENTOR
+      );
+    }
+
     await removeMenteeFromTimeSlot(mentorship.Item?.time_slot_id);
 
     const mentorshipUpdated = await updateMentorship(
