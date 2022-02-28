@@ -7,17 +7,20 @@ import { createMentorship } from "../../../repository/mentorship";
 import {
   addMenteeToTimeSlot,
   fillTimeSlot,
-  getTimeSlotById
+  getTimeSlotById,
 } from "../../../repository/timeSlot";
 import { getUserById } from "../../../repository/user";
 import { getWarningsData } from "../../../repository/warning";
 import { Mentorship } from "../../../types";
-import { sendMessageToCalobot, sendMessageUserToCalobot } from "../../../utils/bot";
+import {
+  sendMessageToCalobot,
+  sendMessageUserToCalobot,
+} from "../../../utils/bot";
 import { getUnixTime, toDateString, toTimeString } from "../../../utils/dates";
 import { createICS } from "../../../utils/ical";
 import {
   makeErrorResponse,
-  makeSuccessResponse
+  makeSuccessResponse,
 } from "../../../utils/makeResponses";
 import { sendEmail } from "../../../utils/sendEmail";
 import { getToken } from "../../../utils/token";
@@ -69,9 +72,9 @@ const createMentorshipAPI: APIGatewayProxyHandler = async (event) => {
   };
 
   try {
-    const {
-      Item: { date, is_occupied, duration },
-    } = await getTimeSlotById(mentorship.time_slot_id);
+    const { Item: timeslot } = await getTimeSlotById(mentorship.time_slot_id);
+
+    const { date, is_occupied, duration } = timeslot;
 
     if (!date) {
       return makeErrorResponse(500, "-103");
@@ -83,9 +86,9 @@ const createMentorshipAPI: APIGatewayProxyHandler = async (event) => {
 
     const mentorshipDate = new Date(date);
 
-    const {
-      Item: { email, full_name, user_timezone },
-    } = await getUserById(mentor_id);
+    const { Item: user } = await getUserById(mentor_id);
+
+    const { email, full_name, user_timezone } = user;
 
     if (!email && !full_name) {
       return makeErrorResponse(500, "-101");
@@ -130,10 +133,10 @@ const createMentorshipAPI: APIGatewayProxyHandler = async (event) => {
         mentorEmail: email,
         mentorName: full_name,
         timezone: mentee_timezone,
-        duration
+        duration,
       })
     );
-    
+
     const htmlMentor = confirmationMail({
       mentorName: full_name,
       menteeName: mentee_name,
@@ -153,7 +156,7 @@ const createMentorshipAPI: APIGatewayProxyHandler = async (event) => {
         mentorEmail: email,
         mentorName: full_name,
         timezone: user_timezone,
-        duration
+        duration,
       })
     );
 
@@ -197,7 +200,7 @@ const createMentorshipAPI: APIGatewayProxyHandler = async (event) => {
         mentorEmail: email,
         mentorshipDate,
         mentorship_token: mentorship.mentorship_token,
-        mentroship_duration: duration
+        mentorship_duration: duration,
       }),
     };
 
