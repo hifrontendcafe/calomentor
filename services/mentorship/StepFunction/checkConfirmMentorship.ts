@@ -50,15 +50,18 @@ const checkConfirmFunction: Handler = async (
 ) => {
   const {
     mentorship_token,
-    mentorName,
-    menteeName,
-    mentorshipId,
-    mentorEmail,
-    menteeEmail,
-    mentorTimezone,
-    menteeTimezone,
-    menteeId,
-    mentorId,
+    mentorship: {
+      mentorName,
+      menteeName,
+      mentorshipId,
+      mentorEmail,
+      menteeEmail,
+      mentorTimezone,
+      menteeTimezone,
+      menteeId,
+      mentorId,
+      mentorship_duration
+    }
   } = responseData;
   const tokenData = verifyToken(mentorship_token);
 
@@ -97,6 +100,7 @@ const checkConfirmFunction: Handler = async (
           mentorEmail,
           mentorName,
           timezone: menteeTimezone,
+          duration: mentorship_duration
         },
         ICalStatus.CANCEL
       );
@@ -111,6 +115,7 @@ const checkConfirmFunction: Handler = async (
           mentorEmail,
           mentorName,
           timezone: mentorTimezone,
+          duration: mentorship_duration
         },
         ICalStatus.CANCEL
       );

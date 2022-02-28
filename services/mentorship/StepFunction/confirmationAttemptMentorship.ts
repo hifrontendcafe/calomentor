@@ -19,13 +19,14 @@ const confirmationAttemptMentorship: Handler = async (event, _, callback) => {
         menteeTimezone,
         mentorshipId,
         menteeId,
-        mentorId
+        mentorId,
+        mentorship_duration,
       },
       mentorshipDate,
       mentorship_token,
     },
     confirmationAttempt,
-    reminderAttempt
+    reminderAttempt,
   } = event;
   const date = new Date(mentorshipDate);
 
@@ -50,6 +51,7 @@ const confirmationAttemptMentorship: Handler = async (event, _, callback) => {
         mentorEmail,
         mentorName,
         timezone: menteeTimezone,
+        duration: mentorship_duration,
       })
     );
 
@@ -65,14 +67,14 @@ const confirmationAttemptMentorship: Handler = async (event, _, callback) => {
       responseCode: "0",
       responseData: event.responseData,
       confirmationAttempt: confirmationAttempt + 1,
-      reminderAttempt
+      reminderAttempt,
     });
   } catch (error) {
     return makeLambdaResponse<MentorshipResponse>(callback, {
       responseMessage: RESPONSE_CODES["-1"],
       responseCode: "-1",
       responseData: event.responseData,
-      reminderAttempt
+      reminderAttempt,
     });
   }
 };

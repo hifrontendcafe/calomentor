@@ -18,30 +18,6 @@ export interface TimeSlot {
   duration: 30 | 45 | 60;
 }
 
-export interface Mentorship {
-  mentee_email: string;
-  mentee_username_discord: string;
-  mentor_email: string;
-  feedback_mentee: string;
-  mentor_id: string;
-  mentor_name: string;
-  info: string;
-  mentee_name: string;
-  mentorship_token: string;
-  mentee_id: string;
-  mentorship_status: STATUS;
-  id: string;
-  cancel_cause: string;
-  who_canceled: WHOCANCELED;
-  time_slot_info?: TimeSlot;
-  time_slot_id?: string;
-  feedback_stars: 1 | 2 | 3 | 4 | 5;
-  feedback_mentee_private?: string;
-  warning_info?: Warning;
-  mentee_timezone: string;
-  mentor_timezone?: string;
-}
-
 interface UserLinks {
   github: string;
   twitter: string;
@@ -82,6 +58,29 @@ export interface Warning {
   warning_author_name: string;
 }
 
+export interface Mentorship {
+  mentee_email: string;
+  mentee_username_discord: string;
+  mentor_email: string;
+  feedback_mentee: string;
+  mentor_id: string;
+  mentor_name: string;
+  info: string;
+  mentee_name: string;
+  mentorship_token: string;
+  mentee_id: string;
+  mentorship_status: STATUS;
+  id: string;
+  cancel_cause: string;
+  who_canceled: WHOCANCELED;
+  time_slot_info?: TimeSlot;
+  time_slot_id?: string;
+  feedback_stars: 1 | 2 | 3 | 4 | 5;
+  feedback_mentee_private?: string;
+  warning_info?: Warning;
+  mentee_timezone: string;
+  mentor_timezone?: string;
+}
 export interface MentorshipStateMachine {
   mentorId: string;
   menteeId: string;
@@ -91,6 +90,22 @@ export interface MentorshipStateMachine {
   mentorTimezone: string;
   mentorName: string;
   mentorEmail: string;
+  mentorshipId: string;
+  mentorship_duration: 30 | 45 | 60;
+}
+
+export interface MentorshipRequestBody {
+  mentorId: string;
+  menteeId: string;
+  menteeName: string;
+  menteeEmail: string;
+  menteeTimezone: string;
+  mentorTimezone: string;
+  mentorName: string;
+  mentorEmail: string;
+  mentorshipDate: Date;
+  mentorship_token: string;
+  mentorship_duration: 30 | 45 | 60;
   mentorshipId: string;
 }
 
