@@ -1,5 +1,5 @@
 import { TABLE_NAME_TIME_SLOT } from "../constants";
-import type { TimeSlot } from "../types";
+import { TimeSlot, TIMESLOT_STATUS } from "../types";
 import { deleteItem, get, put, scan, update } from "../utils/dynamoDb";
 import { toInt } from "../utils/toInt";
 
@@ -37,9 +37,9 @@ export function getTimeSlotsByUserId(
   }
 
   if (filters.onlyFree) {
-    query.FilterExpression = `${query.FilterExpression} and #occupied = :is_occupied`;
-    query.ExpressionAttributeNames["#occupied"] = "is_occupied";
-    query.ExpressionAttributeValues[":is_occupied"] = false;
+    query.FilterExpression = `${query.FilterExpression} and #occupied = :timeslot_status`;
+    query.ExpressionAttributeNames["#occupied"] = "timeslot_status";
+    query.ExpressionAttributeValues[":timeslot_status"] = TIMESLOT_STATUS.FREE;
   }
 
   return scan<TimeSlot>(query);
@@ -53,8 +53,8 @@ export function createTimeSlot(timeSlotInfo: TimeSlot) {
 }
 
 interface UpdateIsOccupiedParams {
-  type: "CHANGE_OCCUPIED_STATE";
-  isOccupied: boolean;
+  type: "CHANGE_TIMESLOT_STATUS";
+  timeslot_status: TIMESLOT_STATUS;
 }
 
 interface Mentee {
@@ -78,12 +78,11 @@ function updateTimeSlot(id: string, payload: UpdateParams) {
   };
 
   switch (payload.type) {
-    case "CHANGE_OCCUPIED_STATE":
+    case "CHANGE_TIMESLOT_STATUS":
       params.ExpressionAttributeValues = {
-        ":is_occupied": payload.isOccupied,
+        ":timeslot_status": payload.timeslot_status,
       };
-      params.UpdateExpression = "SET is_occupied = :is_occupied";
-
+      params.UpdateExpression = `SET timeslot_status = :timeslot_status`;
       break;
 
     case "ADD_MENTEE":
@@ -125,18 +124,8 @@ export function deleteTimeSlot(id: string) {
   });
 }
 
-export function fillTimeSlot(id: string) {
-  return updateTimeSlot(id, {
-    type: "CHANGE_OCCUPIED_STATE",
-    isOccupied: true,
-  });
-}
-
-export function freeTimeSlot(id: string) {
-  return updateTimeSlot(id, {
-    type: "CHANGE_OCCUPIED_STATE",
-    isOccupied: false,
-  });
+export function updateTimeslotStatus(id: string, timeslot_status: TIMESLOT_STATUS) {
+  return updateTimeSlot(id, { type: "CHANGE_TIMESLOT_STATUS", timeslot_status });
 }
 
 export function addMenteeToTimeSlot(id: string, mentee: Mentee) {
