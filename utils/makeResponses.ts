@@ -13,7 +13,7 @@ export interface Response {
 
 export function makeSuccessResponse(
   data: any,
-  responseCode: keyof typeof RESPONSE_CODES = "0"
+  responseCode: keyof typeof RESPONSE_CODES = "1"
 ): APIGatewayProxyResult {
   return {
     statusCode: 200,
