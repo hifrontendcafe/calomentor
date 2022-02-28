@@ -6,12 +6,12 @@ import {
   updateMentorship,
 } from "../../../repository/mentorship";
 import {
-  freeTimeSlot,
+  getTimeSlotById,
   removeMenteeFromTimeSlot,
+  updateTimeslotStatus,
 } from "../../../repository/timeSlot";
-import {
-  sendMessageUserToCalobot,
-} from "../../../utils/bot";
+import { TIMESLOT_STATUS } from "../../../types";
+import { sendMessageUserToCalobot } from "../../../utils/bot";
 import { getUnixTime, toDateString, toTimeString } from "../../../utils/dates";
 import { createICS, ICalStatus } from "../../../utils/ical";
 import {
@@ -59,12 +59,26 @@ const cancelMentorship: APIGatewayProxyHandler = async (event) => {
 
   try {
     const mentorship = await getMentorshipById(tokenData.mentorshipId);
+    const timeslot = await getTimeSlotById(mentorship.Item.time_slot_id);
 
     if (mentorship.Item?.mentorship_status === STATUS.CANCEL) {
       return makeErrorResponse(400, "-109");
     }
 
-    await freeTimeSlot(mentorship.Item?.time_slot_id);
+    if (who_canceled === WHOCANCELED.MENTEE) {
+      await updateTimeslotStatus(
+        mentorship.Item?.time_slot_id,
+        TIMESLOT_STATUS.FREE
+      );
+    }
+
+    if (who_canceled === WHOCANCELED.MENTOR) {
+      await updateTimeslotStatus(
+        mentorship.Item?.time_slot_id,
+        TIMESLOT_STATUS.CANCELED_BY_MENTOR
+      );
+    }
+
     await removeMenteeFromTimeSlot(mentorship.Item?.time_slot_id);
 
     const mentorshipUpdated = await updateMentorship(
@@ -100,6 +114,7 @@ const cancelMentorship: APIGatewayProxyHandler = async (event) => {
         mentorEmail: mentor_email,
         mentorName: mentor_name,
         timezone: mentee_timezone,
+        duration: timeslot.Item.duration
       },
       ICalStatus.CANCEL
     );
@@ -114,6 +129,7 @@ const cancelMentorship: APIGatewayProxyHandler = async (event) => {
         mentorEmail: mentor_email,
         mentorName: mentor_name,
         timezone: mentor_timezone,
+        duration: timeslot.Item.duration
       },
       ICalStatus.CANCEL
     );

@@ -6,10 +6,10 @@ import {
   updateMentorship,
 } from "../../../repository/mentorship";
 import {
-  freeTimeSlot,
   removeMenteeFromTimeSlot,
+  updateTimeslotStatus,
 } from "../../../repository/timeSlot";
-import { MentorshipResponse } from "../../../types";
+import { MentorshipResponse, TIMESLOT_STATUS } from "../../../types";
 import { sendMessageUserToCalobot } from "../../../utils/bot";
 import { getUnixTime, toDateString, toTimeString } from "../../../utils/dates";
 import { createICS, ICalStatus } from "../../../utils/ical";
@@ -50,15 +50,18 @@ const checkConfirmFunction: Handler = async (
 ) => {
   const {
     mentorship_token,
-    mentorName,
-    menteeName,
-    mentorshipId,
-    mentorEmail,
-    menteeEmail,
-    mentorTimezone,
-    menteeTimezone,
-    menteeId,
-    mentorId,
+    mentorship: {
+      mentorName,
+      menteeName,
+      mentorshipId,
+      mentorEmail,
+      menteeEmail,
+      mentorTimezone,
+      menteeTimezone,
+      menteeId,
+      mentorId,
+      mentorship_duration
+    }
   } = responseData;
   const tokenData = verifyToken(mentorship_token);
 
@@ -75,7 +78,7 @@ const checkConfirmFunction: Handler = async (
 
       const mentorship = await getMentorshipById(tokenData.mentorshipId);
 
-      await freeTimeSlot(mentorship.Item?.time_slot_id);
+      await updateTimeslotStatus(mentorship.Item?.time_slot_id, TIMESLOT_STATUS.FREE);
       await removeMenteeFromTimeSlot(mentorship.Item?.time_slot_id);
       await updateMentorship(
         tokenData.mentorshipId,
@@ -97,6 +100,7 @@ const checkConfirmFunction: Handler = async (
           mentorEmail,
           mentorName,
           timezone: menteeTimezone,
+          duration: mentorship_duration
         },
         ICalStatus.CANCEL
       );
@@ -111,6 +115,7 @@ const checkConfirmFunction: Handler = async (
           mentorEmail,
           mentorName,
           timezone: mentorTimezone,
+          duration: mentorship_duration
         },
         ICalStatus.CANCEL
       );

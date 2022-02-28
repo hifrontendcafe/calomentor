@@ -3,7 +3,6 @@ import ical, {
   ICalAttendeeStatus,
   ICalAttendeeType,
   ICalCalendarMethod,
-  ICalEventStatus,
 } from "ical-generator";
 import { addTime } from "./dates";
 
@@ -14,6 +13,7 @@ interface IcalData {
   mentorEmail: string;
   menteeEmail: string;
   timezone: string;
+  duration: 30 | 45 | 60
 }
 
 export enum ICalStatus {
@@ -63,7 +63,7 @@ export function createICS(
     priority: 1,
     timezone: data.timezone ?? "America/Buenos_Aires",
     start: date,
-    end: addTime(date, 1, "hours"),
+    end: addTime(date, data.duration, "minutes"),
     summary: `Mentoría con ${mentorshipWith}`,
     description: `Mentoría con ${mentorshipWith}`,
     location: "FrontendCafé Discord",
