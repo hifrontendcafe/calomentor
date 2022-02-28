@@ -63,8 +63,8 @@ const confirmationAttemptMentorship: Handler = async (event, _, callback) => {
     });
 
     return makeLambdaResponse<MentorshipResponse>(callback, {
-      responseMessage: RESPONSE_CODES["0"],
-      responseCode: "0",
+      responseMessage: RESPONSE_CODES["1"],
+      responseCode: "1",
       responseData: event.responseData,
       confirmationAttempt: confirmationAttempt + 1,
       reminderAttempt,

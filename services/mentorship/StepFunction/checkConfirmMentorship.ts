@@ -157,8 +157,8 @@ const checkConfirmFunction: Handler = async (
     }
 
     return makeLambdaResponse<MentorshipResponse>(callback, {
-      responseMessage: RESPONSE_CODES["0"],
-      responseCode: "0",
+      responseMessage: RESPONSE_CODES["1"],
+      responseCode: "1",
       responseData,
       isConfirm,
       confirmationAttempt,
@@ -166,8 +166,8 @@ const checkConfirmFunction: Handler = async (
     });
   } catch (error) {
     return makeLambdaResponse<MentorshipResponse>(callback, {
-      responseMessage: RESPONSE_CODES["0"],
-      responseCode: "0",
+      responseMessage: RESPONSE_CODES["-1"],
+      responseCode: "-1",
       responseData,
       isConfirm: false,
       confirmationAttempt,

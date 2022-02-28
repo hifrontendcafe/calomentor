@@ -31,13 +31,6 @@ export enum WHOCANCELED {
   "MENTEE" = "MENTEE",
 }
 
-// Response codes types:
-// 100 or -100 => Mentorship service
-// 200 or -200 => User service
-// 300 or -300 => Warning service
-// 400 or -400 => Timeslot service
-// 0 and -1 => Stepfunctions responses
-
 /**
  * Negative numbers for failed responses
  * Postiive numbers for success responses
@@ -52,8 +45,11 @@ export enum WHOCANCELED {
  */
 
 export const RESPONSE_CODES = {
-  "0": "OK.",
+  "1": "OK.",
   "-1": "Unexpected error.",
+  "103": "Time slot added",
+  "104": "Time slot updated",
+  "105": "Time slot successfully deleted",
   "-100":
     "Bad Request: Missing params. The required params are mentor_id, mentee_id, mentee_email, status, time_slot_id, time_slot_time",
   "-101": "Unable to get the mentor.",
@@ -73,6 +69,28 @@ export const RESPONSE_CODES = {
   "-118": "Mentee has warnigns",
   "-119": "Time slot is occupied",
   "-120": "Bad Request: must provide a cancel cause and who cancel.",
+  "200": "User created succesfully",
+  "201": "User",
+  "202": "User successfully deleted",
+  "203": "User successfully updated",
+  "-200": "Unable to create user. User already exists.",
+  "-201": "Unable to create user.",
+  "-202": "There is no mentors",
+  "-203": "Unable to get mentors.",
+  "-204": "User not found",
+  "-205": "Unable to get user by id",
+  "-206": "There was an error trying to delete the user",
+  "-207": "There was an error trying to update the user",
+  "-208": "There was an error trying to update the user. Id not found",
+  "-209":
+    "Bad Request: is_active or last_activated_by properties are missing or is not allowable options.",
+  "-210": "There was an error trying to update the user. Token not updated",
+  "-211": "Bad Request: id is required or is not a string.",
+  "-212": "Bad Request: Missing params. id is required",
+  "300": "Warning added",
+  "301": "There is no warnings for this mentee",
+  "302": "Warnings",
+  "303": "Warning deleted",
   "-300": "Unable to add a warning",
   "-301": "The mentee id and email is required",
   "-302": "The mentee has warnings",
@@ -99,13 +117,6 @@ export const RESPONSE_CODES = {
   "-313": "There was an error trying to delete the slot",
   "-314": "Time slot not found",
   "-311": "Bad Request: Missing params. id is required",
-  "103": "Time slot added",
-  "104": "Time slot updated",
-  "105": "Time slot successfully deleted",
-  "300": "Warning added",
-  "301": "There is no warnings for this mentee",
-  "302": "Warnings",
-  "303": "Warning deleted",
   "400": "Time slot added",
   "401": "Time slot updated",
   "402": "Time slot successfully deleted",
@@ -124,22 +135,4 @@ export const RESPONSE_CODES = {
   "-411": "Bad Request: Missing params. The required params are id and slot",
   "-412": "There was an error trying to delete the slot",
   "-413": "Time slot not found",
-  "200": "User created succesfully",
-  "201": "User",
-  "202": "User successfully deleted",
-  "203": "User successfully updated",
-  "-200": "Unable to create user. User already exists.",
-  "-201": "Unable to create user.",
-  "-202": "There is no mentors",
-  "-203": "Unable to get mentors.",
-  "-204": "User not found",
-  "-205": "Unable to get user by id",
-  "-206": "There was an error trying to delete the user",
-  "-207": "There was an error trying to update the user",
-  "-208": "There was an error trying to update the user. Id not found",
-  "-209":
-    "Bad Request: is_active or last_activated_by properties are missing or is not allowable options.",
-  "-210": "There was an error trying to update the user. Token not updated",
-  "-211": "Bad Request: id is required or is not a string.",
-  "-212": "Bad Request: Missing params. id is required",
 } as const;
