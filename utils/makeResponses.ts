@@ -1,4 +1,4 @@
-import type { APIGatewayProxyResult, Callback, Handler } from "aws-lambda";
+import type { APIGatewayProxyResult, Callback } from "aws-lambda";
 
 import type { OutgoingHttpHeaders } from "http";
 import { RESPONSE_CODES } from "../constants";
@@ -32,7 +32,10 @@ export function makeErrorResponse(
   responseCode: keyof typeof RESPONSE_CODES,
   error?: any
 ): APIGatewayProxyResult {
-  const data = {};
+  const data = {
+    code: responseCode,
+    message: RESPONSE_CODES[responseCode],
+  };
 
   if (error) {
     data["error"] = error;
@@ -40,10 +43,7 @@ export function makeErrorResponse(
 
   return {
     statusCode,
-    body: JSON.stringify({
-      message: RESPONSE_CODES[responseCode],
-      data,
-    }),
+    body: JSON.stringify(data),
     headers: {
       "Access-Control-Allow-Origin": "*",
     },
