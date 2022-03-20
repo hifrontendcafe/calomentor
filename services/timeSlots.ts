@@ -1,5 +1,6 @@
 import type { APIGatewayProxyHandler } from "aws-lambda";
 import { v4 as uuidv4 } from "uuid";
+import { getMentorshipsByTimeSlotId } from "../repository/mentorship";
 import {
   addMenteeToTimeSlot as repositoryAddMenteeToTimeSlot,
   createTimeSlot,
@@ -166,8 +167,13 @@ export const deleteTimeSlot: APIGatewayProxyHandler = async (event) => {
   let deletedTimeSlot: TimeSlot | undefined;
 
   try {
+    const timeSlotId = event.pathParameters.id
+    const mentorship = await getMentorshipsByTimeSlotId(timeSlotId)
+    if(mentorship.Count > 0) {
+      return makeErrorResponse(400, "-414");
+    }
     const deletedResponseData = await repositoryDeleteTimeSlot(
-      event.pathParameters.id
+      timeSlotId
     );
 
     deletedTimeSlot = deletedResponseData.Attributes;
