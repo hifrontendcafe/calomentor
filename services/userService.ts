@@ -205,7 +205,7 @@ export const activateUserService: APIGatewayProxyHandler = async (event) => {
   try {
     if (user_status === USER_STATUS.OUTSIDE_THE_PROGRAM) {
       result = await deleteUserFromMentorship(id, modify_by);
-    } else if (user_status === USER_STATUS.INACTIVE) {
+    } else if (user_status === USER_STATUS.ACTIVE) {
       result = await activateUser(id, modify_by);
     } else {
       result = await deactivateUser(id, modify_by);
