@@ -1,11 +1,13 @@
 import type { APIGatewayProxyHandler } from "aws-lambda";
 import { v4 as uuidv4 } from "uuid";
+import { USER_STATUS } from "../constants";
 import {
   activateUser,
   addTokenToUser,
   createUser,
   deactivateUser,
   deleteUserById,
+  deleteUserFromMentorship,
   getUserById,
   getUserByToken,
   getUsers,
@@ -32,6 +34,7 @@ export const createUserService: APIGatewayProxyHandler = async (event) => {
     links,
     skills,
     timezone,
+    accepted_coc,
   } = JSON.parse(event.body);
 
   if (!id || typeof id !== "string") {
@@ -48,8 +51,9 @@ export const createUserService: APIGatewayProxyHandler = async (event) => {
     role,
     links,
     skills,
-    is_active: false,
-    last_activated_by: "",
+    accepted_coc,
+    user_status: USER_STATUS.INACTIVE,
+    modified_by: "",
     user_timezone: timezone,
     user_token: uuidv4(),
   };
@@ -191,18 +195,20 @@ export const activateUserService: APIGatewayProxyHandler = async (event) => {
     return makeErrorResponse(400, "-212");
   }
 
-  const { is_active, last_activated_by } = JSON.parse(event.body);
+  const { user_status, modified_by } = JSON.parse(event.body);
 
-  if (typeof is_active !== "boolean" || !last_activated_by) {
+  if (!user_status || !modified_by) {
     return makeErrorResponse(400, "-209");
   }
 
   let result: Awaited<ReturnType<typeof updateUser>>;
   try {
-    if (is_active) {
-      result = await activateUser(id, last_activated_by);
+    if (user_status === USER_STATUS.OUTSIDE_THE_PROGRAM) {
+      result = await deleteUserFromMentorship(id, modified_by);
+    } else if (user_status === USER_STATUS.ACTIVE) {
+      result = await activateUser(id, modified_by);
     } else {
-      result = await deactivateUser(id, last_activated_by);
+      result = await deactivateUser(id, modified_by);
     }
   } catch (error) {
     return makeErrorResponse(400, "-207", error);

@@ -1,4 +1,4 @@
-import { TABLE_NAME_USER } from "../constants";
+import { TABLE_NAME_USER, USER_STATUS } from "../constants";
 import type { Role, User } from "../types";
 import {
   deleteItem,
@@ -26,7 +26,7 @@ export function getUsers(filters: UserFilters = {}) {
     TableName: TABLE_NAME_USER,
     ExpressionAttributeNames: { "#role": "role" },
     ProjectionExpression:
-      "id, discord_username, full_name, about_me, email, url_photo, #role, links, skills, is_active, user_timezone, user_token, last_activated_by",
+      "id, discord_username, full_name, about_me, email, url_photo, #role, links, skills, user_status, user_timezone, user_token, modified_by",
   };
 
   if (filters.role) {
@@ -89,17 +89,24 @@ export function updateUser(
   });
 }
 
-export function activateUser(id: string, last_activated_by: string) {
+export function activateUser(id: string, modified_by: string) {
   return updateUser(id, {
-    is_active: true,
-    last_activated_by,
+    user_status: USER_STATUS.ACTIVE,
+    modified_by,
   });
 }
 
-export function deactivateUser(id: string, last_activated_by: string) {
+export function deactivateUser(id: string, modified_by: string) {
   return updateUser(id, {
-    is_active: false,
-    last_activated_by,
+    user_status: USER_STATUS.INACTIVE,
+    modified_by,
+  });
+}
+
+export function deleteUserFromMentorship(id: string, modified_by: string) {
+  return updateUser(id, {
+    user_status: USER_STATUS.OUTSIDE_THE_PROGRAM,
+    modified_by,
   });
 }
 

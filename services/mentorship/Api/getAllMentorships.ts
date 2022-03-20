@@ -88,7 +88,8 @@ const getMentorships: APIGatewayProxyHandler = async (event) => {
     if (filter_dates === FILTERDATES.FUTURE) {
       if (
         isFutureDate(date) &&
-        mentorship.mentorship_status !== STATUS.CANCEL
+        mentorship.mentorship_status !== STATUS.CANCEL &&
+        mentorship.mentorship_status !== STATUS.WITHWARNING
       ) {
         mentorshipsToReturn.push(mentorship);
       }

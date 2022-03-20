@@ -38,7 +38,7 @@ const confirmationAttemptMentorship: Handler = async (event, _, callback) => {
       time: toTimeString(mentorshipDate, menteeTimezone),
       forMentor: false,
       cancelLink: `${process.env.BASE_FRONT_URL}/cancel?mentorship_token=${mentorship_token}`,
-      confirmationLink: `${process.env.BASE_FRONT_URL}/confirmation?mentorship_token=${mentorship_token}`,
+      confirmationLink: `${process.env.BASE_FRONT_URL}/confirmation?mentorship_token=${mentorship_token}&date=${date.getTime()}`,
     });
     sendEmail(
       menteeEmail,

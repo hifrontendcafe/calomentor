@@ -31,6 +31,19 @@ export enum WHOCANCELED {
   "MENTEE" = "MENTEE",
 }
 
+export enum TIMESLOT_STATUS {
+  OCCUPIED = "OCCUPIED",
+  FREE = "FREE",
+  CANCELED_BY_MENTOR = "CANCELED_BY_MENTOR",
+  FINISHED = "FINISHED",
+}
+
+export enum USER_STATUS {
+  ACTIVE = "ACTIVE",
+  INACTIVE = "INACTIVE",
+  OUTSIDE_THE_PROGRAM = "OUTSIDE_THE_PROGRAM",
+}
+
 /**
  * Negative numbers for failed responses
  * Postiive numbers for success responses
@@ -86,7 +99,7 @@ export const RESPONSE_CODES = {
   "-207": "There was an error trying to update the user",
   "-208": "There was an error trying to update the user. Id not found",
   "-209":
-    "Bad Request: is_active or last_activated_by properties are missing or is not allowable options.",
+    "Bad Request: user_status or modified_by properties are missing or is not allowable options.",
   "-210": "There was an error trying to update the user. Token not updated",
   "-211": "Bad Request: id is required or is not a string.",
   "-212": "Bad Request: Missing params. id is required",
@@ -105,7 +118,7 @@ export const RESPONSE_CODES = {
   "-317": "There was an error trying to update the user",
   "-318": "There was an error trying to update the user. Id not found",
   "-319":
-    "Bad Request: is_active property is missing or is not allowable option.",
+    "Bad Request: user_status property is missing or is not allowable option.",
   "-320": "There was an error trying to update the user. Token not updated",
   "-306": "Unable to add a Time Slot",
   "-307": "Unable to get Time Slots",
