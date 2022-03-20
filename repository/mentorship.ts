@@ -23,6 +23,14 @@ export function getMentorshipsByMentorId(id: string) {
   });
 }
 
+export function getMentorshipsByTimeSlotId(id: string) {
+  return scan<Mentorship>({
+    TableName: TABLE_NAME_MENTORSHIP,
+    FilterExpression: "time_slot_id = :time_slot_id",
+    ExpressionAttributeValues: { ":time_slot_id": id },
+  });
+}
+
 export function createMentorship(mentorship: Mentorship) {
   return put<Mentorship>({
     TableName: TABLE_NAME_MENTORSHIP,

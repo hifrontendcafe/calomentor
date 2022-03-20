@@ -135,4 +135,5 @@ export const RESPONSE_CODES = {
   "-411": "Bad Request: Missing params. The required params are id and slot",
   "-412": "There was an error trying to delete the slot",
   "-413": "Time slot not found",
+  "-414": "Time slot is asociated with a mentorship",
 } as const;
