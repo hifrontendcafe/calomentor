@@ -1,5 +1,7 @@
 import { STATUS, WARN, WARNSTATE, WHOCANCELED } from "../constants";
 
+import { ICalCalendarMethod } from "ical-generator";
+
 export enum TIMESLOT_STATUS {
   OCCUPIED = "OCCUPIED",
   FREE = "FREE",
@@ -127,4 +129,19 @@ export interface MentorshipResponse {
   isConfirm?: boolean;
   confirmationAttempt?: number;
   reminderAttempt?: number;
+}
+
+export interface IcalData {
+  mentorshipId: string;
+  mentorName: string;
+  menteeName: string;
+  mentorEmail: string;
+  menteeEmail: string;
+  timezone: string;
+  duration: 30 | 45 | 60;
+}
+
+export enum ICalStatus {
+  REQUEST = ICalCalendarMethod.REQUEST,
+  CANCEL = ICalCalendarMethod.CANCEL,
 }

@@ -4,22 +4,8 @@ import ical, {
   ICalAttendeeType,
   ICalCalendarMethod,
 } from "ical-generator";
+import { IcalData, ICalStatus } from "../types";
 import { addTime } from "./dates";
-
-interface IcalData {
-  mentorshipId: string;
-  mentorName: string;
-  menteeName: string;
-  mentorEmail: string;
-  menteeEmail: string;
-  timezone: string;
-  duration: 30 | 45 | 60
-}
-
-export enum ICalStatus {
-  REQUEST = ICalCalendarMethod.REQUEST,
-  CANCEL = ICalCalendarMethod.CANCEL,
-}
 
 export function createICS(
   date: Date,
