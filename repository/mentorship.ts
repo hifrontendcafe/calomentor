@@ -15,7 +15,7 @@ export function getMentorshipById(id: string) {
   });
 }
 
-export function getMentorshipsByMentorId(id) {
+export function getMentorshipsByMentorId(id: string) {
   return scan<Mentorship>({
     TableName: TABLE_NAME_MENTORSHIP,
     FilterExpression: "mentor_id = :mentor_id",

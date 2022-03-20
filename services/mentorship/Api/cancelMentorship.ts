@@ -10,10 +10,10 @@ import {
   removeMenteeFromTimeSlot,
   updateTimeslotStatus,
 } from "../../../repository/timeSlot";
-import { TIMESLOT_STATUS } from "../../../types";
+import { ICalStatus, TIMESLOT_STATUS } from "../../../types";
 import { sendMessageUserToCalobot } from "../../../utils/bot";
 import { getUnixTime, toDateString, toTimeString } from "../../../utils/dates";
-import { createICS, ICalStatus } from "../../../utils/ical";
+import { createICS } from "../../../utils/ical";
 import {
   makeErrorResponse,
   makeSuccessResponse,

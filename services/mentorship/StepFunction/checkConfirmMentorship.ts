@@ -9,10 +9,10 @@ import {
   removeMenteeFromTimeSlot,
   updateTimeslotStatus,
 } from "../../../repository/timeSlot";
-import { MentorshipResponse, TIMESLOT_STATUS } from "../../../types";
+import { ICalStatus, MentorshipResponse, TIMESLOT_STATUS } from "../../../types";
 import { sendMessageUserToCalobot } from "../../../utils/bot";
 import { getUnixTime, toDateString, toTimeString } from "../../../utils/dates";
-import { createICS, ICalStatus } from "../../../utils/ical";
+import { createICS } from "../../../utils/ical";
 import { makeLambdaResponse } from "../../../utils/makeResponses";
 import { sendEmail } from "../../../utils/sendEmail";
 import { verifyToken } from "../../../utils/token";

@@ -47,6 +47,9 @@ export enum WHOCANCELED {
 export const RESPONSE_CODES = {
   "1": "OK.",
   "-1": "Unexpected error.",
+  "100": "Succesfully mentorship created.",
+  "101": "Mentorship confirmed",
+  "102": "Update feedback succesfully",
   "103": "Time slot added",
   "104": "Time slot updated",
   "105": "Time slot successfully deleted",
@@ -104,9 +107,6 @@ export const RESPONSE_CODES = {
   "-319":
     "Bad Request: is_active property is missing or is not allowable option.",
   "-320": "There was an error trying to update the user. Token not updated",
-  "100": "Succesfully mentorship created.",
-  "101": "Mentorship confirmed",
-  "102": "Update feedback succesfully",
   "-306": "Unable to add a Time Slot",
   "-307": "Unable to get Time Slots",
   "-308": "Time slot not found",
