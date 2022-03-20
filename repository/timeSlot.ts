@@ -13,6 +13,8 @@ export function getTimeSlotById(id: string) {
 interface TimeSlotFilters {
   slotDate?: string;
   onlyFree?: boolean;
+  onlyFuture?: boolean;
+  getAll?: boolean
 }
 
 export function getTimeSlotsByUserId(
@@ -36,10 +38,22 @@ export function getTimeSlotsByUserId(
     query.ExpressionAttributeValues[":slot_date"] = toInt(filters.slotDate);
   }
 
-  if (filters.onlyFree) {
+  if (filters.onlyFree && !filters.getAll) {
     query.FilterExpression = `${query.FilterExpression} and #occupied = :timeslot_status`;
     query.ExpressionAttributeNames["#occupied"] = "timeslot_status";
     query.ExpressionAttributeValues[":timeslot_status"] = TIMESLOT_STATUS.FREE;
+  }
+
+  if (!filters.onlyFree && !filters.getAll) {
+    query.FilterExpression = `${query.FilterExpression} and #occupied <> :timeslot_status`;
+    query.ExpressionAttributeNames["#occupied"] = "timeslot_status";
+    query.ExpressionAttributeValues[":timeslot_status"] = TIMESLOT_STATUS.CANCELED_BY_MENTOR;
+  }
+
+  if (filters.onlyFuture) {
+    query.FilterExpression = `${query.FilterExpression} and #date >= :today`;
+    query.ExpressionAttributeNames["#date"] = "date";
+    query.ExpressionAttributeValues[":today"] = Date.now();
   }
 
   return scan<TimeSlot>(query);
@@ -124,8 +138,14 @@ export function deleteTimeSlot(id: string) {
   });
 }
 
-export function updateTimeslotStatus(id: string, timeslot_status: TIMESLOT_STATUS) {
-  return updateTimeSlot(id, { type: "CHANGE_TIMESLOT_STATUS", timeslot_status });
+export function updateTimeslotStatus(
+  id: string,
+  timeslot_status: TIMESLOT_STATUS
+) {
+  return updateTimeSlot(id, {
+    type: "CHANGE_TIMESLOT_STATUS",
+    timeslot_status,
+  });
 }
 
 export function addMenteeToTimeSlot(id: string, mentee: Mentee) {

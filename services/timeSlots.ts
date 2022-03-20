@@ -77,6 +77,8 @@ export const getTimeSlotsByUser: APIGatewayProxyHandler = async (event) => {
     timeSlotsData = await getTimeSlotsByUserId(pathParameters.id, {
       slotDate: queryStringParameters?.slot_date,
       onlyFree: queryStringParameters?.only_free === "true",
+      onlyFuture: queryStringParameters?.only_future === "true",
+      getAll: queryStringParameters?.get_all === "true",
     });
   } catch (error) {
     return makeErrorResponse(400, "-405", error);
