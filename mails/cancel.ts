@@ -140,8 +140,8 @@ export const cancelMail = ({
                           <div style="font-family:Lexend Deca, sans-serif;font-size:18px;font-weight:500;line-height:1.5;text-align:left;color:#27272A;">
                             ${
                               forMentor
-                                ? `Hola ${menteeName}, ${mentorName} ha cancelado una mentoria previamente agendada. ${isNotConfirmed && (`Debido a que no confirmaste tu mentoria.`)}`
-                                : `Hola ${mentorName}. Tu mentoria con ${menteeName} ha sido cancelada una mentoria previamente agendada. En caso de error o por cualquier consulta relacionada a la mentoría, podés comunicarte vía correo electrónico con el staff a frontendcafe@gmail.com.`
+                                ? `Hola ${mentorName}, ${menteeName} ha cancelado una mentoria previamente agendada. ${isNotConfirmed && (`Debido a que no confirmó la mentoria.`)}`
+                                : `Hola ${menteeName}. Tu mentoria con ${mentorName} ha sido cancelada ${isNotConfirmed && (`debido a que no confirmaste la mentoria con anticipación`)}. En caso de error o por cualquier consulta relacionada a la mentoría, podés comunicarte vía correo electrónico con el staff a frontendcafe@gmail.com.`
                             }
                           </div>
                         </td>
