@@ -19,6 +19,7 @@ export function createUser(user: User) {
 
 interface UserFilters {
   role?: Role;
+  onlyInTheProgram?: boolean;
 }
 
 export function getUsers(filters: UserFilters = {}) {
@@ -32,6 +33,13 @@ export function getUsers(filters: UserFilters = {}) {
   if (filters.role) {
     query.FilterExpression = "contains(#role, :role)";
     query.ExpressionAttributeValues = { ":role": filters.role };
+  }
+
+  if (filters.onlyInTheProgram) {
+    query.FilterExpression = `${query.FilterExpression} and #userStatus <> :user_status`;
+    query.ExpressionAttributeNames["#userStatus"] = "user_status";
+    query.ExpressionAttributeValues[":user_status"] =
+      USER_STATUS.OUTSIDE_THE_PROGRAM;
   }
 
   return scan<User>(query);

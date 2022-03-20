@@ -15,6 +15,7 @@ export function makeSuccessResponse(
   data: any,
   responseCode: keyof typeof RESPONSE_CODES = "1"
 ): APIGatewayProxyResult {
+  data.code = responseCode
   return {
     statusCode: 200,
     body: JSON.stringify({

@@ -52,7 +52,7 @@ export const createUserService: APIGatewayProxyHandler = async (event) => {
     links,
     skills,
     accepted_coc,
-    user_status: USER_STATUS.INACTIVE,
+    user_status: USER_STATUS.OUTSIDE_THE_PROGRAM,
     modified_by: "",
     user_timezone: timezone,
     user_token: uuidv4(),
@@ -71,11 +71,15 @@ export const createUserService: APIGatewayProxyHandler = async (event) => {
   return makeSuccessResponse(user);
 };
 
-export const getUsersService: APIGatewayProxyHandler = async () => {
+export const getUsersService: APIGatewayProxyHandler = async (event) => {
+  const { queryStringParameters } = event;
   let mentors: User[];
 
   try {
-    const mentorsData = await getUsers({ role: "mentor" });
+    const mentorsData = await getUsers({
+      role: "mentor",
+      onlyInTheProgram: queryStringParameters?.only_in_the_program === "true",
+    });
     mentors = mentorsData.Items;
   } catch (error) {
     return makeErrorResponse(400, "-203", error);

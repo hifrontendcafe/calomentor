@@ -26,12 +26,23 @@ const createMentorship: Handler<MentorshipRequestBody, MentorshipResponse> = (
 
   const date = new Date(mentorshipDate);
 
-  const dateToRemindConfirmationAttemptOne = substractTime(date, 3, "days");
-  const dateToRemindConfirmationAttemptTwo = substractTime(date, 2, "days");
-  const dateToRemindAttemptOne = substractTime(date, 1, "day");
-  const dateToRemindAttemptTwo = substractTime(date, 1, "hour");
-  const dateToRemindAttemptThree = substractTime(date, 10, "minutes");
-  const dateToSendFeedback = addTime(date, 1, "hours");
+  // Commented only for testing
+
+  // const dateToRemindConfirmationAttemptOne = substractTime(date, 3, "days");
+  // const dateToRemindConfirmationAttemptTwo = substractTime(date, 2, "days");
+  // const dateToRemindAttemptOne = substractTime(date, 1, "day");
+  // const dateToRemindAttemptTwo = substractTime(date, 1, "hour");
+  // const dateToRemindAttemptThree = substractTime(date, 10, "minutes");
+  // const dateToSendFeedback = addTime(date, 1, "hours");
+
+  // This times are only for testing
+
+  const dateToRemindConfirmationAttemptOne = substractTime(date, 10, "minutes");
+  const dateToRemindConfirmationAttemptTwo = substractTime(date, 8, "minutes");
+  const dateToRemindAttemptOne = substractTime(date, 5, "minutes");
+  const dateToRemindAttemptTwo = substractTime(date, 2, "minutes");
+  const dateToRemindAttemptThree = substractTime(date, 1, "minute");
+  const dateToSendFeedback = addTime(date, 2, "minutes");
 
   return makeLambdaResponse<MentorshipResponse>(callback, {
     responseMessage: RESPONSE_CODES["100"],

@@ -45,7 +45,7 @@ const createMentorshipAPI: APIGatewayProxyHandler = async (event) => {
   const warning = await getWarningsData(mentee_id);
 
   if (warning.Items.length > 0) {
-    return makeErrorResponse(500, "-118");
+    return makeErrorResponse(403, "-118");
   }
 
   const mentorship: Mentorship = {
@@ -81,7 +81,7 @@ const createMentorshipAPI: APIGatewayProxyHandler = async (event) => {
     }
 
     if (timeslot_status !== TIMESLOT_STATUS.FREE) {
-      return makeErrorResponse(403, "-119");
+      return makeErrorResponse(500, "-119");
     }
 
     const mentorshipDate = new Date(date);
@@ -145,7 +145,7 @@ const createMentorshipAPI: APIGatewayProxyHandler = async (event) => {
       menteeName: mentee_name,
       date: toDateString(mentorshipDate, user_timezone),
       time: toTimeString(mentorshipDate, user_timezone),
-      cancelLink: `${process.env.BASE_FRONT_URL}/cancel?mentorship_token=${mentorship.mentorship_token}`,
+      cancelLink: `${process.env.BASE_FRONT_URL}/cancel?mentorship_token=${mentorship.mentorship_token}&who_canceled=MENTOR`,
       forMentor: true,
     });
     sendEmail(

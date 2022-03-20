@@ -1,4 +1,4 @@
-import { TABLE_NAME_WARNINGS } from "../constants";
+import { TABLE_NAME_WARNINGS, WARNSTATE } from "../constants";
 import { Warning } from "../types";
 import { generateUpdateQuery, put, scan, update } from "../utils/dynamoDb";
 
@@ -15,9 +15,10 @@ export function getWarningsData(id?: string) {
   };
 
   if (id) {
-    query.FilterExpression = "mentee_id = :mentee_id";
+    query.FilterExpression = "mentee_id = :mentee_id and warning_status = :warning_status";
     query.ExpressionAttributeValues = {
       ":mentee_id": id,
+      ":warning_status": WARNSTATE.ACTIVE
     };
   } else {
     query.ProjectionExpression =
