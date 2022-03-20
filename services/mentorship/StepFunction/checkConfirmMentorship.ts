@@ -1,5 +1,5 @@
 import { Handler } from "aws-lambda";
-import { RESPONSE_CODES, STATUS, WHOCANCELED } from "../../../constants";
+import { RESPONSE_CODES, STATUS, TIMESLOT_STATUS, WHOCANCELED } from "../../../constants";
 import { cancelMail, CancelMailParams } from "../../../mails/cancel";
 import {
   getMentorshipById,
@@ -9,7 +9,7 @@ import {
   removeMenteeFromTimeSlot,
   updateTimeslotStatus,
 } from "../../../repository/timeSlot";
-import { ICalStatus, MentorshipResponse, TIMESLOT_STATUS } from "../../../types";
+import { ICalStatus, MentorshipResponse } from "../../../types";
 import { sendMessageUserToCalobot } from "../../../utils/bot";
 import { getUnixTime, toDateString, toTimeString } from "../../../utils/dates";
 import { createICS } from "../../../utils/ical";

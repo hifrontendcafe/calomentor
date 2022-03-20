@@ -1,5 +1,5 @@
-import { TABLE_NAME_TIME_SLOT } from "../constants";
-import { TimeSlot, TIMESLOT_STATUS } from "../types";
+import { TABLE_NAME_TIME_SLOT, TIMESLOT_STATUS } from "../constants";
+import { TimeSlot } from "../types";
 import { deleteItem, get, put, scan, update } from "../utils/dynamoDb";
 import { toInt } from "../utils/toInt";
 

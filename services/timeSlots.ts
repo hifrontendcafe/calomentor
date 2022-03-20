@@ -1,5 +1,6 @@
 import type { APIGatewayProxyHandler } from "aws-lambda";
 import { v4 as uuidv4 } from "uuid";
+import { TIMESLOT_STATUS } from "../constants";
 import { getMentorshipsByTimeSlotId } from "../repository/mentorship";
 import {
   addMenteeToTimeSlot as repositoryAddMenteeToTimeSlot,
@@ -9,7 +10,7 @@ import {
   getTimeSlotsByUserId,
   updateTimeslotStatus,
 } from "../repository/timeSlot";
-import { TimeSlot, TIMESLOT_STATUS } from "../types";
+import { TimeSlot } from "../types";
 import { addTime, dateIsBetween, isPastDate, isSameDate } from "../utils/dates";
 import { makeErrorResponse, makeSuccessResponse } from "../utils/makeResponses";
 

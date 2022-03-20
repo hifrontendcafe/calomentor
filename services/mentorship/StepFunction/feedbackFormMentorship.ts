@@ -1,9 +1,9 @@
 import { Handler } from "aws-lambda";
-import { RESPONSE_CODES } from "../../../constants";
+import { RESPONSE_CODES, TIMESLOT_STATUS } from "../../../constants";
 import { feedbackMail } from "../../../mails/feedback";
 import { getMentorshipById } from "../../../repository/mentorship";
 import { updateTimeslotStatus } from "../../../repository/timeSlot";
-import { MentorshipResponse, TIMESLOT_STATUS } from "../../../types";
+import { MentorshipResponse } from "../../../types";
 import {
   removeRoleCalobot,
   sendMessageUserToCalobot,
