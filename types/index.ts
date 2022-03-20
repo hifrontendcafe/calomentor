@@ -1,13 +1,6 @@
-import { STATUS, WARN, WARNSTATE, WHOCANCELED } from "../constants";
+import { STATUS, WARN, WARNSTATE, WHOCANCELED, TIMESLOT_STATUS, USER_STATUS } from "../constants";
 
 import { ICalCalendarMethod } from "ical-generator";
-
-export enum TIMESLOT_STATUS {
-  OCCUPIED = "OCCUPIED",
-  FREE = "FREE",
-  CANCELED_BY_MENTOR = "CANCELED_BY_MENTOR",
-  FINISHED = "FINISHED",
-}
 
 export interface TimeSlot {
   id: string;
@@ -39,10 +32,11 @@ export interface User {
   role?: Role[];
   links?: UserLinks;
   skills?: string[];
-  is_active: boolean;
-  last_activated_by: string; // discord id
+  user_status: USER_STATUS;
+  modify_by: string; // discord id
   user_timezone: string;
   user_token: string;
+  accepted_coc: boolean
 }
 
 export interface Warning {
