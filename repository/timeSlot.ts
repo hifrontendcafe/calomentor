@@ -14,6 +14,7 @@ interface TimeSlotFilters {
   slotDate?: string;
   onlyFree?: boolean;
   onlyFuture?: boolean;
+  getAll?: boolean
 }
 
 export function getTimeSlotsByUserId(
@@ -37,13 +38,13 @@ export function getTimeSlotsByUserId(
     query.ExpressionAttributeValues[":slot_date"] = toInt(filters.slotDate);
   }
 
-  if (filters.onlyFree) {
+  if (filters.onlyFree && !filters.getAll) {
     query.FilterExpression = `${query.FilterExpression} and #occupied = :timeslot_status`;
     query.ExpressionAttributeNames["#occupied"] = "timeslot_status";
     query.ExpressionAttributeValues[":timeslot_status"] = TIMESLOT_STATUS.FREE;
   }
 
-  if (!filters.onlyFree) {
+  if (!filters.onlyFree && !filters.getAll) {
     query.FilterExpression = `${query.FilterExpression} and #occupied <> :timeslot_status`;
     query.ExpressionAttributeNames["#occupied"] = "timeslot_status";
     query.ExpressionAttributeValues[":timeslot_status"] = TIMESLOT_STATUS.CANCELED_BY_MENTOR;
