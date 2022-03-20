@@ -1,5 +1,5 @@
 import { APIGatewayProxyHandler } from "aws-lambda";
-import { STATUS, WHOCANCELED } from "../../../constants";
+import { STATUS, TIMESLOT_STATUS, WHOCANCELED } from "../../../constants";
 import { cancelMail, CancelMailParams } from "../../../mails/cancel";
 import {
   getMentorshipById,
@@ -10,7 +10,7 @@ import {
   removeMenteeFromTimeSlot,
   updateTimeslotStatus,
 } from "../../../repository/timeSlot";
-import { ICalStatus, TIMESLOT_STATUS } from "../../../types";
+import { ICalStatus } from "../../../types";
 import { sendMessageUserToCalobot } from "../../../utils/bot";
 import { getUnixTime, toDateString, toTimeString } from "../../../utils/dates";
 import { createICS } from "../../../utils/ical";

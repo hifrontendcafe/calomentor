@@ -1,7 +1,7 @@
 import { APIGatewayProxyHandler } from "aws-lambda";
 import { StepFunctions } from "aws-sdk";
 import { v4 as uuidv4 } from "uuid";
-import { STATUS } from "../../../constants";
+import { STATUS, TIMESLOT_STATUS } from "../../../constants";
 import { confirmationMail } from "../../../mails/confirmation";
 import { createMentorship } from "../../../repository/mentorship";
 import {
@@ -11,7 +11,7 @@ import {
 } from "../../../repository/timeSlot";
 import { getUserById } from "../../../repository/user";
 import { getWarningsData } from "../../../repository/warning";
-import { Mentorship, TIMESLOT_STATUS } from "../../../types";
+import { Mentorship } from "../../../types";
 import {
   sendMessageToCalobot,
   sendMessageUserToCalobot,
