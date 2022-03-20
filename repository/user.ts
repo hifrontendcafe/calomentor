@@ -26,7 +26,7 @@ export function getUsers(filters: UserFilters = {}) {
     TableName: TABLE_NAME_USER,
     ExpressionAttributeNames: { "#role": "role" },
     ProjectionExpression:
-      "id, discord_username, full_name, about_me, email, url_photo, #role, links, skills, user_status, user_timezone, user_token, modify_by",
+      "id, discord_username, full_name, about_me, email, url_photo, #role, links, skills, user_status, user_timezone, user_token, modified_by",
   };
 
   if (filters.role) {
@@ -89,24 +89,24 @@ export function updateUser(
   });
 }
 
-export function activateUser(id: string, modify_by: string) {
+export function activateUser(id: string, modified_by: string) {
   return updateUser(id, {
     user_status: USER_STATUS.ACTIVE,
-    modify_by,
+    modified_by,
   });
 }
 
-export function deactivateUser(id: string, modify_by: string) {
+export function deactivateUser(id: string, modified_by: string) {
   return updateUser(id, {
     user_status: USER_STATUS.INACTIVE,
-    modify_by,
+    modified_by,
   });
 }
 
-export function deleteUserFromMentorship(id: string, modify_by: string) {
+export function deleteUserFromMentorship(id: string, modified_by: string) {
   return updateUser(id, {
     user_status: USER_STATUS.OUTSIDE_THE_PROGRAM,
-    modify_by,
+    modified_by,
   });
 }
 

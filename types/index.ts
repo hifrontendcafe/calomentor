@@ -33,7 +33,7 @@ export interface User {
   links?: UserLinks;
   skills?: string[];
   user_status: USER_STATUS;
-  modify_by: string; // discord id
+  modified_by: string; // discord id
   user_timezone: string;
   user_token: string;
   accepted_coc: boolean

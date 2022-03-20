@@ -99,7 +99,7 @@ export const RESPONSE_CODES = {
   "-207": "There was an error trying to update the user",
   "-208": "There was an error trying to update the user. Id not found",
   "-209":
-    "Bad Request: user_status or modify_by properties are missing or is not allowable options.",
+    "Bad Request: user_status or modified_by properties are missing or is not allowable options.",
   "-210": "There was an error trying to update the user. Token not updated",
   "-211": "Bad Request: id is required or is not a string.",
   "-212": "Bad Request: Missing params. id is required",

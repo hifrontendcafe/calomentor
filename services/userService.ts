@@ -53,7 +53,7 @@ export const createUserService: APIGatewayProxyHandler = async (event) => {
     skills,
     accepted_coc,
     user_status: USER_STATUS.INACTIVE,
-    modify_by: "",
+    modified_by: "",
     user_timezone: timezone,
     user_token: uuidv4(),
   };
@@ -195,20 +195,20 @@ export const activateUserService: APIGatewayProxyHandler = async (event) => {
     return makeErrorResponse(400, "-212");
   }
 
-  const { user_status, modify_by } = JSON.parse(event.body);
+  const { user_status, modified_by } = JSON.parse(event.body);
 
-  if (!user_status || !modify_by) {
+  if (!user_status || !modified_by) {
     return makeErrorResponse(400, "-209");
   }
 
   let result: Awaited<ReturnType<typeof updateUser>>;
   try {
     if (user_status === USER_STATUS.OUTSIDE_THE_PROGRAM) {
-      result = await deleteUserFromMentorship(id, modify_by);
+      result = await deleteUserFromMentorship(id, modified_by);
     } else if (user_status === USER_STATUS.ACTIVE) {
-      result = await activateUser(id, modify_by);
+      result = await activateUser(id, modified_by);
     } else {
-      result = await deactivateUser(id, modify_by);
+      result = await deactivateUser(id, modified_by);
     }
   } catch (error) {
     return makeErrorResponse(400, "-207", error);
