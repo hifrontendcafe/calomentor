@@ -34,7 +34,6 @@ export const createUserService: APIGatewayProxyHandler = async (event) => {
     links,
     skills,
     timezone,
-    accepted_coc,
   } = JSON.parse(event.body);
 
   if (!id || typeof id !== "string") {
@@ -51,7 +50,7 @@ export const createUserService: APIGatewayProxyHandler = async (event) => {
     role,
     links,
     skills,
-    accepted_coc,
+    accepted_coc: false,
     user_status: USER_STATUS.OUTSIDE_THE_PROGRAM,
     modified_by: "",
     user_timezone: timezone,
@@ -167,6 +166,7 @@ export const updateUserByIdService: APIGatewayProxyHandler = async (event) => {
       "links",
       "skills",
       "user_timezone",
+      "accepted_coc"
     ]);
   } catch (err) {
     return makeErrorResponse(400, "-207", err);
