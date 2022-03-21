@@ -131,7 +131,7 @@ stateMachines:
         MENTORSHIP_REMINDER_ATTEMPT_ONE_WAIT:
           Type: Wait
           Next: CHECK_CANCEL_TASK_THREE
-          SecondsPath: $.responseData.dateToRemindAttemptTwo
+          TimestampPath: $.responseData.dateToRemindAttemptTwo
         CHECK_CANCEL_TASK_TWO:
           Type: Task
           Resource: arn:aws:lambda:sa-east-1:822886109108:function:server-dev-checkCancel
@@ -227,7 +227,7 @@ stateMachines:
         MENTORSHIP_REMINDER_ATTEMPT_ONE_WAIT_AFTER:
           Type: Wait
           Next: CHECK_CANCEL_TASK_THREE
-          SecondsPath: $.responseData.dateToRemindAttemptTwo
+          TimestampPath: $.responseData.dateToRemindAttemptTwo
         CHECK_CANCEL_TASK_THREE:
           Type: Task
           Resource: arn:aws:lambda:sa-east-1:822886109108:function:server-dev-checkCancel
@@ -321,7 +321,7 @@ stateMachines:
           Next: MENTORSHIP_FEEDBACK_WAIT
         MENTORSHIP_FEEDBACK_WAIT:
           Type: Wait
-          SecondsPath: $.responseData.dateToSendFeedback
+          TimestampPath: $.responseData.dateToSendFeedback
           Next: SEND_FEEDBACK
         SEND_FEEDBACK:
           Type: Task
