@@ -27,7 +27,7 @@ export function getUsers(filters: UserFilters = {}) {
     TableName: TABLE_NAME_USER,
     ExpressionAttributeNames: { "#role": "role" },
     ProjectionExpression:
-      "id, discord_username, full_name, about_me, email, url_photo, #role, links, skills, user_status, user_timezone, user_token, modified_by",
+      "id, discord_username, full_name, about_me, email, url_photo, #role, links, skills, user_status, user_timezone, user_token, modified_by, accepted_coc",
   };
 
   if (filters.role) {
