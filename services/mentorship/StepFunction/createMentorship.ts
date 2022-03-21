@@ -37,8 +37,8 @@ const createMentorship: Handler<MentorshipRequestBody, MentorshipResponse> = (
 
   // This times are only for testing
 
-  const dateToRemindConfirmationAttemptOne = substractTime(date, 10, "minutes");
-  const dateToRemindConfirmationAttemptTwo = substractTime(date, 8, "minutes");
+  const dateToRemindConfirmationAttemptOne = substractTime(date, 20, "minutes");
+  const dateToRemindConfirmationAttemptTwo = substractTime(date, 10, "minutes");
   const dateToRemindAttemptOne = substractTime(date, 5, "minutes");
   const dateToRemindAttemptTwo = substractTime(date, 2, "minutes");
   const dateToRemindAttemptThree = substractTime(date, 1, "minute");
