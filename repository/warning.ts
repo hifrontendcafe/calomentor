@@ -9,17 +9,20 @@ export function addWarning(warning: Warning) {
   });
 }
 
-export function getWarningsData(id?: string) {
+export function getWarningsData(id?: string, allWarnings?: boolean) {
   let query: Parameters<typeof scan>[0] = {
     TableName: TABLE_NAME_WARNINGS,
   };
 
   if (id) {
-    query.FilterExpression = "mentee_id = :mentee_id and warning_status = :warning_status";
+    query.FilterExpression = "mentee_id = :mentee_id";
     query.ExpressionAttributeValues = {
       ":mentee_id": id,
-      ":warning_status": WARNSTATE.ACTIVE
     };
+    if (!allWarnings) {
+      query.FilterExpression = `${query.FilterExpression} and warning_status = :warning_status`;
+      query.ExpressionAttributeValues[":warning_status"] = WARNSTATE.ACTIVE;
+    }
   } else {
     query.ProjectionExpression =
       "id, mentee_id, warn_type, warn_cause, mentorship_id, warning_date, forgive_cause, mentor_name, mentee_name, warning_status, warning_author_id, warning_author_name";

@@ -115,10 +115,15 @@ export const addWarningMatebotService: APIGatewayProxyHandler = async (event) =>
 };
 
 export const getWarnings: APIGatewayProxyHandler = async (event) => {
+  const id = event.pathParameters?.id
+  const allWarnings = Boolean(event.queryStringParameters?.all_warnings)
   try {
-    const warnings = await getWarningsData(event.pathParameters?.id);
+    const warnings = await getWarningsData(id, allWarnings);
     if (warnings.Items?.length === 0) {
       return makeSuccessResponse(null, "301");
+    }
+    if (allWarnings) {
+      return makeSuccessResponse(warnings.Items, "302");
     }
     return makeErrorResponse(400, "-302", warnings.Items);
   } catch (error) {
