@@ -44,6 +44,7 @@ export interface Warning {
   warning_date: number;
   mentee_id: string;
   mentee_name?: string;
+  mentee_username_discord?: string;
   mentor_name?: string;
   warn_type: WARN;
   warn_cause: string;
@@ -52,6 +53,7 @@ export interface Warning {
   forgive_cause?: string;
   warning_author_id: string;
   warning_author_name: string;
+  warning_author_username_discord: string;
 }
 
 export interface Mentorship {

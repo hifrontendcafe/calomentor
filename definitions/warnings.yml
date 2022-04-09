@@ -30,3 +30,11 @@ forgiveWarningMentorship:
         method: patch
         cors: true
         private: true
+forgiveWarningByMenteeHandler:
+  handler: index.forgiveWarningByMenteeHandler
+  events:
+    - http:
+        path: warning/mentee/{id}
+        method: patch
+        cors: true
+        private: true

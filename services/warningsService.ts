@@ -40,6 +40,8 @@ export const addWarningService: APIGatewayProxyHandler = async (event) => {
     mentee_name: null,
     mentor_name: null,
     warning_author_name: null,
+    warning_author_username_discord: null,
+    mentee_username_discord: null
   };
 
   try {
@@ -68,6 +70,44 @@ export const addWarningService: APIGatewayProxyHandler = async (event) => {
     });
     sendEmail(mentee_email, `Hola ${mentee_name}!`, htmlMentee);
 
+    return makeSuccessResponse(warningData, "300");
+  } catch (error) {
+    return makeErrorResponse(400, "-300", error);
+  }
+};
+
+export const addWarningMatebotService: APIGatewayProxyHandler = async (event) => {
+  const { mentee_id, mentee_username_discord, warn_type, warn_cause, warning_author_id, warning_author_username_discord } =
+    JSON.parse(event.body);
+
+  if (
+    !mentee_id &&
+    !Object.values(WARN).includes(warn_type) &&
+    !warn_cause &&
+    !warning_author_id
+  ) {
+    return makeErrorResponse(400, "-301");
+  }
+
+  const warningData: Warning = {
+    id: uuidv4(),
+    warning_date: Date.now(),
+    mentee_id,
+    mentee_name: null,
+    mentee_username_discord,
+    warn_type,
+    warn_cause,
+    mentorship_id: null,
+    warning_status: WARNSTATE.ACTIVE,
+    forgive_cause: null,
+    mentor_name: null,
+    warning_author_id,
+    warning_author_name: null,
+    warning_author_username_discord
+  };
+
+  try {
+    await addWarning(warningData);
     return makeSuccessResponse(warningData, "300");
   } catch (error) {
     return makeErrorResponse(400, "-300", error);
@@ -128,5 +168,39 @@ export const forgiveWarning: APIGatewayProxyHandler = async (event) => {
     return makeSuccessResponse(warningUpdate, "303");
   } catch (error) {
     return makeErrorResponse(400, "-305", error);
+  }
+};
+
+export const forgiveWarningByMentee: APIGatewayProxyHandler = async (event) => {
+  const { forgive_cause } = JSON.parse(event.body);
+  const { id } = event.pathParameters;
+  if (!id) {
+    return makeErrorResponse(400, "-304");
+  }
+
+  let warningData: Awaited<ReturnType<typeof getWarningsData>>;
+
+  try {
+    warningData = await getWarningsData(id)
+  } catch (error) {
+    return makeErrorResponse(400, "-303");
+  }
+
+  if(warningData?.Count === 0) {
+    return makeErrorResponse(400, "301");
+  }
+
+  for (const warning of warningData?.Items) {
+    try {
+      const warningUpdate = await updateWarning(
+        warning.id,
+        { warning_status: WARNSTATE.FORGIVE, forgive_cause },
+        ["forgive_cause", "warning_status"]
+      );
+  
+      return makeSuccessResponse(warningUpdate, "303");
+    } catch (error) {
+      return makeErrorResponse(400, "-305", error);
+    }
   }
 };

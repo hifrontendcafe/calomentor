@@ -6,7 +6,7 @@ import {
 } from "../../../repository/mentorship";
 import { getTimeSlotById } from "../../../repository/timeSlot";
 import { getUserByToken } from "../../../repository/user";
-import { Mentorship } from "../../../types";
+import { Mentorship, TimeSlot } from "../../../types";
 import { isFutureDate, isPastDate } from "../../../utils/dates";
 import {
   makeErrorResponse,
@@ -55,43 +55,49 @@ const getMentorships: APIGatewayProxyHandler = async (event) => {
   const mentorshipsToReturn: Mentorship[] = [];
 
   for (const mentorship of mentorshipsData) {
-    const timeSlotResult = await getTimeSlotById(mentorship.time_slot_id);
-
-    if (!timeSlotResult || !timeSlotResult.Item) {
-      return makeErrorResponse(500, "-103");
+    let timeSlotResult: Awaited<ReturnType<typeof getTimeSlotById>>;
+    
+    if (mentorship.time_slot_id) {
+      timeSlotResult = await getTimeSlotById(mentorship.time_slot_id);
     }
 
-    const timeSlot = timeSlotResult.Item;
+    let timeSlot: TimeSlot | null = null;
+    let date: Date;
 
-    const date = new Date(timeSlotResult.Item.date);
-
-    delete mentorship?.feedback_mentee_private;
-    delete mentorship?.time_slot_id;
+    if (timeSlotResult && timeSlotResult.Item) {
+      timeSlot = timeSlotResult.Item;
+      date = new Date(timeSlotResult.Item.date);
+    }
 
     mentorship.time_slot_info = timeSlot;
 
-    /**
-     * When filter_dates is "PAST" we need to show:
-     * - Past mentorships
-     * - Canceled mentorships
-     */
-    if (filter_dates === FILTERDATES.PAST) {
-      if (isPastDate(date) || mentorship.mentorship_status === STATUS.CANCEL) {
-        mentorshipsToReturn.push(mentorship);
+    if (date) {
+      /**
+       * When filter_dates is "PAST" we need to show:
+       * - Past mentorships
+       * - Canceled mentorships
+       */
+      if (filter_dates === FILTERDATES.PAST) {
+        if (
+          isPastDate(date) ||
+          mentorship.mentorship_status === STATUS.CANCEL
+        ) {
+          mentorshipsToReturn.push(mentorship);
+        }
       }
-    }
 
-    /**
-     * When filter_dates is "FUTURE" we need to show:
-     * - Future mentorships that aren't canceled
-     */
-    if (filter_dates === FILTERDATES.FUTURE) {
-      if (
-        isFutureDate(date) &&
-        mentorship.mentorship_status !== STATUS.CANCEL &&
-        mentorship.mentorship_status !== STATUS.WITHWARNING
-      ) {
-        mentorshipsToReturn.push(mentorship);
+      /**
+       * When filter_dates is "FUTURE" we need to show:
+       * - Future mentorships that aren't canceled
+       */
+      if (filter_dates === FILTERDATES.FUTURE) {
+        if (
+          isFutureDate(date) &&
+          mentorship.mentorship_status !== STATUS.CANCEL &&
+          mentorship.mentorship_status !== STATUS.WITHWARNING
+        ) {
+          mentorshipsToReturn.push(mentorship);
+        }
       }
     }
 
