@@ -30,7 +30,7 @@ import {
   confirmMentorship,
   cancelMentorship,
   feedbackMentorship,
-  createMentorshipApi,
+  createMentorshipAPI,
   createMentorship,
   addRoleMentorship,
   reminderMentorship,
@@ -38,7 +38,8 @@ import {
   checkCancelMentorship,
   checkConfirmMentorship,
   confirmationAttemptMentorship,
-  catchMentorship
+  catchMentorship,
+  createMentorshipMatebot
 } from "./services/mentorship";
 
 // User functions handlers
@@ -85,7 +86,13 @@ export const mentorshipCreateAPI: Handler = (
   event: any,
   context: Context,
   callback: Callback<any>
-) => createMentorshipApi(event, context, callback);
+) => createMentorshipAPI(event, context, callback);
+
+export const mentorshipCreateMatebot: Handler = (
+  event: any,
+  context: Context,
+  callback: Callback<any>
+) => createMentorshipMatebot(event, context, callback);
 
 export const mentorshipCreate: Handler = (
   event: any,

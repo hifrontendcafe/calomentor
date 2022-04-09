@@ -53,6 +53,7 @@ const createMentorshipAPI: APIGatewayProxyHandler = async (event) => {
     mentor_id,
     mentor_email: null,
     mentor_name: null,
+    mentor_username_discord: null,
     mentorship_token: null,
     mentee_id,
     mentee_name,
@@ -69,6 +70,7 @@ const createMentorshipAPI: APIGatewayProxyHandler = async (event) => {
     feedback_mentee_private: null,
     warning_info: null,
     mentor_timezone: null,
+    mentorship_create_date: null
   };
 
   try {
@@ -217,4 +219,74 @@ const createMentorshipAPI: APIGatewayProxyHandler = async (event) => {
   }
 };
 
-export default createMentorshipAPI;
+const createMentorshipMatebot: APIGatewayProxyHandler = async (event) => {
+  const {
+    mentor_id,
+    mentor_username_discord,
+    mentee_id,
+    mentee_username_discord,
+  } = JSON.parse(event.body);
+
+  if (
+    !mentor_id ||
+    !mentor_username_discord ||
+    !mentee_id ||
+    !mentee_username_discord
+  ) {
+    return makeErrorResponse(500, "-100");
+  }
+
+  try {
+    // check if the mentee has any warning, if it has the system reject the mentorship request
+    const warning = await getWarningsData(mentee_id);
+
+    if (warning.Items.length > 0) {
+      return makeErrorResponse(403, "-118");
+    }
+  } catch (error) {
+    return makeErrorResponse(500, "-102", error);
+  }
+
+  const date = Date.now()
+
+  const mentorship: Mentorship = {
+    id: uuidv4(),
+    mentor_id,
+    mentor_username_discord,
+    mentor_email: null,
+    mentor_name: null,
+    mentorship_token: null,
+    mentee_id,
+    mentee_name: null,
+    mentee_username_discord,
+    mentee_email: null,
+    mentee_timezone: null,
+    info: null,
+    mentorship_status: STATUS.ACTIVE,
+    time_slot_id: null,
+    cancel_cause: null,
+    who_canceled: null,
+    feedback_mentee: null,
+    feedback_stars: null,
+    feedback_mentee_private: null,
+    warning_info: null,
+    mentor_timezone: null,
+    mentorship_create_date: String(date)
+  };
+
+  mentorship.mentorship_token = getToken({
+    menteeEmail: mentorship.mentee_email,
+    mentorshipId: mentorship.id,
+    date: date,
+  });
+
+  try {
+    await createMentorship(mentorship);
+  } catch (error) {
+    return makeErrorResponse(500, "-102", error.stack);
+  }
+
+  return makeSuccessResponse({}, "100");
+};
+
+export { createMentorshipAPI, createMentorshipMatebot };
