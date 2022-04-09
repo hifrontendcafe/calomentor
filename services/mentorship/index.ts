@@ -1,6 +1,6 @@
 export { default as cancelMentorship } from "./Api/cancelMentorship";
 export { default as confirmMentorship } from "./Api/confirmMentorship";
-export { default as createMentorshipApi } from "./Api/createMentorship";
+export { createMentorshipAPI, createMentorshipMatebot } from "./Api/createMentorship";
 export { default as feedbackMentorship } from "./Api/feedbackMentorship";
 export { default as getMentorships } from "./Api/getAllMentorships";
 export { default as addRoleMentorship } from "./StepFunction/addRoleMentorship";

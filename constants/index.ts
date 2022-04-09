@@ -67,7 +67,7 @@ export const RESPONSE_CODES = {
   "104": "Time slot updated",
   "105": "Time slot successfully deleted",
   "-100":
-    "Bad Request: Missing params. The required params are mentor_id, mentee_id, mentee_email, status, time_slot_id, time_slot_time",
+    "Bad Request: Missing params. The required params are mentor_id, mentor_username_discord, mentee_id, mentee_username_discord",
   "-101": "Unable to get the mentor.",
   "-102": "Unable to create the mentorship.",
   "-103": "Unable to get the time slot.",

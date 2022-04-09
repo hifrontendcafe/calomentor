@@ -61,6 +61,7 @@ export interface Mentorship {
   feedback_mentee: string;
   mentor_id: string;
   mentor_name: string;
+  mentor_username_discord: string;
   info: string;
   mentee_name: string;
   mentorship_token: string;
@@ -76,6 +77,7 @@ export interface Mentorship {
   warning_info?: Warning;
   mentee_timezone: string;
   mentor_timezone?: string;
+  mentorship_create_date?: string;
 }
 export interface MentorshipStateMachine {
   mentorId: string;

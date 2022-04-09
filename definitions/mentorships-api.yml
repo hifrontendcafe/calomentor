@@ -6,6 +6,14 @@ mentorshipCreateAPI:
         method: post
         cors: true
         private: true
+mentorshipCreateMatebot:
+  handler: index.mentorshipCreateMatebot
+  events:
+    - http:
+        path: matebot/mentorship
+        method: post
+        cors: true
+        private: true
 mentorshipCancelAPI:
   handler: index.mentorshipCancel
   events:
