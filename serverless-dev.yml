@@ -49,6 +49,7 @@ functions:
   - ${file(definitions/warnings.yml)}
   - ${file(definitions/mentorships-api.yml)}
   - ${file(definitions/mentorships-state-machine.yml)}
+  - ${file(definitions/matebot.yml)}
 
 stepFunctions:
   ${file(definitions/create-mentorship-step-function.yml)}

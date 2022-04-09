@@ -1,0 +1,16 @@
+addWarningMatebotMentorship:
+  handler: index.addWarningMatebotMentorship
+  events:
+    - http:
+        path: matebot/warning
+        method: post
+        cors: true
+        private: true
+mentorshipCreateMatebot:
+  handler: index.mentorshipCreateMatebot
+  events:
+    - http:
+        path: matebot/mentorship
+        method: post
+        cors: true
+        private: true

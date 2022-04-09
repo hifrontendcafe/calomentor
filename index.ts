@@ -23,6 +23,8 @@ import {
   forgiveWarning,
   getAllWarnings,
   getWarnings,
+  addWarningMatebotService,
+  forgiveWarningByMentee
 } from "./services/warningsService";
 
 import {
@@ -174,6 +176,12 @@ export const addWarningMentorship: Handler = (
   callback: Callback<any>
 ) => addWarningService(event, context, callback);
 
+export const addWarningMatebotMentorship: Handler = (
+  event: any,
+  context: Context,
+  callback: Callback<any>
+) => addWarningMatebotService(event, context, callback);
+
 export const getWarningsMentorship: Handler = (
   event: any,
   context: Context,
@@ -191,3 +199,9 @@ export const forgiveWarningMentorship: Handler = (
   context: Context,
   callback: Callback<any>
 ) => forgiveWarning(event, context, callback);
+
+export const forgiveWarningByMenteeHandler: Handler = (
+  event: any,
+  context: Context,
+  callback: Callback<any>
+) => forgiveWarningByMentee(event, context, callback);
