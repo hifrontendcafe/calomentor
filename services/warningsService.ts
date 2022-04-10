@@ -41,7 +41,10 @@ export const addWarningService: APIGatewayProxyHandler = async (event) => {
     mentor_name: null,
     warning_author_name: null,
     warning_author_username_discord: null,
-    mentee_username_discord: null
+    mentee_username_discord: null,
+    forgive_author_id: null,
+    forgive_author_name: null,
+    forgive_author_username_discord: null,
   };
 
   try {
@@ -76,9 +79,17 @@ export const addWarningService: APIGatewayProxyHandler = async (event) => {
   }
 };
 
-export const addWarningMatebotService: APIGatewayProxyHandler = async (event) => {
-  const { mentee_id, mentee_username_discord, warn_type, warn_cause, warning_author_id, warning_author_username_discord } =
-    JSON.parse(event.body);
+export const addWarningMatebotService: APIGatewayProxyHandler = async (
+  event
+) => {
+  const {
+    mentee_id,
+    mentee_username_discord,
+    warn_type,
+    warn_cause,
+    warning_author_id,
+    warning_author_username_discord,
+  } = JSON.parse(event.body);
 
   if (
     !mentee_id &&
@@ -102,8 +113,11 @@ export const addWarningMatebotService: APIGatewayProxyHandler = async (event) =>
     forgive_cause: null,
     mentor_name: null,
     warning_author_id,
-    warning_author_name: null,
-    warning_author_username_discord
+    warning_author_name: warning_author_username_discord,
+    warning_author_username_discord,
+    forgive_author_id: null,
+    forgive_author_name: null,
+    forgive_author_username_discord: null,
   };
 
   try {
@@ -115,8 +129,8 @@ export const addWarningMatebotService: APIGatewayProxyHandler = async (event) =>
 };
 
 export const getWarnings: APIGatewayProxyHandler = async (event) => {
-  const id = event.pathParameters?.id
-  const allWarnings = Boolean(event.queryStringParameters?.all_warnings)
+  const id = event.pathParameters?.id;
+  const allWarnings = Boolean(event.queryStringParameters?.all_warnings);
   try {
     const warnings = await getWarningsData(id, allWarnings);
     if (warnings.Items?.length === 0) {
@@ -177,7 +191,8 @@ export const forgiveWarning: APIGatewayProxyHandler = async (event) => {
 };
 
 export const forgiveWarningByMentee: APIGatewayProxyHandler = async (event) => {
-  const { forgive_cause } = JSON.parse(event.body);
+  const { forgive_cause, forgive_author_id, forgive_author_username_discord } =
+    JSON.parse(event.body);
   const { id } = event.pathParameters;
   if (!id) {
     return makeErrorResponse(400, "-304");
@@ -186,12 +201,12 @@ export const forgiveWarningByMentee: APIGatewayProxyHandler = async (event) => {
   let warningData: Awaited<ReturnType<typeof getWarningsData>>;
 
   try {
-    warningData = await getWarningsData(id)
+    warningData = await getWarningsData(id);
   } catch (error) {
     return makeErrorResponse(400, "-303");
   }
 
-  if(warningData?.Count === 0) {
+  if (warningData?.Count === 0) {
     return makeErrorResponse(400, "301");
   }
 
@@ -199,10 +214,16 @@ export const forgiveWarningByMentee: APIGatewayProxyHandler = async (event) => {
     try {
       const warningUpdate = await updateWarning(
         warning.id,
-        { warning_status: WARNSTATE.FORGIVE, forgive_cause },
+        {
+          warning_status: WARNSTATE.FORGIVE,
+          forgive_cause,
+          forgive_author_id,
+          forgive_author_name: forgive_author_username_discord,
+          forgive_author_username_discord,
+        },
         ["forgive_cause", "warning_status"]
       );
-  
+
       return makeSuccessResponse(warningUpdate, "303");
     } catch (error) {
       return makeErrorResponse(400, "-305", error);
