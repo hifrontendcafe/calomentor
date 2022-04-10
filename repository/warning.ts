@@ -25,7 +25,7 @@ export function getWarningsData(id?: string, allWarnings?: boolean) {
     }
   } else {
     query.ProjectionExpression =
-      "id, mentee_id, warn_type, warn_cause, mentorship_id, warning_date, forgive_cause, mentor_name, mentee_name, warning_status, warning_author_id, warning_author_name";
+      "id, mentee_id, warn_type, warn_cause, mentorship_id, warning_date, forgive_cause, mentor_name, mentee_name, warning_status, warning_author_id, warning_author_name, forgive_author_username_discord, forgive_author_name, forgive_author_id";
   }
 
   return scan<Warning>(query);

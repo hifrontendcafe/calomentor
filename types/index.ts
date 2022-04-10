@@ -54,6 +54,9 @@ export interface Warning {
   warning_author_id: string;
   warning_author_name: string;
   warning_author_username_discord: string;
+  forgive_author_id: string;
+  forgive_author_name: string;
+  forgive_author_username_discord: string;
 }
 
 export interface Mentorship {
