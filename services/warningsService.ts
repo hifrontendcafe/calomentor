@@ -246,7 +246,15 @@ export const forgiveWarningByMentee: APIGatewayProxyHandler = async (event) => {
           searcheable_forgive_author_username_discord:
             forgive_author_username_discord.toLowerCase(),
         },
-        ["forgive_cause", "warning_status"]
+        [
+          "forgive_cause",
+          "warning_status",
+          "forgive_author_id",
+          "forgive_author_username_discord",
+          "forgive_author_name",
+          "searcheable_forgive_author_name",
+          "searcheable_forgive_author_username_discord",
+        ]
       );
 
       return makeSuccessResponse(warningUpdate, "303");
