@@ -70,7 +70,11 @@ const createMentorshipAPI: APIGatewayProxyHandler = async (event) => {
     feedback_mentee_private: null,
     warning_info: null,
     mentor_timezone: null,
-    mentorship_create_date: null
+    mentorship_create_date: null,
+    searcheable_mentor_name: null,
+    searcheable_mentor_username_discord: null,
+    searcheable_mentee_name: mentee_username_discord.toLowerCase(),
+    searcheable_mentee_username_discord: mentee_username_discord.toLowerCase(),
   };
 
   try {
@@ -98,6 +102,7 @@ const createMentorshipAPI: APIGatewayProxyHandler = async (event) => {
 
     mentorship.mentor_email = email;
     mentorship.mentor_name = full_name;
+    mentorship.searcheable_mentor_name = full_name.toLowerCase();
     mentorship.mentorship_token = getToken({
       menteeEmail: mentorship.mentee_email,
       mentorshipId: mentorship.id,
@@ -247,7 +252,7 @@ const createMentorshipMatebot: APIGatewayProxyHandler = async (event) => {
     return makeErrorResponse(500, "-102", error);
   }
 
-  const date = Date.now()
+  const date = Date.now();
 
   const mentorship: Mentorship = {
     id: uuidv4(),
@@ -271,7 +276,11 @@ const createMentorshipMatebot: APIGatewayProxyHandler = async (event) => {
     feedback_mentee_private: null,
     warning_info: null,
     mentor_timezone: null,
-    mentorship_create_date: String(date)
+    mentorship_create_date: String(date),
+    searcheable_mentor_name: mentor_username_discord.toLowerCase(),
+    searcheable_mentor_username_discord: mentor_username_discord.toLowerCase(),
+    searcheable_mentee_name: mentee_username_discord.toLowerCase(),
+    searcheable_mentee_username_discord: mentee_username_discord.toLowerCase(),
   };
 
   mentorship.mentorship_token = getToken({

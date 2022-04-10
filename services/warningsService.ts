@@ -45,6 +45,10 @@ export const addWarningService: APIGatewayProxyHandler = async (event) => {
     forgive_author_id: null,
     forgive_author_name: null,
     forgive_author_username_discord: null,
+    searcheable_warning_author_name: null,
+    searcheable_warning_author_username_discord: null,
+    searcheable_mentee_name: null,
+    searcheable_mentee_username_discord: null,
   };
 
   try {
@@ -54,9 +58,14 @@ export const addWarningService: APIGatewayProxyHandler = async (event) => {
     const {
       Item: { full_name },
     } = await getUserById(warning_author_id);
+
     warningData.mentee_name = mentee_name;
     warningData.mentor_name = mentor_name;
     warningData.warning_author_name = full_name;
+    warningData.searcheable_mentee_name = mentee_name.toLowerCase();
+    warningData.searcheable_mentor_name = mentor_name.toLowerCase();
+    warningData.searcheable_warning_author_name = full_name.toLowerCase();
+
     await addWarning(warningData);
     await updateMentorship(
       mentorship_id,
@@ -118,6 +127,12 @@ export const addWarningMatebotService: APIGatewayProxyHandler = async (
     forgive_author_id: null,
     forgive_author_name: null,
     forgive_author_username_discord: null,
+    searcheable_warning_author_name:
+      warning_author_username_discord.toLowerCase(),
+    searcheable_warning_author_username_discord:
+      warning_author_username_discord.toLowerCase(),
+    searcheable_mentee_name: mentee_username_discord.toLowerCase(),
+    searcheable_mentee_username_discord: mentee_username_discord.toLowerCase(),
   };
 
   try {
@@ -132,8 +147,8 @@ export const getWarnings: APIGatewayProxyHandler = async (event) => {
   const id = event.pathParameters?.id;
   const allWarnings = Boolean(event.queryStringParameters?.all_warnings);
   try {
-    const warnings = await getWarningsData(id, allWarnings);
-    if (warnings.Items?.length === 0) {
+    const warnings = await getWarningsData({ id, allWarnings });
+    if (warnings?.Items?.length === 0) {
       return makeSuccessResponse(null, "301");
     }
     if (allWarnings) {
@@ -145,9 +160,15 @@ export const getWarnings: APIGatewayProxyHandler = async (event) => {
   }
 };
 
-export const getAllWarnings: APIGatewayProxyHandler = async () => {
+export const getAllWarnings: APIGatewayProxyHandler = async (event) => {
+  const name = event.queryStringParameters?.name;
   try {
-    const warnings = await getWarningsData();
+    let warnings: Awaited<ReturnType<typeof getWarningsData>>;
+    if (name) {
+      warnings = await getWarningsData({ name });
+    } else {
+      warnings = await getWarningsData({});
+    }
     return makeSuccessResponse(warnings.Items, "302");
   } catch (error) {
     return makeErrorResponse(400, "-303", error);
@@ -201,7 +222,7 @@ export const forgiveWarningByMentee: APIGatewayProxyHandler = async (event) => {
   let warningData: Awaited<ReturnType<typeof getWarningsData>>;
 
   try {
-    warningData = await getWarningsData(id);
+    warningData = await getWarningsData({ id });
   } catch (error) {
     return makeErrorResponse(400, "-303");
   }
@@ -220,6 +241,10 @@ export const forgiveWarningByMentee: APIGatewayProxyHandler = async (event) => {
           forgive_author_id,
           forgive_author_name: forgive_author_username_discord,
           forgive_author_username_discord,
+          searcheable_forgive_author_name:
+            forgive_author_username_discord.toLowerCase(),
+          searcheable_forgive_author_username_discord:
+            forgive_author_username_discord.toLowerCase(),
         },
         ["forgive_cause", "warning_status"]
       );

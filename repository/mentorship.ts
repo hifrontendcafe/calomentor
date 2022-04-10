@@ -26,9 +26,11 @@ export function getMentorshipsByUserId(id: string) {
 export function getMentorshipsByName(name: string) {
   return scan<Mentorship>({
     TableName: TABLE_NAME_MENTORSHIP,
-    FilterExpression:
-      "contains(mentee_username_discord, :name) OR contains(mentee_name, :name) OR contains(mentor_username_discord, :name) OR contains(mentor_name, :name)",
-    ExpressionAttributeValues: { ":name": name },
+    FilterExpression: `contains(searcheable_mentee_username_discord, :name) OR 
+      contains(searcheable_mentee_name, :name) OR 
+      contains(searcheable_mentor_username_discord, :name) OR 
+      contains(searcheable_mentor_name, :name)`,
+    ExpressionAttributeValues: { ":name": name.toLowerCase() },
   });
 }
 

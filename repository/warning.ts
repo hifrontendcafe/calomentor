@@ -9,7 +9,13 @@ export function addWarning(warning: Warning) {
   });
 }
 
-export function getWarningsData(id?: string, allWarnings?: boolean) {
+export function getWarningsData(filter: {
+  id?: string;
+  allWarnings?: boolean;
+  name?: string;
+}) {
+  const { id, allWarnings, name } = filter;
+
   let query: Parameters<typeof scan>[0] = {
     TableName: TABLE_NAME_WARNINGS,
   };
@@ -23,6 +29,19 @@ export function getWarningsData(id?: string, allWarnings?: boolean) {
       query.FilterExpression = `${query.FilterExpression} and warning_status = :warning_status`;
       query.ExpressionAttributeValues[":warning_status"] = WARNSTATE.ACTIVE;
     }
+  } else if (name) {
+    query.FilterExpression = `
+      contains(searcheable_warning_author_name, :name) OR 
+      contains(searcheable_warning_author_username_discord, :name) OR 
+      contains(searcheable_mentee_name, :name) OR 
+      contains(searcheable_mentee_username_discord, :name) OR 
+      contains(searcheable_mentor_name, :name) OR 
+      contains(searcheable_mentor_username_discord, :name) OR 
+      contains(searcheable_forgive_author_name, :name) OR 
+      contains(searcheable_forgive_author_username_discord, :name)`;
+    query.ExpressionAttributeValues = {
+      ":name": name.toLowerCase(),
+    };
   } else {
     query.ProjectionExpression =
       "id, mentee_id, warn_type, warn_cause, mentorship_id, warning_date, forgive_cause, mentor_name, mentee_name, warning_status, warning_author_id, warning_author_name, forgive_author_username_discord, forgive_author_name, forgive_author_id";

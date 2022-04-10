@@ -1,4 +1,11 @@
-import { STATUS, WARN, WARNSTATE, WHOCANCELED, TIMESLOT_STATUS, USER_STATUS } from "../constants";
+import {
+  STATUS,
+  WARN,
+  WARNSTATE,
+  WHOCANCELED,
+  TIMESLOT_STATUS,
+  USER_STATUS,
+} from "../constants";
 
 import { ICalCalendarMethod } from "ical-generator";
 
@@ -36,7 +43,7 @@ export interface User {
   modified_by: string; // discord id
   user_timezone: string;
   user_token: string;
-  accepted_coc: boolean
+  accepted_coc: boolean;
 }
 
 export interface Warning {
@@ -57,6 +64,14 @@ export interface Warning {
   forgive_author_id: string;
   forgive_author_name: string;
   forgive_author_username_discord: string;
+  searcheable_warning_author_name: string;
+  searcheable_warning_author_username_discord: string;
+  searcheable_mentee_name: string;
+  searcheable_mentee_username_discord: string;
+  searcheable_mentor_name?: string;
+  searcheable_mentor_username_discord?: string;
+  searcheable_forgive_author_name?: string;
+  searcheable_forgive_author_username_discord?: string;
 }
 
 export interface Mentorship {
@@ -83,6 +98,10 @@ export interface Mentorship {
   mentee_timezone: string;
   mentor_timezone?: string;
   mentorship_create_date?: string;
+  searcheable_mentor_name: string;
+  searcheable_mentor_username_discord: string;
+  searcheable_mentee_name: string;
+  searcheable_mentee_username_discord: string;
 }
 export interface MentorshipStateMachine {
   mentorId: string;
