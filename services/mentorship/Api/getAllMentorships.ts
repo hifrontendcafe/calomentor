@@ -2,7 +2,8 @@ import { APIGatewayProxyHandler } from "aws-lambda";
 import { FILTERDATES, STATUS } from "../../../constants";
 import {
   getAllMentorships,
-  getMentorshipsByMentorId,
+  getMentorshipsByUserId,
+  getMentorshipsByName,
 } from "../../../repository/mentorship";
 import { getTimeSlotById } from "../../../repository/timeSlot";
 import { getUserByToken } from "../../../repository/user";
@@ -12,7 +13,6 @@ import {
   makeErrorResponse,
   makeSuccessResponse,
 } from "../../../utils/makeResponses";
-import { isAdmin } from "../../../utils/validations";
 
 const getMentorships: APIGatewayProxyHandler = async (event) => {
   const { pathParameters, queryStringParameters } = event;
@@ -20,6 +20,7 @@ const getMentorships: APIGatewayProxyHandler = async (event) => {
   const id = pathParameters?.id;
   const filter = queryStringParameters?.filter;
   const filter_dates = queryStringParameters?.filter_dates ?? FILTERDATES.ALL;
+  const name = queryStringParameters?.name;
 
   // if (filter_dates === FILTERDATES.ALL) {
   //   const user_token = event.headers["user-token"];
@@ -31,14 +32,23 @@ const getMentorships: APIGatewayProxyHandler = async (event) => {
   //   }
   // }
 
-  let data: Awaited<ReturnType<typeof getMentorshipsByMentorId>>;
+  let data: Awaited<ReturnType<typeof getAllMentorships>>;
 
   try {
-    if (id) {
-      data = await getMentorshipsByMentorId(id);
-    } else {
+    if(!id && !name) {
       data = await getAllMentorships();
     }
+
+    // ID can be mentor or mentee discord id
+    if (id) {
+      data = await getMentorshipsByUserId(id);
+    } 
+    
+    // NAME can be mentor or mentee discord username or real name
+    if (name) {
+      data = await getMentorshipsByName(name);
+    } 
+
   } catch (err) {
     return makeErrorResponse(400, "-107", err);
   }
@@ -56,7 +66,7 @@ const getMentorships: APIGatewayProxyHandler = async (event) => {
 
   for (const mentorship of mentorshipsData) {
     let timeSlotResult: Awaited<ReturnType<typeof getTimeSlotById>>;
-    
+
     if (mentorship.time_slot_id) {
       timeSlotResult = await getTimeSlotById(mentorship.time_slot_id);
     }

@@ -15,11 +15,20 @@ export function getMentorshipById(id: string) {
   });
 }
 
-export function getMentorshipsByMentorId(id: string) {
+export function getMentorshipsByUserId(id: string) {
   return scan<Mentorship>({
     TableName: TABLE_NAME_MENTORSHIP,
-    FilterExpression: "mentor_id = :mentor_id",
-    ExpressionAttributeValues: { ":mentor_id": id },
+    FilterExpression: "mentor_id = :id OR mentee_id = :id",
+    ExpressionAttributeValues: { ":id": id },
+  });
+}
+
+export function getMentorshipsByName(name: string) {
+  return scan<Mentorship>({
+    TableName: TABLE_NAME_MENTORSHIP,
+    FilterExpression:
+      "contains(mentee_username_discord, :name) OR contains(mentee_name, :name) OR contains(mentor_username_discord, :name) OR contains(mentor_name, :name)",
+    ExpressionAttributeValues: { ":name": name },
   });
 }
 
