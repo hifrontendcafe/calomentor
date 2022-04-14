@@ -153,7 +153,13 @@ export const getWarnings: APIGatewayProxyHandler = async (event) => {
     }
     if (allWarnings) {
       return makeSuccessResponse(
-        { warnings_data: warnings.Items, warning_quantity: warnings.Count },
+        {
+          warnings_data: warnings.Items,
+          warning_quantity: warnings.Count,
+          active_warnings: warnings.Items?.filter(
+            (warn) => warn.warning_status === WARNSTATE.ACTIVE
+          )?.length,
+        },
         "302"
       );
     }
