@@ -5,7 +5,7 @@
   "main": "handler.js",
   "scripts": {
     "deploy-dev": "serverless deploy -s dev",
-    "deploy-prod": "serverless deploy -s prod",
+    "deploy-prod": "serverless deploy -s prod --config serverless-prod.yml",
     "start-offline": "serverless offline --printOutput --config serverless-dev.yml",
     "lint": "tsc --noEmit index.ts"
   },

@@ -8,3 +8,5 @@ jspm_packages
 
 .env
 config.dev.json
+config.prod.json
+serverless-prod.yml
