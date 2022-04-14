@@ -152,7 +152,10 @@ export const getWarnings: APIGatewayProxyHandler = async (event) => {
       return makeSuccessResponse(null, "301");
     }
     if (allWarnings) {
-      return makeSuccessResponse(warnings.Items, "302");
+      return makeSuccessResponse(
+        { warnings_data: warnings.Items, warning_quantity: warnings.Count },
+        "302"
+      );
     }
     return makeErrorResponse(400, "-302", warnings.Items);
   } catch (error) {
