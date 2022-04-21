@@ -10,3 +10,5 @@ jspm_packages
 config.dev.json
 config.prod.json
 serverless-prod.yml
+definitions/create-mentorship-step-function-prod.yml
+definitions/db-tables-prod.yml

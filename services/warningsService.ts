@@ -146,8 +146,9 @@ export const addWarningMatebotService: APIGatewayProxyHandler = async (
 export const getWarnings: APIGatewayProxyHandler = async (event) => {
   const id = event.pathParameters?.id;
   const allWarnings = Boolean(event.queryStringParameters?.all_warnings);
+  const lastKey = event.queryStringParameters?.last_key
   try {
-    const warnings = await getWarningsData({ id, allWarnings });
+    const warnings = await getWarningsData({ id, allWarnings }, lastKey);
     if (warnings?.Items?.length === 0) {
       return makeSuccessResponse(null, "301");
     }
@@ -171,12 +172,13 @@ export const getWarnings: APIGatewayProxyHandler = async (event) => {
 
 export const getAllWarnings: APIGatewayProxyHandler = async (event) => {
   const name = event.queryStringParameters?.name;
+  const lastKey = event.queryStringParameters?.last_key
   try {
     let warnings: Awaited<ReturnType<typeof getWarningsData>>;
     if (name) {
-      warnings = await getWarningsData({ name });
+      warnings = await getWarningsData({ name }, lastKey);
     } else {
-      warnings = await getWarningsData({});
+      warnings = await getWarningsData({}, lastKey);
     }
     return makeSuccessResponse(warnings.Items, "302");
   } catch (error) {
@@ -250,6 +252,7 @@ export const forgiveWarningByMentee: APIGatewayProxyHandler = async (event) => {
           forgive_author_id,
           forgive_author_name: forgive_author_username_discord,
           forgive_author_username_discord,
+          from_bot: true,
           searcheable_forgive_author_name:
             forgive_author_username_discord.toLowerCase(),
           searcheable_forgive_author_username_discord:

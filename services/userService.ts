@@ -75,10 +75,13 @@ export const getUsersService: APIGatewayProxyHandler = async (event) => {
   let mentors: User[];
 
   try {
-    const mentorsData = await getUsers({
-      role: "mentor",
-      onlyInTheProgram: queryStringParameters?.only_in_the_program === "true",
-    });
+    const mentorsData = await getUsers(
+      {
+        role: "mentor",
+        onlyInTheProgram: queryStringParameters?.only_in_the_program === "true",
+      },
+      queryStringParameters?.last_key
+    );
     mentors = mentorsData.Items;
   } catch (error) {
     return makeErrorResponse(400, "-203", error);
@@ -166,7 +169,7 @@ export const updateUserByIdService: APIGatewayProxyHandler = async (event) => {
       "links",
       "skills",
       "user_timezone",
-      "accepted_coc"
+      "accepted_coc",
     ]);
   } catch (err) {
     return makeErrorResponse(400, "-207", err);
