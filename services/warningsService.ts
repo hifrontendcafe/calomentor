@@ -161,14 +161,12 @@ export const getWarnings: APIGatewayProxyHandler = async (event) => {
             (warn) => warn.warning_status === WARNSTATE.ACTIVE
           )?.length,
         },
-        "302"
+        "302",
+        warnings.Count,
+        warnings.LastEvaluatedKey
       );
     }
-    return makeErrorResponse(400, "-302", {
-      warnings: warnings.Items,
-      count: warnings.Count,
-      lastKey: warnings.LastEvaluatedKey,
-    });
+    return makeErrorResponse(400, "-302", warnings.Items);
   } catch (error) {
     return makeErrorResponse(400, "-303", error);
   }
@@ -185,12 +183,10 @@ export const getAllWarnings: APIGatewayProxyHandler = async (event) => {
       warnings = await getWarningsData({}, lastKey);
     }
     return makeSuccessResponse(
-      {
-        warnings: warnings.Items,
-        count: warnings.Count,
-        lastKey: warnings.LastEvaluatedKey,
-      },
-      "302"
+      warnings.Items,
+      "302",
+      warnings.Count,
+      warnings.LastEvaluatedKey
     );
   } catch (error) {
     return makeErrorResponse(400, "-303", error);

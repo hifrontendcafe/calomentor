@@ -1,4 +1,5 @@
 import type { APIGatewayProxyResult, Callback } from "aws-lambda";
+import { DocumentClient } from "aws-sdk/clients/dynamodb";
 
 import type { OutgoingHttpHeaders } from "http";
 import { RESPONSE_CODES } from "../constants";
@@ -13,15 +14,33 @@ export interface Response {
 
 export function makeSuccessResponse(
   data: any,
-  responseCode: keyof typeof RESPONSE_CODES = "1"
+  responseCode: keyof typeof RESPONSE_CODES = "1",
+  itemsCount?: number,
+  lastKey?: DocumentClient.Key
 ): APIGatewayProxyResult {
+  const body: {
+    message: string;
+    code: keyof typeof RESPONSE_CODES;
+    data: any;
+    itemsCount?: number;
+    lastKey?: DocumentClient.Key;
+  } = {
+    message: RESPONSE_CODES[responseCode],
+    code: responseCode,
+    data,
+  };
+
+  if (itemsCount) {
+    body.itemsCount = itemsCount;
+  }
+
+  if (lastKey) {
+    body.lastKey = lastKey;
+  }
+
   return {
     statusCode: 200,
-    body: JSON.stringify({
-      message: RESPONSE_CODES[responseCode],
-      code: responseCode,
-      data,
-    }),
+    body: JSON.stringify(body),
     headers: {
       "Access-Control-Allow-Origin": "*",
     },

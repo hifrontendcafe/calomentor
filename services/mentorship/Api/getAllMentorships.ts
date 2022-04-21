@@ -116,11 +116,7 @@ const getMentorships: APIGatewayProxyHandler = async (event) => {
     }
   }
 
-  return makeSuccessResponse({
-    mentorship: mentorshipsToReturn,
-    count: data.Count,
-    lastKey: data.LastEvaluatedKey,
-  });
+  return makeSuccessResponse(mentorshipsToReturn, "1", data.Count, data.LastEvaluatedKey);
 };
 
 export default getMentorships;

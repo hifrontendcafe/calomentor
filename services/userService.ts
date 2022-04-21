@@ -96,11 +96,7 @@ export const getUsersService: APIGatewayProxyHandler = async (event) => {
     return makeErrorResponse(404, "-202");
   }
 
-  return makeSuccessResponse({
-    mentors,
-    count,
-    lastKey,
-  });
+  return makeSuccessResponse(mentors, "1", count, lastKey);
 };
 
 export const getUserByIdService: APIGatewayProxyHandler = async (event) => {
