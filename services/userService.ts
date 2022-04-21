@@ -1,4 +1,5 @@
 import type { APIGatewayProxyHandler } from "aws-lambda";
+import { DocumentClient } from "aws-sdk/clients/dynamodb";
 import { v4 as uuidv4 } from "uuid";
 import { USER_STATUS } from "../constants";
 import {
@@ -73,13 +74,20 @@ export const createUserService: APIGatewayProxyHandler = async (event) => {
 export const getUsersService: APIGatewayProxyHandler = async (event) => {
   const { queryStringParameters } = event;
   let mentors: User[];
+  let count: number;
+  let lastKey: DocumentClient.Key
 
   try {
-    const mentorsData = await getUsers({
-      role: "mentor",
-      onlyInTheProgram: queryStringParameters?.only_in_the_program === "true",
-    });
+    const mentorsData = await getUsers(
+      {
+        role: "mentor",
+        onlyInTheProgram: queryStringParameters?.only_in_the_program === "true",
+      },
+      queryStringParameters?.last_key
+    );
     mentors = mentorsData.Items;
+    count = mentorsData.Count
+    lastKey = mentorsData.LastEvaluatedKey
   } catch (error) {
     return makeErrorResponse(400, "-203", error);
   }
@@ -88,7 +96,7 @@ export const getUsersService: APIGatewayProxyHandler = async (event) => {
     return makeErrorResponse(404, "-202");
   }
 
-  return makeSuccessResponse(mentors);
+  return makeSuccessResponse(mentors, "1", count, lastKey);
 };
 
 export const getUserByIdService: APIGatewayProxyHandler = async (event) => {
@@ -166,7 +174,7 @@ export const updateUserByIdService: APIGatewayProxyHandler = async (event) => {
       "links",
       "skills",
       "user_timezone",
-      "accepted_coc"
+      "accepted_coc",
     ]);
   } catch (err) {
     return makeErrorResponse(400, "-207", err);

@@ -2,6 +2,8 @@ import { TABLE_NAME_WARNINGS, WARNSTATE } from "../constants";
 import { Warning } from "../types";
 import { generateUpdateQuery, put, scan, update } from "../utils/dynamoDb";
 
+const ITEMS_LIMIT = 20;
+
 export function addWarning(warning: Warning) {
   return put<Warning>({
     TableName: TABLE_NAME_WARNINGS,
@@ -13,12 +15,17 @@ export function getWarningsData(filter: {
   id?: string;
   allWarnings?: boolean;
   name?: string;
-}) {
+}, lastKey?: string) {
   const { id, allWarnings, name } = filter;
 
   let query: Parameters<typeof scan>[0] = {
     TableName: TABLE_NAME_WARNINGS,
+    Limit: ITEMS_LIMIT
   };
+
+  if(lastKey) {
+    query.ExclusiveStartKey = { id: lastKey };
+  }
 
   if (id) {
     query.FilterExpression = "mentee_id = :mentee_id";

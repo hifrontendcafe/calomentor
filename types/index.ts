@@ -72,6 +72,7 @@ export interface Warning {
   searcheable_mentor_username_discord?: string;
   searcheable_forgive_author_name?: string;
   searcheable_forgive_author_username_discord?: string;
+  from_bot?: boolean;
 }
 
 export interface Mentorship {
@@ -98,6 +99,7 @@ export interface Mentorship {
   mentee_timezone: string;
   mentor_timezone?: string;
   mentorship_create_date?: string;
+  from_bot?: boolean;
   searcheable_mentor_name: string;
   searcheable_mentor_username_discord: string;
   searcheable_mentee_name: string;

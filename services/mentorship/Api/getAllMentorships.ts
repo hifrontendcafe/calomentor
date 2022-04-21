@@ -21,6 +21,7 @@ const getMentorships: APIGatewayProxyHandler = async (event) => {
   const filter = queryStringParameters?.filter;
   const filter_dates = queryStringParameters?.filter_dates ?? FILTERDATES.ALL;
   const name = queryStringParameters?.name;
+  const lastKey = queryStringParameters?.last_key;
 
   // if (filter_dates === FILTERDATES.ALL) {
   //   const user_token = event.headers["user-token"];
@@ -35,20 +36,19 @@ const getMentorships: APIGatewayProxyHandler = async (event) => {
   let data: Awaited<ReturnType<typeof getAllMentorships>>;
 
   try {
-    if(!id && !name) {
-      data = await getAllMentorships();
+    if (!id && !name) {
+      data = await getAllMentorships(lastKey);
     }
 
     // ID can be mentor or mentee discord id
     if (id) {
-      data = await getMentorshipsByUserId(id);
-    } 
-    
+      data = await getMentorshipsByUserId(id, lastKey);
+    }
+
     // NAME can be mentor or mentee discord username or real name
     if (name) {
-      data = await getMentorshipsByName(name);
-    } 
-
+      data = await getMentorshipsByName(name, lastKey);
+    }
   } catch (err) {
     return makeErrorResponse(400, "-107", err);
   }
@@ -116,7 +116,7 @@ const getMentorships: APIGatewayProxyHandler = async (event) => {
     }
   }
 
-  return makeSuccessResponse(mentorshipsToReturn);
+  return makeSuccessResponse(mentorshipsToReturn, "1", data.Count, data.LastEvaluatedKey);
 };
 
 export default getMentorships;
