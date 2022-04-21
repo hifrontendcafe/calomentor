@@ -1,4 +1,5 @@
 import type { APIGatewayProxyHandler } from "aws-lambda";
+import { DocumentClient } from "aws-sdk/clients/dynamodb";
 import { v4 as uuidv4 } from "uuid";
 import { USER_STATUS } from "../constants";
 import {
@@ -73,6 +74,8 @@ export const createUserService: APIGatewayProxyHandler = async (event) => {
 export const getUsersService: APIGatewayProxyHandler = async (event) => {
   const { queryStringParameters } = event;
   let mentors: User[];
+  let count: number;
+  let lastKey: DocumentClient.Key
 
   try {
     const mentorsData = await getUsers(
@@ -83,6 +86,8 @@ export const getUsersService: APIGatewayProxyHandler = async (event) => {
       queryStringParameters?.last_key
     );
     mentors = mentorsData.Items;
+    count = mentorsData.Count
+    lastKey = mentorsData.LastEvaluatedKey
   } catch (error) {
     return makeErrorResponse(400, "-203", error);
   }
@@ -91,7 +96,11 @@ export const getUsersService: APIGatewayProxyHandler = async (event) => {
     return makeErrorResponse(404, "-202");
   }
 
-  return makeSuccessResponse(mentors);
+  return makeSuccessResponse({
+    mentors,
+    count,
+    lastKey,
+  });
 };
 
 export const getUserByIdService: APIGatewayProxyHandler = async (event) => {

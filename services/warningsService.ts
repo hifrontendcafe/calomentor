@@ -146,7 +146,7 @@ export const addWarningMatebotService: APIGatewayProxyHandler = async (
 export const getWarnings: APIGatewayProxyHandler = async (event) => {
   const id = event.pathParameters?.id;
   const allWarnings = Boolean(event.queryStringParameters?.all_warnings);
-  const lastKey = event.queryStringParameters?.last_key
+  const lastKey = event.queryStringParameters?.last_key;
   try {
     const warnings = await getWarningsData({ id, allWarnings }, lastKey);
     if (warnings?.Items?.length === 0) {
@@ -164,7 +164,11 @@ export const getWarnings: APIGatewayProxyHandler = async (event) => {
         "302"
       );
     }
-    return makeErrorResponse(400, "-302", warnings.Items);
+    return makeErrorResponse(400, "-302", {
+      warnings: warnings.Items,
+      count: warnings.Count,
+      lastKey: warnings.LastEvaluatedKey,
+    });
   } catch (error) {
     return makeErrorResponse(400, "-303", error);
   }
@@ -172,7 +176,7 @@ export const getWarnings: APIGatewayProxyHandler = async (event) => {
 
 export const getAllWarnings: APIGatewayProxyHandler = async (event) => {
   const name = event.queryStringParameters?.name;
-  const lastKey = event.queryStringParameters?.last_key
+  const lastKey = event.queryStringParameters?.last_key;
   try {
     let warnings: Awaited<ReturnType<typeof getWarningsData>>;
     if (name) {
@@ -180,7 +184,14 @@ export const getAllWarnings: APIGatewayProxyHandler = async (event) => {
     } else {
       warnings = await getWarningsData({}, lastKey);
     }
-    return makeSuccessResponse(warnings.Items, "302");
+    return makeSuccessResponse(
+      {
+        warnings: warnings.Items,
+        count: warnings.Count,
+        lastKey: warnings.LastEvaluatedKey,
+      },
+      "302"
+    );
   } catch (error) {
     return makeErrorResponse(400, "-303", error);
   }
