@@ -83,7 +83,8 @@ export const getUsersService: APIGatewayProxyHandler = async (event) => {
         role: "mentor",
         onlyInTheProgram: queryStringParameters?.only_in_the_program === "true",
       },
-      queryStringParameters?.last_key
+      queryStringParameters?.last_key,
+      queryStringParameters?.limit
     );
     mentors = mentorsData.Items;
     count = mentorsData.Count

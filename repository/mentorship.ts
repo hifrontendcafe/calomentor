@@ -2,16 +2,17 @@ import { TABLE_NAME_MENTORSHIP } from "../constants";
 import { Mentorship } from "../types";
 import { generateUpdateQuery, get, put, scan, update } from "../utils/dynamoDb";
 
-const ITEMS_LIMIT = 20;
-
-export function getAllMentorships(lastKey?: string) {
+export function getAllMentorships(lastKey?: string, limit?: string) {
   const query: Parameters<typeof scan>[0] = {
     TableName: TABLE_NAME_MENTORSHIP,
-    Limit: ITEMS_LIMIT,
   };
 
   if (lastKey) {
     query.ExclusiveStartKey = { id: lastKey };
+  }
+
+  if (limit) {
+    query.Limit = Number.parseInt(limit);
   }
 
   return scan<Mentorship>(query);
@@ -24,22 +25,33 @@ export function getMentorshipById(id: string) {
   });
 }
 
-export function getMentorshipsByUserId(id: string, lastKey?: string) {
+export function getMentorshipsByUserId(
+  id: string,
+  lastKey?: string,
+  limit?: string
+) {
   const query: Parameters<typeof scan>[0] = {
     TableName: TABLE_NAME_MENTORSHIP,
     FilterExpression: "mentor_id = :id OR mentee_id = :id",
     ExpressionAttributeValues: { ":id": id },
-    Limit: ITEMS_LIMIT,
   };
 
   if (lastKey) {
     query.ExclusiveStartKey = { id: lastKey };
   }
 
+  if (limit) {
+    query.Limit = Number.parseInt(limit);
+  }
+
   return scan<Mentorship>(query);
 }
 
-export function getMentorshipsByName(name: string, lastKey?: string) {
+export function getMentorshipsByName(
+  name: string,
+  lastKey?: string,
+  limit?: string
+) {
   const query: Parameters<typeof scan>[0] = {
     TableName: TABLE_NAME_MENTORSHIP,
     FilterExpression: `contains(searcheable_mentee_username_discord, :name) OR 
@@ -47,25 +59,34 @@ export function getMentorshipsByName(name: string, lastKey?: string) {
       contains(searcheable_mentor_username_discord, :name) OR 
       contains(searcheable_mentor_name, :name)`,
     ExpressionAttributeValues: { ":name": name.toLowerCase() },
-    Limit: ITEMS_LIMIT,
   };
 
   if (lastKey) {
     query.ExclusiveStartKey = { id: lastKey };
   }
 
+  if (limit) {
+    query.Limit = Number.parseInt(limit);
+  }
+
   return scan<Mentorship>(query);
 }
 
-export function getMentorshipsByTimeSlotId(id: string, lastKey?: string) {
+export function getMentorshipsByTimeSlotId(
+  id: string,
+  lastKey?: string,
+  limit?: string
+) {
   const query: Parameters<typeof scan>[0] = {
     TableName: TABLE_NAME_MENTORSHIP,
     FilterExpression: "time_slot_id = :time_slot_id",
     ExpressionAttributeValues: { ":time_slot_id": id },
-    Limit: ITEMS_LIMIT,
   };
   if (lastKey) {
     query.ExclusiveStartKey = { id: lastKey };
+  }
+  if (limit) {
+    query.Limit = Number.parseInt(limit);
   }
   return scan<Mentorship>(query);
 }

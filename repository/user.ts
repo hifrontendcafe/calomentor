@@ -9,8 +9,6 @@ import {
   update,
 } from "../utils/dynamoDb";
 
-const ITEMS_LIMIT = 20;
-
 export function createUser(user: User) {
   return put<User>({
     TableName: TABLE_NAME_USER,
@@ -24,11 +22,14 @@ interface UserFilters {
   onlyInTheProgram?: boolean;
 }
 
-export function getUsers(filters: UserFilters = {}, lastKey?: string) {
+export function getUsers(
+  filters: UserFilters = {},
+  lastKey?: string,
+  limit?: string
+) {
   const query: Parameters<typeof scan>[0] = {
     TableName: TABLE_NAME_USER,
     ExpressionAttributeNames: { "#role": "role" },
-    Limit: ITEMS_LIMIT,
     ProjectionExpression:
       "id, discord_username, full_name, about_me, email, url_photo, #role, links, skills, user_status, user_timezone, user_token, modified_by, accepted_coc",
   };
@@ -45,8 +46,12 @@ export function getUsers(filters: UserFilters = {}, lastKey?: string) {
       USER_STATUS.OUTSIDE_THE_PROGRAM;
   }
 
-  if(lastKey) {
+  if (lastKey) {
     query.ExclusiveStartKey = { id: lastKey };
+  }
+
+  if (limit) {
+    query.Limit = Number.parseInt(limit);
   }
 
   return scan<User>(query);
