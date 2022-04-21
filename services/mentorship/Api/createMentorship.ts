@@ -42,7 +42,7 @@ const createMentorshipAPI: APIGatewayProxyHandler = async (event) => {
   }
 
   // check if the mentee has any warning, if it has the system reject the mentorship request
-  const warning = await getWarningsData(mentee_id);
+  const warning = await getWarningsData({id: mentee_id});
 
   if (warning.Items.length > 0) {
     return makeErrorResponse(403, "-118");
@@ -231,6 +231,7 @@ const createMentorshipMatebot: APIGatewayProxyHandler = async (event) => {
     mentor_username_discord,
     mentee_id,
     mentee_username_discord,
+    mentorship_date,
   } = JSON.parse(event.body);
 
   if (
@@ -244,7 +245,7 @@ const createMentorshipMatebot: APIGatewayProxyHandler = async (event) => {
 
   try {
     // check if the mentee has any warning, if it has the system reject the mentorship request
-    const warning = await getWarningsData(mentee_id);
+    const warning = await getWarningsData({ id: mentee_id });
 
     if (warning.Items.length > 0) {
       return makeErrorResponse(403, "-118");
@@ -253,7 +254,7 @@ const createMentorshipMatebot: APIGatewayProxyHandler = async (event) => {
     return makeErrorResponse(500, "-102", error);
   }
 
-  const date = Date.now();
+  const date = mentorship_date || Date.now();
 
   const mentorship: Mentorship = {
     id: uuidv4(),

@@ -98,6 +98,7 @@ export const addWarningMatebotService: APIGatewayProxyHandler = async (
     warn_cause,
     warning_author_id,
     warning_author_username_discord,
+    warning_date,
   } = JSON.parse(event.body);
 
   if (
@@ -111,7 +112,8 @@ export const addWarningMatebotService: APIGatewayProxyHandler = async (
 
   const warningData: Warning = {
     id: uuidv4(),
-    warning_date: Date.now(),
+    warning_date: warning_date || Date.now(),
+    from_bot: true,
     mentee_id,
     mentee_name: null,
     mentee_username_discord,
