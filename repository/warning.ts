@@ -1,10 +1,12 @@
-import { TABLE_NAME_WARNINGS, WARNSTATE } from "../constants";
+import { TABLE_NAME_WARNINGS, TABLE_NAME_WARNINGS_DEV, WARNSTATE } from "../constants";
 import { Warning } from "../types";
 import { generateUpdateQuery, put, scan, update } from "../utils/dynamoDb";
 
+const TableName = process.env.STAGE === "dev" ? TABLE_NAME_WARNINGS_DEV : TABLE_NAME_WARNINGS
+
 export function addWarning(warning: Warning) {
   return put<Warning>({
-    TableName: TABLE_NAME_WARNINGS,
+    TableName,
     Item: warning,
   });
 }
@@ -21,7 +23,8 @@ export function getWarningsData(
   const { id, allWarnings, name } = filter;
 
   let query: Parameters<typeof scan>[0] = {
-    TableName: TABLE_NAME_WARNINGS,
+    TableName,
+    Select: "ALL_ATTRIBUTES"
   };
 
   if (lastKey) {
@@ -54,10 +57,7 @@ export function getWarningsData(
     query.ExpressionAttributeValues = {
       ":name": name.toLowerCase(),
     };
-  } else {
-    query.ProjectionExpression =
-      "id, mentee_id, warn_type, warn_cause, mentorship_id, warning_date, forgive_cause, mentor_name, mentee_name, warning_status, warning_author_id, warning_author_name, forgive_author_username_discord, forgive_author_name, forgive_author_id";
-  }
+  } 
 
   return scan<Warning>(query);
 }
@@ -78,7 +78,7 @@ export function updateWarning(
   }
 
   return update<Warning>({
-    TableName: TABLE_NAME_WARNINGS,
+    TableName,
     Key: { id },
     ConditionExpression: "attribute_exists(id)",
     ReturnValues: "ALL_NEW",

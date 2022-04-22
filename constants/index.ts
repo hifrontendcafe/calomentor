@@ -3,6 +3,11 @@ export const TABLE_NAME_TIME_SLOT = "time-slots";
 export const TABLE_NAME_MENTORSHIP = "mentorship";
 export const TABLE_NAME_WARNINGS = "warnings";
 
+export const TABLE_NAME_USER_DEV = "user-dev";
+export const TABLE_NAME_TIME_SLOT_DEV = "time-slots-dev";
+export const TABLE_NAME_MENTORSHIP_DEV = "mentorships-dev";
+export const TABLE_NAME_WARNINGS_DEV = "warnings-dev";
+
 export enum STATUS {
   ACTIVE = "ACTIVE",
   CANCEL = "CANCEL",

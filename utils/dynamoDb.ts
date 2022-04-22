@@ -12,6 +12,8 @@ type DeleteItemInput = DynamoDB.DocumentClient.DeleteItemInput;
 type DeleteItemOutput = DynamoDB.DocumentClient.DeleteItemOutput;
 type ScanInput = DynamoDB.DocumentClient.ScanInput;
 type ScanOutput = DynamoDB.DocumentClient.ScanOutput;
+type QueryInput = DynamoDB.DocumentClient.QueryInput;
+type QueryOutput = DynamoDB.DocumentClient.QueryOutput;
 
 type Result<T> = Promise<PromiseResult<T, AWSError>>;
 
@@ -20,6 +22,10 @@ interface GetItemResult<T = Record<string, any>> extends GetItemOutput {
 }
 
 interface ScanResult<T = Record<string, any>> extends ScanOutput {
+  Items?: T[];
+}
+
+interface QueryResult<T = Record<string, any>> extends QueryOutput {
   Items?: T[];
 }
 
@@ -53,6 +59,15 @@ export function scan<T extends Record<string, any>>(
 
 export function scan(params: ScanInput) {
   return dynamoDb.scan(params).promise();
+}
+
+export function query(params: QueryInput): Result<QueryResult>;
+export function query<T extends Record<string, any>>(
+  params: QueryInput
+): Result<QueryResult<T>>;
+
+export function query(params: QueryInput) {
+  return dynamoDb.query(params).promise();
 }
 
 export function put(params: PutItemInput): Result<PutItemResult>;
