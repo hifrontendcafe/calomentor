@@ -2,15 +2,25 @@ import { TABLE_NAME_MENTORSHIP, TABLE_NAME_MENTORSHIP_DEV } from "../constants";
 import { Mentorship } from "../types";
 import { generateUpdateQuery, get, put, scan, update } from "../utils/dynamoDb";
 
-const TableName = process.env.STAGE === "dev" ? TABLE_NAME_MENTORSHIP_DEV : TABLE_NAME_MENTORSHIP
+const TableName =
+  process.env.STAGE === "dev"
+    ? TABLE_NAME_MENTORSHIP_DEV
+    : TABLE_NAME_MENTORSHIP;
 
-export function getAllMentorships(lastKey?: string, limit?: string) {
+export function getAllMentorships(
+  lastKeyId?: string,
+  lastKeyDate?: string,
+  limit?: string
+) {
   const query: Parameters<typeof scan>[0] = {
     TableName,
   };
 
-  if (lastKey) {
-    query.ExclusiveStartKey = { id: lastKey };
+  if (lastKeyId && lastKeyDate) {
+    query.ExclusiveStartKey = {
+      id: lastKeyId,
+      mentorship_create_date: lastKeyDate,
+    };
   }
 
   if (limit) {
@@ -29,7 +39,8 @@ export function getMentorshipById(id: string) {
 
 export function getMentorshipsByUserId(
   id: string,
-  lastKey?: string,
+  lastKeyId?: string,
+  lastKeyDate?: string,
   limit?: string
 ) {
   const query: Parameters<typeof scan>[0] = {
@@ -38,8 +49,11 @@ export function getMentorshipsByUserId(
     ExpressionAttributeValues: { ":id": id },
   };
 
-  if (lastKey) {
-    query.ExclusiveStartKey = { id: lastKey };
+  if (lastKeyId && lastKeyDate) {
+    query.ExclusiveStartKey = {
+      id: lastKeyId,
+      mentorship_create_date: lastKeyDate,
+    };
   }
 
   if (limit) {
@@ -51,7 +65,8 @@ export function getMentorshipsByUserId(
 
 export function getMentorshipsByName(
   name: string,
-  lastKey?: string,
+  lastKeyId?: string,
+  lastKeyDate?: string,
   limit?: string
 ) {
   const query: Parameters<typeof scan>[0] = {
@@ -63,8 +78,11 @@ export function getMentorshipsByName(
     ExpressionAttributeValues: { ":name": name.toLowerCase() },
   };
 
-  if (lastKey) {
-    query.ExclusiveStartKey = { id: lastKey };
+  if (lastKeyId && lastKeyDate) {
+    query.ExclusiveStartKey = {
+      id: lastKeyId,
+      mentorship_create_date: lastKeyDate,
+    };
   }
 
   if (limit) {
@@ -76,7 +94,8 @@ export function getMentorshipsByName(
 
 export function getMentorshipsByTimeSlotId(
   id: string,
-  lastKey?: string,
+  lastKeyId?: string,
+  lastKeyDate?: string,
   limit?: string
 ) {
   const query: Parameters<typeof scan>[0] = {
@@ -84,8 +103,11 @@ export function getMentorshipsByTimeSlotId(
     FilterExpression: "time_slot_id = :time_slot_id",
     ExpressionAttributeValues: { ":time_slot_id": id },
   };
-  if (lastKey) {
-    query.ExclusiveStartKey = { id: lastKey };
+  if (lastKeyId && lastKeyDate) {
+    query.ExclusiveStartKey = {
+      id: lastKeyId,
+      mentorship_create_date: lastKeyDate,
+    };
   }
   if (limit) {
     query.Limit = Number.parseInt(limit);
