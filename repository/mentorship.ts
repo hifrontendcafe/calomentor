@@ -1,17 +1,30 @@
-import { TABLE_NAME_MENTORSHIP } from "../constants";
+import { TABLE_NAME_MENTORSHIP, TABLE_NAME_MENTORSHIP_DEV } from "../constants";
 import { Mentorship } from "../types";
 import { generateUpdateQuery, get, put, scan, update } from "../utils/dynamoDb";
 
-const ITEMS_LIMIT = 20;
+const TableName =
+  process.env.STAGE === "dev"
+    ? TABLE_NAME_MENTORSHIP_DEV
+    : TABLE_NAME_MENTORSHIP;
 
-export function getAllMentorships(lastKey?: string) {
+export function getAllMentorships(
+  lastKeyId?: string,
+  lastKeyDate?: string,
+  limit?: string
+) {
   const query: Parameters<typeof scan>[0] = {
-    TableName: TABLE_NAME_MENTORSHIP,
-    Limit: ITEMS_LIMIT,
+    TableName,
   };
 
-  if (lastKey) {
-    query.ExclusiveStartKey = { id: lastKey };
+  if (lastKeyId && lastKeyDate) {
+    query.ExclusiveStartKey = {
+      id: lastKeyId,
+      mentorship_create_date: lastKeyDate,
+    };
+  }
+
+  if (limit) {
+    query.Limit = Number.parseInt(limit);
   }
 
   return scan<Mentorship>(query);
@@ -19,60 +32,92 @@ export function getAllMentorships(lastKey?: string) {
 
 export function getMentorshipById(id: string) {
   return get<Mentorship>({
-    TableName: TABLE_NAME_MENTORSHIP,
+    TableName,
     Key: { id },
   });
 }
 
-export function getMentorshipsByUserId(id: string, lastKey?: string) {
+export function getMentorshipsByUserId(
+  id: string,
+  lastKeyId?: string,
+  lastKeyDate?: string,
+  limit?: string
+) {
   const query: Parameters<typeof scan>[0] = {
-    TableName: TABLE_NAME_MENTORSHIP,
+    TableName,
     FilterExpression: "mentor_id = :id OR mentee_id = :id",
     ExpressionAttributeValues: { ":id": id },
-    Limit: ITEMS_LIMIT,
   };
 
-  if (lastKey) {
-    query.ExclusiveStartKey = { id: lastKey };
+  if (lastKeyId && lastKeyDate) {
+    query.ExclusiveStartKey = {
+      id: lastKeyId,
+      mentorship_create_date: lastKeyDate,
+    };
+  }
+
+  if (limit) {
+    query.Limit = Number.parseInt(limit);
   }
 
   return scan<Mentorship>(query);
 }
 
-export function getMentorshipsByName(name: string, lastKey?: string) {
+export function getMentorshipsByName(
+  name: string,
+  lastKeyId?: string,
+  lastKeyDate?: string,
+  limit?: string
+) {
   const query: Parameters<typeof scan>[0] = {
-    TableName: TABLE_NAME_MENTORSHIP,
+    TableName,
     FilterExpression: `contains(searcheable_mentee_username_discord, :name) OR 
       contains(searcheable_mentee_name, :name) OR 
       contains(searcheable_mentor_username_discord, :name) OR 
       contains(searcheable_mentor_name, :name)`,
     ExpressionAttributeValues: { ":name": name.toLowerCase() },
-    Limit: ITEMS_LIMIT,
   };
 
-  if (lastKey) {
-    query.ExclusiveStartKey = { id: lastKey };
+  if (lastKeyId && lastKeyDate) {
+    query.ExclusiveStartKey = {
+      id: lastKeyId,
+      mentorship_create_date: lastKeyDate,
+    };
+  }
+
+  if (limit) {
+    query.Limit = Number.parseInt(limit);
   }
 
   return scan<Mentorship>(query);
 }
 
-export function getMentorshipsByTimeSlotId(id: string, lastKey?: string) {
+export function getMentorshipsByTimeSlotId(
+  id: string,
+  lastKeyId?: string,
+  lastKeyDate?: string,
+  limit?: string
+) {
   const query: Parameters<typeof scan>[0] = {
-    TableName: TABLE_NAME_MENTORSHIP,
+    TableName,
     FilterExpression: "time_slot_id = :time_slot_id",
     ExpressionAttributeValues: { ":time_slot_id": id },
-    Limit: ITEMS_LIMIT,
   };
-  if (lastKey) {
-    query.ExclusiveStartKey = { id: lastKey };
+  if (lastKeyId && lastKeyDate) {
+    query.ExclusiveStartKey = {
+      id: lastKeyId,
+      mentorship_create_date: lastKeyDate,
+    };
+  }
+  if (limit) {
+    query.Limit = Number.parseInt(limit);
   }
   return scan<Mentorship>(query);
 }
 
 export function createMentorship(mentorship: Mentorship) {
   return put<Mentorship>({
-    TableName: TABLE_NAME_MENTORSHIP,
+    TableName,
     Item: mentorship,
     ConditionExpression: "attribute_not_exists(id)",
   });
@@ -94,7 +139,7 @@ export function updateMentorship(
   }
 
   return update<Mentorship>({
-    TableName: TABLE_NAME_MENTORSHIP,
+    TableName,
     Key: { id },
     ConditionExpression: "attribute_exists(id)",
     ReturnValues: "ALL_NEW",

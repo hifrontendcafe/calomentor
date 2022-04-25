@@ -1,11 +1,13 @@
-import { TABLE_NAME_TIME_SLOT, TIMESLOT_STATUS } from "../constants";
+import { TABLE_NAME_TIME_SLOT, TABLE_NAME_TIME_SLOT_DEV, TIMESLOT_STATUS } from "../constants";
 import { TimeSlot } from "../types";
 import { deleteItem, get, put, scan, update } from "../utils/dynamoDb";
 import { toInt } from "../utils/toInt";
 
+const TableName = process.env.STAGE === "dev" ? TABLE_NAME_TIME_SLOT_DEV : TABLE_NAME_TIME_SLOT
+
 export function getTimeSlotById(id: string) {
   return get<TimeSlot>({
-    TableName: TABLE_NAME_TIME_SLOT,
+    TableName,
     Key: { id },
   });
 }
@@ -22,7 +24,7 @@ export function getTimeSlotsByUserId(
   filters: TimeSlotFilters = {}
 ) {
   const query: Parameters<typeof scan>[0] = {
-    TableName: TABLE_NAME_TIME_SLOT,
+    TableName,
     FilterExpression: "#user = :user_id",
     ExpressionAttributeNames: {
       "#user": "user_id",
@@ -61,7 +63,7 @@ export function getTimeSlotsByUserId(
 
 export function createTimeSlot(timeSlotInfo: TimeSlot) {
   return put<TimeSlot>({
-    TableName: TABLE_NAME_TIME_SLOT,
+    TableName,
     Item: timeSlotInfo,
   });
 }
@@ -86,7 +88,7 @@ type UpdateParams = UpdateIsOccupiedParams | UpdateMenteeParams;
 
 function updateTimeSlot(id: string, payload: UpdateParams) {
   const params: Parameters<typeof update>[0] = {
-    TableName: TABLE_NAME_TIME_SLOT,
+    TableName,
     Key: { id },
     ReturnValues: "ALL_NEW",
   };
@@ -132,7 +134,7 @@ function updateTimeSlot(id: string, payload: UpdateParams) {
 
 export function deleteTimeSlot(id: string) {
   return deleteItem<TimeSlot>({
-    TableName: TABLE_NAME_TIME_SLOT,
+    TableName,
     Key: { id },
     ReturnValues: "ALL_OLD",
   });

@@ -20,6 +20,7 @@ provider:
     JWT_KEY: ${param:JWT_KEY}
     API_KEY: ${param:API_KEY}
     STATE_MACHINE_ARN: ${param:STATE_MACHINE_ARN}
+    STAGE: ${opt:stage, self:provider.stage}
   runtime: nodejs14.x
   region: sa-east-1
   stackName: calomentor

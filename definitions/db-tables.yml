@@ -12,7 +12,7 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: 1
         WriteCapacityUnits: 1
-      TableName: user
+      TableName: user-dev
   CalomentorTimeSlotDynamoDB:
     Type: "AWS::DynamoDB::Table"
     DeletionPolicy: Retain
@@ -26,7 +26,7 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: 1
         WriteCapacityUnits: 1
-      TableName: time-slots
+      TableName: time-slots-dev
   CalomentorMentorshipDynamoDB:
     Type: "AWS::DynamoDB::Table"
     DeletionPolicy: Retain
@@ -34,13 +34,17 @@ Resources:
       AttributeDefinitions:
         - AttributeName: id
           AttributeType: S
+        - AttributeName: mentorship_create_date
+          AttributeType: S
       KeySchema:
         - AttributeName: id
           KeyType: HASH
+        - AttributeName: mentorship_create_date
+          KeyType: RANGE
       ProvisionedThroughput:
         ReadCapacityUnits: 1
         WriteCapacityUnits: 1
-      TableName: mentorship
+      TableName: mentorships-dev
   CalomentorWarningsDynamoDB:
     Type: "AWS::DynamoDB::Table"
     DeletionPolicy: Retain
@@ -48,10 +52,14 @@ Resources:
       AttributeDefinitions:
         - AttributeName: id
           AttributeType: S
+        - AttributeName: warning_date
+          AttributeType: S
       KeySchema:
         - AttributeName: id
           KeyType: HASH
+        - AttributeName: warning_date
+          KeyType: RANGE
       ProvisionedThroughput:
         ReadCapacityUnits: 1
         WriteCapacityUnits: 1
-      TableName: warnings
+      TableName: warnings-dev

@@ -1,4 +1,4 @@
-import { TABLE_NAME_USER, USER_STATUS } from "../constants";
+import { TABLE_NAME_USER, TABLE_NAME_USER_DEV, USER_STATUS } from "../constants";
 import type { Role, User } from "../types";
 import {
   deleteItem,
@@ -9,11 +9,11 @@ import {
   update,
 } from "../utils/dynamoDb";
 
-const ITEMS_LIMIT = 20;
+const TableName = process.env.STAGE === "dev" ? TABLE_NAME_USER_DEV : TABLE_NAME_USER
 
 export function createUser(user: User) {
   return put<User>({
-    TableName: TABLE_NAME_USER,
+    TableName,
     Item: user,
     ConditionExpression: "attribute_not_exists(id)",
   });
@@ -24,13 +24,15 @@ interface UserFilters {
   onlyInTheProgram?: boolean;
 }
 
-export function getUsers(filters: UserFilters = {}, lastKey?: string) {
+export function getUsers(
+  filters: UserFilters = {},
+  lastKey?: string,
+  limit?: string
+) {
   const query: Parameters<typeof scan>[0] = {
-    TableName: TABLE_NAME_USER,
+    TableName,
     ExpressionAttributeNames: { "#role": "role" },
-    Limit: ITEMS_LIMIT,
-    ProjectionExpression:
-      "id, discord_username, full_name, about_me, email, url_photo, #role, links, skills, user_status, user_timezone, user_token, modified_by, accepted_coc",
+    Select: "ALL_ATTRIBUTES"
   };
 
   if (filters.role) {
@@ -45,8 +47,12 @@ export function getUsers(filters: UserFilters = {}, lastKey?: string) {
       USER_STATUS.OUTSIDE_THE_PROGRAM;
   }
 
-  if(lastKey) {
+  if (lastKey) {
     query.ExclusiveStartKey = { id: lastKey };
+  }
+
+  if (limit) {
+    query.Limit = Number.parseInt(limit);
   }
 
   return scan<User>(query);
@@ -54,14 +60,14 @@ export function getUsers(filters: UserFilters = {}, lastKey?: string) {
 
 export function getUserById(id: string) {
   return get<User>({
-    TableName: TABLE_NAME_USER,
+    TableName,
     Key: { id },
   });
 }
 
 export function getUserByToken(token: string) {
   return scan<User>({
-    TableName: TABLE_NAME_USER,
+    TableName,
     FilterExpression: "#token = :user_token",
     ExpressionAttributeNames: {
       "#token": "user_token",
@@ -74,7 +80,7 @@ export function getUserByToken(token: string) {
 
 export function deleteUserById(id: string) {
   return deleteItem<User>({
-    TableName: TABLE_NAME_USER,
+    TableName,
     Key: { id },
     ReturnValues: "ALL_OLD",
   });
@@ -96,7 +102,7 @@ export function updateUser(
   }
 
   return update<User>({
-    TableName: TABLE_NAME_USER,
+    TableName,
     Key: { id },
     ConditionExpression: "attribute_exists(id)",
     ReturnValues: "ALL_NEW",
