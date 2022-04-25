@@ -112,7 +112,7 @@ export const addWarningMatebotService: APIGatewayProxyHandler = async (
 
   const warningData: Warning = {
     id: uuidv4(),
-    warning_date: warning_date || Date.now(),
+    warning_date: warning_date || String(Date.now()),
     from_bot: true,
     mentee_id,
     mentee_name: null,
