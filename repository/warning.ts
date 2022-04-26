@@ -18,7 +18,6 @@ export function getWarningsData(
     name?: string;
   },
   lastKeyId?: string,
-  lastKeyDate?: string,
   limit?: string,
 ) {
   const { id, allWarnings, name } = filter;
@@ -28,8 +27,8 @@ export function getWarningsData(
     Select: "ALL_ATTRIBUTES"
   };
 
-  if (lastKeyId && lastKeyDate) {
-    query.ExclusiveStartKey = { id: lastKeyId, warning_date: lastKeyDate  };
+  if (lastKeyId) {
+    query.ExclusiveStartKey = { id: lastKeyId  };
   }
 
   if(limit) { 
