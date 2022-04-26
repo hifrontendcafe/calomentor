@@ -149,13 +149,11 @@ export const getWarnings: APIGatewayProxyHandler = async (event) => {
   const id = event.pathParameters?.id;
   const allWarnings = Boolean(event.queryStringParameters?.all_warnings);
   const lastKeyId = event.queryStringParameters?.last_key_id;
-  const lastKeyDate = event.queryStringParameters?.last_key_date;
   const limit = event.queryStringParameters?.limit;
   try {
     const warnings = await getWarningsData(
       { id, allWarnings },
       lastKeyId,
-      lastKeyDate,
       limit
     );
     if (warnings?.Items?.length === 0) {
@@ -184,15 +182,14 @@ export const getWarnings: APIGatewayProxyHandler = async (event) => {
 export const getAllWarnings: APIGatewayProxyHandler = async (event) => {
   const name = event.queryStringParameters?.name;
   const lastKeyId = event.queryStringParameters?.last_key_id;
-  const lastKeyDate = event.queryStringParameters?.last_key_date;
   const limit = event.queryStringParameters?.limit;
 
   try {
     let warnings: Awaited<ReturnType<typeof getWarningsData>>;
     if (name) {
-      warnings = await getWarningsData({ name }, lastKeyId, lastKeyDate, limit);
+      warnings = await getWarningsData({ name }, lastKeyId, limit);
     } else {
-      warnings = await getWarningsData({}, lastKeyId, lastKeyDate, limit);
+      warnings = await getWarningsData({}, lastKeyId, limit);
     }
     return makeSuccessResponse(
       warnings.Items,
