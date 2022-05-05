@@ -46,6 +46,56 @@ export interface User {
   accepted_coc: boolean;
 }
 
+interface SanityPersonaInterface {
+  _createdAt: string;
+  _id: string;
+  _rev: string;
+  _type: string;
+  _updatedAt: string;
+  discordID: {
+    _type: string;
+    current: string;
+  };
+  email: string;
+  firstName: string;
+  github: string;
+  lastName: string;
+  linkedin: string;
+  photo: {
+    _type: string;
+    asset: {
+      _ref: string;
+      _type: string;
+    };
+  };
+  timezone: string;
+  twitter: string;
+  username: string;
+}
+
+interface Topics {
+  _key: string;
+  _ref: string;
+  _type: string;
+}
+
+export interface Mentor {
+  _id: string;
+  calendly: string;
+  description: string;
+  github?: string;
+  isActive: boolean;
+  linkedin: string;
+  name: string;
+  persona: SanityPersonaInterface;
+  photo?: {
+    alt?: string;
+    src: string;
+  };
+  topics: Topics[];
+  web?: string;
+}
+
 export interface Warning {
   id: string;
   warning_date: number;

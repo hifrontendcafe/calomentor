@@ -21,6 +21,7 @@ provider:
     API_KEY: ${file(./config.dev.json):API_KEY}
     STATE_MACHINE_ARN: ${file(./config.dev.json):STATE_MACHINE_ARN}
     STAGE: ${opt:stage, self:provider.stage}
+    SANITY_PROJECT_ID: ${file(./config.dev.json):SANITY_PROJECT_ID}
   runtime: nodejs14.x
   region: sa-east-1
   stackName: calomentor

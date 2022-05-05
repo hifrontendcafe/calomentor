@@ -113,7 +113,8 @@ export const RESPONSE_CODES = {
   "302": "Warnings",
   "303": "Warning deleted",
   "-300": "Unable to add a warning",
-  "-301": "Bad Request: Missing params. The required params are mentee_id, mentee_username_discord, warn_type, warn_cause, warning_author_id, warning_author_username_discord",
+  "-301":
+    "Bad Request: Missing params. The required params are mentee_id, mentee_username_discord, warn_type, warn_cause, warning_author_id, warning_author_username_discord",
   "-302": "The mentee has warnings",
   "-303": "Unable to get warnings",
   "-304": "The mentee id is required",

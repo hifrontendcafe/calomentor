@@ -1,5 +1,9 @@
-import { TABLE_NAME_USER, TABLE_NAME_USER_DEV, USER_STATUS } from "../constants";
-import type { Role, User } from "../types";
+import {
+  TABLE_NAME_USER,
+  TABLE_NAME_USER_DEV,
+  USER_STATUS,
+} from "../constants";
+import type { Mentor, Role, User } from "../types";
 import {
   deleteItem,
   generateUpdateQuery,
@@ -9,7 +13,10 @@ import {
   update,
 } from "../utils/dynamoDb";
 
-const TableName = process.env.STAGE === "dev" ? TABLE_NAME_USER_DEV : TABLE_NAME_USER
+const axios = require("axios");
+
+const TableName =
+  process.env.STAGE === "dev" ? TABLE_NAME_USER_DEV : TABLE_NAME_USER;
 
 export function createUser(user: User) {
   return put<User>({
@@ -32,7 +39,7 @@ export function getUsers(
   const query: Parameters<typeof scan>[0] = {
     TableName,
     ExpressionAttributeNames: { "#role": "role" },
-    Select: "ALL_ATTRIBUTES"
+    Select: "ALL_ATTRIBUTES",
   };
 
   if (filters.role) {
@@ -135,4 +142,38 @@ export function addTokenToUser(id: string, user_token: string) {
   return updateUser(id, {
     user_token,
   });
+}
+
+export async function getMentors(): Promise<Mentor[]> {
+  const query = `*[_type == "mentor"] | order(date desc) {
+    _id,
+    persona->,
+    name,
+    description,
+    'photo': {
+      'alt': photo.alt,
+      'src': photo.asset->url
+    },
+    isActive,
+    web,
+    calendly,
+    github,
+    linkedin,
+    topics
+  }`;
+
+  const url = `https://${
+    process.env.SANITY_PROJECT_ID
+  }.api.sanity.io/v2022-04-29/data/query/${
+    process.env.STAGE === "dev" ? "develop" : "production"
+  }?query=${encodeURIComponent(query)}`;
+
+  try {
+    const {
+      data: { result },
+    }: Awaited<{ data: { result: Mentor[] } }> = await axios.get(url);
+    return result;
+  } catch (error) {
+    return error.stack;
+  }
 }

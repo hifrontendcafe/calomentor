@@ -16,6 +16,7 @@ import {
   getUserByIdService,
   deleteUserByIdService,
   updateUserByIdService,
+  getMentorsFromSanity,
 } from "./services/userService";
 
 import {
@@ -81,6 +82,12 @@ export const updateUserById: Handler = (
   context: Context,
   callback: Callback<any>
 ) => updateUserByIdService(event, context, callback);
+
+export const getMentors: Handler = (
+  event: any,
+  context: Context,
+  callback: Callback<any>
+) => getMentorsFromSanity(event, context, callback);
 
 // Mentorships functions handlers
 
