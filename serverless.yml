@@ -51,6 +51,7 @@ functions:
   - ${file(definitions/mentorships-api.yml)}
   - ${file(definitions/mentorships-state-machine.yml)}
   - ${file(definitions/matebot.yml)}
+  - ${file(definitions/feedback.yml)}
 
 stepFunctions:
   ${file(definitions/create-mentorship-step-function.yml)}

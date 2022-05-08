@@ -1,0 +1,16 @@
+addFeedbackHandler:
+  handler: index.addFeedbackHandler
+  events:
+    - http:
+        path: feedback
+        method: post
+        cors: true
+        private: true
+getFeedbackHandler:
+  handler: index.getFeedbackHandler
+  events:
+    - http:
+        path: feedback/{id}
+        method: get
+        cors: true
+        private: true

@@ -24,7 +24,7 @@ import {
   getAllWarnings,
   getWarnings,
   addWarningMatebotService,
-  forgiveWarningByMentee
+  forgiveWarningByMentee,
 } from "./services/warningsService";
 
 import {
@@ -41,8 +41,9 @@ import {
   checkConfirmMentorship,
   confirmationAttemptMentorship,
   catchMentorship,
-  createMentorshipMatebot
+  createMentorshipMatebot,
 } from "./services/mentorship";
+import { addFeedbackService, getFeedbackService } from "./services/feedbackService";
 
 // User functions handlers
 
@@ -205,3 +206,17 @@ export const forgiveWarningByMenteeHandler: Handler = (
   context: Context,
   callback: Callback<any>
 ) => forgiveWarningByMentee(event, context, callback);
+
+// Feedback functions handlers
+
+export const addFeedbackHandler: Handler = (
+  event: any,
+  context: Context,
+  callback: Callback<any>
+) => addFeedbackService(event, context, callback);
+
+export const getFeedbackHandler: Handler = (
+  event: any,
+  context: Context,
+  callback: Callback<any>
+) => getFeedbackService(event, context, callback);
