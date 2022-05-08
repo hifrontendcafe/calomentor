@@ -11,6 +11,7 @@ import {
 } from "../repository/warning";
 import { Warning } from "../types";
 import { makeErrorResponse, makeSuccessResponse } from "../utils/makeResponses";
+import { orderWarningsByDate } from "../utils/orderBy";
 import { sendEmail } from "../utils/sendEmail";
 import { isAdmin } from "../utils/validations";
 
@@ -189,7 +190,10 @@ export const getAllWarnings: APIGatewayProxyHandler = async (event) => {
     if (name) {
       warnings = await getWarningsData({ name }, lastKeyId, limit);
     } else {
-      warnings = await getWarningsData({}, lastKeyId, limit);
+      warnings = await getWarningsData({});
+      // Order the mentorships by date and replace the data.Itemes for this
+      // ordered array with the last 20 elements
+      warnings = { ...warnings, Items: orderWarningsByDate(warnings.Items, Number.parseInt(limit || "20")) };
     }
     return makeSuccessResponse(
       warnings.Items,

@@ -13,6 +13,7 @@ import {
   makeErrorResponse,
   makeSuccessResponse,
 } from "../../../utils/makeResponses";
+import { orderMentorshipsByDate } from "../../../utils/orderBy";
 
 const getMentorships: APIGatewayProxyHandler = async (event) => {
   const { pathParameters, queryStringParameters } = event;
@@ -38,7 +39,10 @@ const getMentorships: APIGatewayProxyHandler = async (event) => {
 
   try {
     if (!id && !name) {
-      data = await getAllMentorships(lastKeyId, limit);
+      data = await getAllMentorships();
+      // Order the mentorships by date and replace the data.Itemes for this
+      // ordered array with the last 20 elements
+      data = { ...data, Items: orderMentorshipsByDate(data.Items, Number.parseInt(limit || "20")) };
     }
 
     // ID can be mentor or mentee discord id
@@ -117,7 +121,12 @@ const getMentorships: APIGatewayProxyHandler = async (event) => {
     }
   }
 
-  return makeSuccessResponse(mentorshipsToReturn, "1", data.Count, data.LastEvaluatedKey);
+  return makeSuccessResponse(
+    mentorshipsToReturn,
+    "1",
+    data.Count,
+    data.LastEvaluatedKey
+  );
 };
 
 export default getMentorships;
