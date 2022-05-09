@@ -232,6 +232,8 @@ const createMentorshipMatebot: APIGatewayProxyHandler = async (event) => {
     mentee_id,
     mentee_username_discord,
     mentorship_date,
+    mentee_email,
+    mentor_email
   } = JSON.parse(event.body);
 
   if (
@@ -260,13 +262,13 @@ const createMentorshipMatebot: APIGatewayProxyHandler = async (event) => {
     id: uuidv4(),
     mentor_id,
     mentor_username_discord,
-    mentor_email: null,
+    mentor_email: mentor_email ?? null,
     mentor_name: mentor_username_discord,
     mentorship_token: null,
     mentee_id,
     mentee_name: mentee_username_discord,
     mentee_username_discord,
-    mentee_email: null,
+    mentee_email: mentee_email ?? null,
     mentee_timezone: null,
     info: null,
     mentorship_status: STATUS.CONFIRMED,
