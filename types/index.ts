@@ -129,7 +129,6 @@ export interface Mentorship {
   mentee_email: string;
   mentee_username_discord: string;
   mentor_email: string;
-  feedback_mentee: string;
   mentor_id: string;
   mentor_name: string;
   mentor_username_discord: string;
@@ -143,8 +142,6 @@ export interface Mentorship {
   who_canceled: WHOCANCELED;
   time_slot_info?: TimeSlot;
   time_slot_id?: string;
-  feedback_stars: 1 | 2 | 3 | 4 | 5;
-  feedback_mentee_private?: string;
   warning_info?: Warning;
   mentee_timezone: string;
   mentor_timezone?: string;
@@ -201,6 +198,20 @@ export interface MentorshipResponse {
   isConfirm?: boolean;
   confirmationAttempt?: number;
   reminderAttempt?: number;
+}
+
+export interface Feedback {
+  id: string;
+  mentor_id: string;
+  mentor_username_discord: string;
+  mentor_name: string;
+  mentee_id: string;
+  mentee_username_discord: string;
+  mentee_name: string;
+  feedback_date: string;
+  feedback_stars: 1 | 2 | 3 | 4 | 5;
+  feedback_mentee: Record<string, string>;
+  feedback_mentee_private?: Record<string, string>;
 }
 
 export interface IcalData {

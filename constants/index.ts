@@ -2,11 +2,13 @@ export const TABLE_NAME_USER = "user-prod";
 export const TABLE_NAME_TIME_SLOT = "time-slots-prod";
 export const TABLE_NAME_MENTORSHIP = "mentorship-prod";
 export const TABLE_NAME_WARNINGS = "warnings-prod";
+export const TABLE_NAME_FEEDBACK = "feedback-prod";
 
 export const TABLE_NAME_USER_DEV = "user-test";
 export const TABLE_NAME_TIME_SLOT_DEV = "time-slots-test";
 export const TABLE_NAME_MENTORSHIP_DEV = "mentorships-test";
 export const TABLE_NAME_WARNINGS_DEV = "warnings-test";
+export const TABLE_NAME_FEEDBACK_DEV = "feedback-test";
 
 export enum STATUS {
   ACTIVE = "ACTIVE",
@@ -155,4 +157,8 @@ export const RESPONSE_CODES = {
   "-412": "There was an error trying to delete the slot",
   "-413": "Time slot not found",
   "-414": "Time slot is asociated with a mentorship",
+  "500": "Feedback created",
+  "501": "Feedback",
+  "-500": "There was an error trying to add feedback.",
+  "-501": "There was an error trying to get the feedback."
 } as const;
