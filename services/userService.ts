@@ -9,12 +9,13 @@ import {
   deactivateUser,
   deleteUserById,
   deleteUserFromMentorship,
+  getMentors,
   getUserById,
   getUserByToken,
   getUsers,
   updateUser,
 } from "../repository/user";
-import type { User } from "../types";
+import type { Mentor, User } from "../types";
 import { isAWSError } from "../utils/dynamoDb";
 import { makeErrorResponse, makeSuccessResponse } from "../utils/makeResponses";
 import { isAdmin, isUserRoleUpdated } from "../utils/validations";
@@ -75,7 +76,7 @@ export const getUsersService: APIGatewayProxyHandler = async (event) => {
   const { queryStringParameters } = event;
   let mentors: User[];
   let count: number;
-  let lastKey: DocumentClient.Key
+  let lastKey: DocumentClient.Key;
 
   try {
     const mentorsData = await getUsers(
@@ -87,8 +88,8 @@ export const getUsersService: APIGatewayProxyHandler = async (event) => {
       queryStringParameters?.limit
     );
     mentors = mentorsData.Items;
-    count = mentorsData.Count
-    lastKey = mentorsData.LastEvaluatedKey
+    count = mentorsData.Count;
+    lastKey = mentorsData.LastEvaluatedKey;
   } catch (error) {
     return makeErrorResponse(400, "-203", error);
   }
@@ -238,4 +239,13 @@ export const activateUserService: APIGatewayProxyHandler = async (event) => {
   }
 
   return makeSuccessResponse(user, "203");
+};
+
+export const getMentorsFromSanity: APIGatewayProxyHandler = async (event) => {
+  try {
+    const mentors: Awaited<Mentor[]> = await getMentors()
+    return makeSuccessResponse(mentors, "200");
+  } catch (error) {
+    return makeErrorResponse(400, "-207", error);
+  }
 };

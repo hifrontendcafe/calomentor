@@ -21,6 +21,7 @@ provider:
     API_KEY: ${param:API_KEY}
     STATE_MACHINE_ARN: ${param:STATE_MACHINE_ARN}
     STAGE: ${opt:stage, self:provider.stage}
+    SANITY_PROJECT_ID: ${param:SANITY_PROJECT_ID}
   runtime: nodejs14.x
   region: sa-east-1
   stackName: calomentor

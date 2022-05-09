@@ -46,3 +46,11 @@ updateUserById:
         method: put
         cors: true
         private: true
+getMentors:
+  handler: index.getMentors
+  events:
+    - http:
+        path: mentor
+        method: get
+        cors: true
+        private: true
