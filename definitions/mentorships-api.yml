@@ -30,6 +30,14 @@ getAllMentorships:
         method: get
         cors: true
         private: true
+getMentorshipsByMentee:
+  handler: index.getMentorshipsByMenteeHandler
+  events:
+    - http:
+        path: mentorships/mentee/{id}
+        method: get
+        cors: true
+        private: true
 mentorshipConfirmation:
   handler: index.mentorshipConfirmation
   events:

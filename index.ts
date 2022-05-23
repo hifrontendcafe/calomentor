@@ -1,4 +1,4 @@
-import { Handler, Context, Callback } from "aws-lambda";
+import { Handler, Context, Callback } from 'aws-lambda';
 
 export {
   getTimeSlotsByUser,
@@ -6,8 +6,8 @@ export {
   addTimeSlot,
   updateTimeSlotState,
   deleteTimeSlot,
-  addMenteeToTimeSlot,
-} from "./services/timeSlots";
+  addMenteeToTimeSlot
+} from './services/timeSlots';
 
 import {
   createUserService,
@@ -16,8 +16,8 @@ import {
   getUserByIdService,
   deleteUserByIdService,
   updateUserByIdService,
-  getMentorsFromSanity,
-} from "./services/userService";
+  getMentorsFromSanity
+} from './services/userService';
 
 import {
   addWarningService,
@@ -25,8 +25,8 @@ import {
   getAllWarnings,
   getWarnings,
   addWarningMatebotService,
-  forgiveWarningByMentee,
-} from "./services/warningsService";
+  forgiveWarningByMentee
+} from './services/warningsService';
 
 import {
   getMentorships,
@@ -43,8 +43,13 @@ import {
   confirmationAttemptMentorship,
   catchMentorship,
   createMentorshipMatebot,
-} from "./services/mentorship";
-import { addFeedbackService, getFeedbackService } from "./services/feedbackService";
+  getMentorshipsByMentee
+} from './services/mentorship';
+import {
+  addFeedbackService,
+  getFeedbackService
+} from './services/feedbackService';
+import { Content } from 'aws-sdk/clients/codecommit';
 
 // User functions handlers
 
@@ -157,6 +162,12 @@ export const getAllMentorships: Handler = (
   context: Context,
   callback: Callback<any>
 ) => getMentorships(event, context, callback);
+
+export const getMentorshipsByMenteeHandler: Handler = (
+  event: any,
+  context: Context,
+  callback: Callback<any>
+) => getMentorshipsByMentee(event, context, callback);
 
 export const checkConfirmation: Handler = (
   event: any,
