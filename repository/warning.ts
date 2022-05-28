@@ -2,7 +2,7 @@ import { TABLE_NAME_WARNINGS, TABLE_NAME_WARNINGS_DEV, WARNSTATE } from "../cons
 import { Warning } from "../types";
 import { generateUpdateQuery, put, scan, update } from "../utils/dynamoDb";
 
-const TableName = process.env.STAGE === "dev" ? TABLE_NAME_WARNINGS_DEV : TABLE_NAME_WARNINGS
+const TableName = process.env.STAGE === "dev" ? TABLE_NAME_WARNINGS : TABLE_NAME_WARNINGS
 
 export function addWarning(warning: Warning) {
   return put<Warning>({
@@ -58,6 +58,16 @@ export function getWarningsData(
       ":name": name.toLowerCase(),
     };
   } 
+
+  return scan<Warning>(query);
+}
+
+export function getWarningBetweenTwoDates(dateOne: string, dateTwo: string) {
+  const query: Parameters<typeof scan>[0] = {
+    TableName,
+    FilterExpression: `warning_date BETWEEN :dateOne AND :dateTwo`,
+    ExpressionAttributeValues: { ":dateOne": dateOne, ":dateTwo": dateTwo },
+  };
 
   return scan<Warning>(query);
 }

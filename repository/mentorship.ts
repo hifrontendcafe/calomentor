@@ -114,6 +114,16 @@ export function getMentorshipsByTimeSlotId(
   return scan<Mentorship>(query);
 }
 
+export function getMentorshipBetweenTwoDates(dateOne: string, dateTwo: string) {
+  const query: Parameters<typeof scan>[0] = {
+    TableName,
+    FilterExpression: `mentorship_create_date BETWEEN :dateOne AND :dateTwo`,
+    ExpressionAttributeValues: { ":dateOne": dateOne, ":dateTwo": dateTwo },
+  };
+
+  return scan<Mentorship>(query);
+}
+
 export function createMentorship(mentorship: Mentorship) {
   return put<Mentorship>({
     TableName,
