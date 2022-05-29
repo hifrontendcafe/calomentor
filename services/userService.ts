@@ -53,7 +53,7 @@ export const createUserService: APIGatewayProxyHandler = async (event) => {
     links,
     skills,
     accepted_coc: false,
-    user_status: USER_STATUS.OUTSIDE_THE_PROGRAM,
+    user_status: USER_STATUS.OUT,
     modified_by: "",
     user_timezone: timezone,
     user_token: uuidv4(),
@@ -217,7 +217,7 @@ export const activateUserService: APIGatewayProxyHandler = async (event) => {
 
   let result: Awaited<ReturnType<typeof updateUser>>;
   try {
-    if (user_status === USER_STATUS.OUTSIDE_THE_PROGRAM) {
+    if (user_status === USER_STATUS.OUT) {
       result = await deleteUserFromMentorship(id, modified_by);
     } else if (user_status === USER_STATUS.ACTIVE) {
       result = await activateUser(id, modified_by);
@@ -244,7 +244,7 @@ export const activateUserService: APIGatewayProxyHandler = async (event) => {
 export const getMentorsFromSanity: APIGatewayProxyHandler = async (event) => {
   try {
     const mentors: Awaited<Mentor[]> = await getMentors()
-    return makeSuccessResponse(mentors, "200");
+    return makeSuccessResponse(mentors, "201");
   } catch (error) {
     return makeErrorResponse(400, "-207", error);
   }
