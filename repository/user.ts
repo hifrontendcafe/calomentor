@@ -12,6 +12,7 @@ import {
   scan,
   update,
 } from "../utils/dynamoDb";
+import { getFeedbackByMentorId } from "./feedback";
 
 const axios = require("axios");
 
@@ -50,8 +51,7 @@ export function getUsers(
   if (filters.onlyInTheProgram) {
     query.FilterExpression = `${query.FilterExpression} and #userStatus <> :user_status`;
     query.ExpressionAttributeNames["#userStatus"] = "user_status";
-    query.ExpressionAttributeValues[":user_status"] =
-      USER_STATUS.OUTSIDE_THE_PROGRAM;
+    query.ExpressionAttributeValues[":user_status"] = USER_STATUS.OUT;
   }
 
   if (lastKey) {
@@ -133,7 +133,7 @@ export function deactivateUser(id: string, modified_by: string) {
 
 export function deleteUserFromMentorship(id: string, modified_by: string) {
   return updateUser(id, {
-    user_status: USER_STATUS.OUTSIDE_THE_PROGRAM,
+    user_status: USER_STATUS.OUT,
     modified_by,
   });
 }
@@ -159,7 +159,8 @@ export async function getMentors(): Promise<Mentor[]> {
     calendly,
     github,
     linkedin,
-    topics
+    topics,
+    status
   }`;
 
   const url = `https://${
@@ -172,7 +173,14 @@ export async function getMentors(): Promise<Mentor[]> {
     const {
       data: { result },
     }: Awaited<{ data: { result: Mentor[] } }> = await axios.get(url);
-    return result;
+    return await Promise.all(
+      result.map(async (mentor) => {
+        mentor.feedback = (
+          await getFeedbackByMentorId(mentor.persona?.discordID?.current)
+        )?.Items?.[0]?.feedback_stars;
+        return mentor;
+      })
+    );
   } catch (error) {
     return error.stack;
   }

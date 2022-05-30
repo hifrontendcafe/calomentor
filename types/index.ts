@@ -94,8 +94,9 @@ export interface Mentor {
   };
   topics: Topics[];
   web?: string;
+  status?: USER_STATUS
+  feedback?:  1 | 2 | 3 | 4 | 5;
 }
-
 export interface Warning {
   id: string;
   warning_date: number;
