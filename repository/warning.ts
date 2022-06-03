@@ -1,6 +1,6 @@
 import { TABLE_NAME_WARNINGS, TABLE_NAME_WARNINGS_DEV, WARNSTATE } from "../constants";
 import { Warning } from "../types";
-import { generateUpdateQuery, put, scan, update } from "../utils/dynamoDb";
+import { deleteItem, generateUpdateQuery, put, scan, update } from "../utils/dynamoDb";
 
 const TableName = process.env.STAGE === "dev" ? TABLE_NAME_WARNINGS_DEV : TABLE_NAME_WARNINGS
 
@@ -83,5 +83,13 @@ export function updateWarning(
     ConditionExpression: "attribute_exists(id)",
     ReturnValues: "ALL_NEW",
     ...updateExpression,
+  });
+}
+
+export function deleteWarning(id: string) {
+  return deleteItem<Warning>({
+    TableName,
+    Key: { id },
+    ReturnValues: "ALL_OLD",
   });
 }

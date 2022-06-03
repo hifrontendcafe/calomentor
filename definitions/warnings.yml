@@ -38,3 +38,11 @@ forgiveWarningByMenteeHandler:
         method: patch
         cors: true
         private: true
+warningDelete:
+  handler: index.warningDelete
+  events:
+    - http:
+        path: warning/{id}
+        method: delete
+        cors: true
+        private: true

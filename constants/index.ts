@@ -74,6 +74,7 @@ export const RESPONSE_CODES = {
   "103": "Time slot added",
   "104": "Time slot updated",
   "105": "Time slot successfully deleted",
+  "106": "Mentorship deleted.",
   "-100":
     "Bad Request: Missing params. The required params are mentor_id, mentor_username_discord, mentee_id, mentee_username_discord",
   "-101": "Unable to get the mentor.",
@@ -93,6 +94,8 @@ export const RESPONSE_CODES = {
   "-118": "Mentee has warnings",
   "-119": "Time slot is occupied",
   "-120": "Bad Request: must provide a cancel cause and who cancel.",
+  "-121": "Bad Request: must provide an id",
+  "-122": "There was a problem when try to delete the mentorship",
   "200": "User created succesfully",
   "201": "User",
   "202": "User successfully deleted",
@@ -114,7 +117,8 @@ export const RESPONSE_CODES = {
   "300": "Warning added",
   "301": "There is no warnings for this mentee",
   "302": "Warnings",
-  "303": "Warning deleted",
+  "303": "Warning removed",
+  "304": "Warning deleted",
   "-300": "Unable to add a warning",
   "-301":
     "Bad Request: Missing params. The required params are mentee_id, mentee_username_discord, warn_type, warn_cause, warning_author_id, warning_author_username_discord",

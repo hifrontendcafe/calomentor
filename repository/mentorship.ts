@@ -1,6 +1,6 @@
 import { TABLE_NAME_MENTORSHIP, TABLE_NAME_MENTORSHIP_DEV } from '../constants';
 import { Mentorship } from '../types';
-import { generateUpdateQuery, get, put, scan, update } from '../utils/dynamoDb';
+import { deleteItem, generateUpdateQuery, get, put, scan, update } from '../utils/dynamoDb';
 
 const TableName =
   process.env.STAGE === 'dev'
@@ -143,5 +143,13 @@ export function updateMentorship(
     ConditionExpression: 'attribute_exists(id)',
     ReturnValues: 'ALL_NEW',
     ...updateExpression
+  });
+}
+
+export function deleteMentorship(id: string) {
+  return deleteItem<Mentorship>({
+    TableName,
+    Key: { id },
+    ReturnValues: "ALL_OLD",
   });
 }

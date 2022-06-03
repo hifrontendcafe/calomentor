@@ -54,3 +54,11 @@ mentorshipFeedback:
         method: post
         cors: true
         private: true
+mentorshipDelete:
+  handler: index.mentorshipDelete
+  events:
+    - http:
+        path: mentorship/{id}
+        method: delete
+        cors: true
+        private: true
