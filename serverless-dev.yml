@@ -48,6 +48,7 @@ plugins:
 functions:
   - ${file(definitions/timeslots.yml)}
   - ${file(definitions/users.yml)}
+  - ${file(definitions/metrics.yml)}
   - ${file(definitions/warnings.yml)}
   - ${file(definitions/mentorships-api.yml)}
   - ${file(definitions/mentorships-state-machine.yml)}

@@ -3,7 +3,7 @@ import { Mentorship } from '../types';
 import { generateUpdateQuery, get, put, scan, update } from '../utils/dynamoDb';
 
 const TableName =
-  process.env.STAGE === 'dev'
+  process.env.STAGE !== 'dev'
     ? TABLE_NAME_MENTORSHIP_DEV
     : TABLE_NAME_MENTORSHIP;
 
@@ -111,6 +111,16 @@ export function getMentorshipsByTimeSlotId(
   if (limit) {
     query.Limit = Number.parseInt(limit);
   }
+  return scan<Mentorship>(query);
+}
+
+export function getMentorshipBetweenTwoDates(dateOne: string, dateTwo: string) {
+  const query: Parameters<typeof scan>[0] = {
+    TableName,
+    FilterExpression: `mentorship_create_date BETWEEN :dateOne AND :dateTwo`,
+    ExpressionAttributeValues: { ':dateOne': dateOne, ':dateTwo': dateTwo }
+  };
+
   return scan<Mentorship>(query);
 }
 

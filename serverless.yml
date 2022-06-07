@@ -53,6 +53,7 @@ functions:
   - ${file(definitions/mentorships-state-machine.yml)}
   - ${file(definitions/matebot.yml)}
   - ${file(definitions/feedback.yml)}
+  - ${file(definitions/metrics.yml)}
 
 stepFunctions:
   ${file(definitions/create-mentorship-step-function.yml)}
