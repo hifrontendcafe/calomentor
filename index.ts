@@ -26,6 +26,7 @@ import {
   getWarnings,
   addWarningMatebotService,
   forgiveWarningByMentee,
+  deleteWarningById,
 } from "./services/warningsService";
 
 import {
@@ -44,6 +45,7 @@ import {
   catchMentorship,
   createMentorshipMatebot,
   getMentorshipsByMentee,
+  deleteMentorshipById,
 } from "./services/mentorship";
 import {
   addFeedbackService,
@@ -191,6 +193,12 @@ export const mentorshipCatch: Handler = (
   callback: Callback<any>
 ) => catchMentorship(event, context, callback);
 
+export const mentorshipDelete: Handler = (
+  event: any,
+  context: Context,
+  callback: Callback<any>
+) => deleteMentorshipById(event, context, callback);
+
 // Warnings functions handlers
 
 export const addWarningMentorship: Handler = (
@@ -228,6 +236,12 @@ export const forgiveWarningByMenteeHandler: Handler = (
   context: Context,
   callback: Callback<any>
 ) => forgiveWarningByMentee(event, context, callback);
+
+export const warningDelete: Handler = (
+  event: any,
+  context: Context,
+  callback: Callback<any>
+) => deleteWarningById(event, context, callback);
 
 // Feedback functions handlers
 

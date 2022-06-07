@@ -6,6 +6,7 @@ import { getMentorshipById, updateMentorship } from "../repository/mentorship";
 import { getUserById, getUserByToken } from "../repository/user";
 import {
   addWarning,
+  deleteWarning,
   getWarningsData,
   updateWarning,
 } from "../repository/warning";
@@ -193,7 +194,13 @@ export const getAllWarnings: APIGatewayProxyHandler = async (event) => {
       warnings = await getWarningsData({});
       // Order the mentorships by date and replace the data.Itemes for this
       // ordered array with the last 20 elements
-      warnings = { ...warnings, Items: orderWarningsByDate(warnings.Items, Number.parseInt(limit || "20")) };
+      warnings = {
+        ...warnings,
+        Items: orderWarningsByDate(
+          warnings.Items,
+          Number.parseInt(limit || "20")
+        ),
+      };
     }
     return makeSuccessResponse(
       warnings.Items,
@@ -293,5 +300,21 @@ export const forgiveWarningByMentee: APIGatewayProxyHandler = async (event) => {
     } catch (error) {
       return makeErrorResponse(400, "-305", error);
     }
+  }
+};
+
+export const deleteWarningById: APIGatewayProxyHandler = async (event) => {
+  const id = event.pathParameters?.id;
+
+  try {
+    if (!id) {
+      return makeErrorResponse(400, "-311");
+    }
+
+    await deleteWarning(id);
+
+    return makeSuccessResponse({}, "304");
+  } catch (error) {
+    return makeErrorResponse(400, "-303", error);
   }
 };
