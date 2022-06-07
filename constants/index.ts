@@ -6,8 +6,8 @@ export const TABLE_NAME_FEEDBACK = "feedback-prod";
 
 export const TABLE_NAME_USER_DEV = "user-test";
 export const TABLE_NAME_TIME_SLOT_DEV = "time-slots-test";
-export const TABLE_NAME_MENTORSHIP_DEV = "mentorships-prod";
-export const TABLE_NAME_WARNINGS_DEV = "warnings-prod";
+export const TABLE_NAME_MENTORSHIP_DEV = "mentorships-dev";
+export const TABLE_NAME_WARNINGS_DEV = "warnings-dev";
 export const TABLE_NAME_FEEDBACK_DEV = "feedback-test";
 
 export enum STATUS {

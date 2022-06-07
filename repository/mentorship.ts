@@ -3,7 +3,7 @@ import { Mentorship } from '../types';
 import { deleteItem, generateUpdateQuery, get, put, scan, update } from '../utils/dynamoDb';
 
 const TableName =
-  process.env.STAGE !== 'dev'
+  process.env.STAGE === 'dev'
     ? TABLE_NAME_MENTORSHIP_DEV
     : TABLE_NAME_MENTORSHIP;
 
