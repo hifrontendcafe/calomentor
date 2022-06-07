@@ -3,7 +3,7 @@ import * as timezone from "dayjs/plugin/timezone";
 import * as utc from "dayjs/plugin/utc";
 import * as localizedFormat from "dayjs/plugin/localizedFormat";
 import * as isBetween from "dayjs/plugin/isBetween";
-import * as  relativeTime from 'dayjs/plugin/relativeTime';
+import * as relativeTime from "dayjs/plugin/relativeTime";
 import "dayjs/locale/es-mx";
 
 dayjs.extend(localizedFormat);
@@ -66,12 +66,58 @@ export const substractTime = (
 
 export const getUnixTime = (date: Date): number => {
   return dayjs(date).unix();
-}
+};
 
-export const distanceFromNow = (date: Date, timeZone = "America/Buenos_Aires", locale = "es-mx"): string => {
+export const distanceFromNow = (
+  date: Date,
+  timeZone = "America/Buenos_Aires",
+  locale = "es-mx"
+): string => {
   return dayjs(date).tz(timeZone).locale(locale).fromNow();
-}
+};
 
-export const distanceToNow = (date: Date, timeZone = "America/Buenos_Aires", locale = "es-mx"): string => {
+export const distanceToNow = (
+  date: Date,
+  timeZone = "America/Buenos_Aires",
+  locale = "es-mx"
+): string => {
   return dayjs(date).tz(timeZone).locale(locale).toNow();
-}
+};
+
+export const getFirstDayOfWeek = (today: number): string => {
+  const todayDate = dayjs(today);
+  const numberOfTheDayOfTheWeek = todayDate.day();
+  const firstDayOfTheWeek = substractTime(
+    todayDate.toDate(),
+    numberOfTheDayOfTheWeek,
+    "days"
+  );
+  return String(firstDayOfTheWeek.getTime());
+};
+
+export const getFirstDayOfMonth = (today: number): string => {
+  const todayDate = dayjs(today);
+  const firstDayOfTheMonth = dayjs(
+    `${todayDate.month() + 1}/01/${todayDate.year()}`
+  ).toDate();
+  return String(firstDayOfTheMonth.getTime());
+};
+
+export const getFirstDayOfYear = (today: number): string => {
+  const year = dayjs(today).year();
+  const firstDayOfTheYear = dayjs(`01/01/${year}`).toDate();
+  return String(firstDayOfTheYear.getTime());
+};
+
+export const getLastDayOfMonth = (today: number): string => {
+  const todayDate = dayjs(today)
+  const dayOfTheMonth = todayDate.date() + 1
+  const lastDayOfTheMonth = substractTime(todayDate.toDate(), dayOfTheMonth, "days")
+  return String(lastDayOfTheMonth.getTime());
+};
+
+export const getLastDayOfYear = (today: number): string => {
+  const year = dayjs(today).year();
+  const lastDayOfTheYear = dayjs(`12/31/${year}`).toDate();
+  return String(lastDayOfTheYear.getTime());
+};

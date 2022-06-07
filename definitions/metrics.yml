@@ -1,0 +1,24 @@
+getMetrics:
+  handler: index.getCalomentorMetrics
+  events:
+    - http:
+        path: metrics
+        method: get
+        cors: true
+        private: true
+getMentorshipsBetweenTwoDates:
+  handler: index.getMentorshipsBetweenTwoDates
+  events:
+    - http:
+        path: metrics/mentorships
+        method: get
+        cors: true
+        private: true
+getWarningsBetweenTwoDates:
+  handler: index.getWarningsBetweenTwoDates
+  events:
+    - http:
+        path: metrics/warnings
+        method: get
+        cors: true
+        private: true

@@ -1,4 +1,4 @@
-import { Handler, Context, Callback } from 'aws-lambda';
+import { Handler, Context, Callback } from "aws-lambda";
 
 export {
   getTimeSlotsByUser,
@@ -6,8 +6,8 @@ export {
   addTimeSlot,
   updateTimeSlotState,
   deleteTimeSlot,
-  addMenteeToTimeSlot
-} from './services/timeSlots';
+  addMenteeToTimeSlot,
+} from "./services/timeSlots";
 
 import {
   createUserService,
@@ -16,8 +16,8 @@ import {
   getUserByIdService,
   deleteUserByIdService,
   updateUserByIdService,
-  getMentorsFromSanity
-} from './services/userService';
+  getMentorsFromSanity,
+} from "./services/userService";
 
 import {
   addWarningService,
@@ -26,8 +26,8 @@ import {
   getWarnings,
   addWarningMatebotService,
   forgiveWarningByMentee,
-  deleteWarningById
-} from './services/warningsService';
+  deleteWarningById,
+} from "./services/warningsService";
 
 import {
   getMentorships,
@@ -45,12 +45,18 @@ import {
   catchMentorship,
   createMentorshipMatebot,
   getMentorshipsByMentee,
-  deleteMentorshipById
-} from './services/mentorship';
+  deleteMentorshipById,
+} from "./services/mentorship";
 import {
   addFeedbackService,
-  getFeedbackService
-} from './services/feedbackService';
+  getFeedbackService,
+} from "./services/feedbackService";
+import {
+  getMentorshipsMetricsBetweenTwoDates,
+  getMetrics,
+  getWarningsMetricsBetweenTwoDates,
+} from "./services/metrics";
+
 // User functions handlers
 
 export const activateUser: Handler = (
@@ -250,3 +256,22 @@ export const getFeedbackHandler: Handler = (
   context: Context,
   callback: Callback<any>
 ) => getFeedbackService(event, context, callback);
+// Metrics functions handlers
+
+export const getCalomentorMetrics: Handler = (
+  event: any,
+  context: Context,
+  callback: Callback<any>
+) => getMetrics(event, context, callback);
+
+export const getMentorshipsBetweenTwoDates: Handler = (
+  event: any,
+  context: Context,
+  callback: Callback<any>
+) => getMentorshipsMetricsBetweenTwoDates(event, context, callback);
+
+export const getWarningsBetweenTwoDates: Handler = (
+  event: any,
+  context: Context,
+  callback: Callback<any>
+) => getWarningsMetricsBetweenTwoDates(event, context, callback);
