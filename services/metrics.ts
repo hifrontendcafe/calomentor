@@ -1,25 +1,26 @@
-import { APIGatewayProxyHandler } from "aws-lambda/trigger/api-gateway-proxy";
-import dayjs from "dayjs";
+import { APIGatewayProxyHandler } from 'aws-lambda/trigger/api-gateway-proxy';
+import dayjs from 'dayjs';
 import {
   getAllMentorships,
-  getMentorshipBetweenTwoDates,
-} from "../repository/mentorship";
-import { getMentors } from "../repository/user";
+  getMentorshipBetweenTwoDates
+} from '../repository/mentorship';
+import { getMentors } from '../repository/user';
 import {
   getWarningBetweenTwoDates,
-  getWarningsData,
-} from "../repository/warning";
+  getWarningsData
+} from '../repository/warning';
 import {
   getFirstDayOfMonth,
   getFirstDayOfWeek,
   getFirstDayOfYear,
   getLastDayOfMonth,
   getLastDayOfYear,
-  substractTime,
-} from "../utils/dates";
-import { makeErrorResponse, makeSuccessResponse } from "../utils/makeResponses";
+  substractTime
+} from '../utils/dates';
+import { makeErrorResponse, makeSuccessResponse } from '../utils/makeResponses';
+import { promiseHash } from '../utils/promise';
 
-export const getMetrics: APIGatewayProxyHandler = async (event) => {
+export const getMetrics: APIGatewayProxyHandler = async event => {
   // Get dates for search metrics
 
   const today = new Date();
@@ -27,124 +28,129 @@ export const getMetrics: APIGatewayProxyHandler = async (event) => {
   const firstDayOfTheMonth = getFirstDayOfMonth(today.getTime());
   const firstDayOfTheWeek = getFirstDayOfWeek(today.getTime());
   const todayMinusTwentyFourHours = String(
-    substractTime(today, 24, "hours").getTime()
+    substractTime(today, 24, 'hours').getTime()
   );
   const firstDayOfTheLastYear = getFirstDayOfYear(
-    substractTime(today, 1, "year").getTime()
+    substractTime(today, 1, 'year').getTime()
   );
   const firstDayOfTheLastMonth = getFirstDayOfMonth(
-    substractTime(today, 1, "month").getTime()
+    substractTime(today, 1, 'month').getTime()
   );
   const lastDayOfTheLastYear = getLastDayOfYear(today.getTime());
   const lastDayOfTheLastMonth = getLastDayOfMonth(today.getTime());
 
   try {
-    // Get Mentors metrics
+    const data = await promiseHash({
+      // Get Mentors metrics
 
-    const mentors = await getMentors();
-    const activeMentors = mentors?.filter((mentor) => mentor.isActive);
+      mentors: getMentors(),
 
-    // Get Mentorships metrics
+      // Get Mentorships metrics
 
-    const mentorshipsOfTheYear = await getMentorshipBetweenTwoDates(
-      firstDayOfTheYear,
-      String(today.getTime())
-    );
-    const mentorshipsOfTheMonth = await getMentorshipBetweenTwoDates(
-      firstDayOfTheMonth,
-      String(today.getTime())
-    );
-    const mentorshipsOfTheWeek = await getMentorshipBetweenTwoDates(
-      firstDayOfTheWeek,
-      String(today.getTime())
-    );
-    const mentorshipsOfTheDay = await getMentorshipBetweenTwoDates(
-      String(todayMinusTwentyFourHours),
-      String(today.getTime())
-    );
-    const mentorshipsOfTheLastMonth = await getMentorshipBetweenTwoDates(
-      String(firstDayOfTheLastMonth),
-      String(lastDayOfTheLastMonth)
-    );
-    const mentorshipsOfTheLastYear = await getMentorshipBetweenTwoDates(
-      String(firstDayOfTheLastYear),
-      String(lastDayOfTheLastYear)
-    );
+      mentorshipsOfTheYear: getMentorshipBetweenTwoDates(
+        firstDayOfTheYear,
+        String(today.getTime())
+      ),
+      mentorshipsOfTheMonth: getMentorshipBetweenTwoDates(
+        firstDayOfTheMonth,
+        String(today.getTime())
+      ),
+      mentorshipsOfTheWeek: getMentorshipBetweenTwoDates(
+        firstDayOfTheWeek,
+        String(today.getTime())
+      ),
+      mentorshipsOfTheDay: getMentorshipBetweenTwoDates(
+        String(todayMinusTwentyFourHours),
+        String(today.getTime())
+      ),
+      mentorshipsOfTheLastMonth: getMentorshipBetweenTwoDates(
+        String(firstDayOfTheLastMonth),
+        String(lastDayOfTheLastMonth)
+      ),
+      mentorshipsOfTheLastYear: getMentorshipBetweenTwoDates(
+        String(firstDayOfTheLastYear),
+        String(lastDayOfTheLastYear)
+      ),
 
-    const allMentorships = await getAllMentorships();
+      allMentorships: getAllMentorships(),
 
-    // Get Warnings metrics
+      // Get Warnings metrics
 
-    const warningsOfTheYear = await getWarningBetweenTwoDates(
-      firstDayOfTheYear,
-      String(today.getTime())
-    );
-    const warningsOfTheMonth = await getWarningBetweenTwoDates(
-      firstDayOfTheMonth,
-      String(today.getTime())
-    );
-    const warningsOfTheWeek = await getWarningBetweenTwoDates(
-      firstDayOfTheWeek,
-      String(today.getTime())
-    );
-    const warningsOfTheDay = await getWarningBetweenTwoDates(
-      String(todayMinusTwentyFourHours),
-      String(today.getTime())
-    );
-    const warningsOfTheLastMonth = await getWarningBetweenTwoDates(
-      String(firstDayOfTheLastMonth),
-      String(lastDayOfTheLastMonth)
-    );
-    const warningsOfTheLastYear = await getWarningBetweenTwoDates(
-      String(firstDayOfTheLastYear),
-      String(lastDayOfTheLastYear)
-    );
+      warningsOfTheYear: getWarningBetweenTwoDates(
+        firstDayOfTheYear,
+        String(today.getTime())
+      ),
+      warningsOfTheMonth: getWarningBetweenTwoDates(
+        firstDayOfTheMonth,
+        String(today.getTime())
+      ),
+      warningsOfTheWeek: getWarningBetweenTwoDates(
+        firstDayOfTheWeek,
+        String(today.getTime())
+      ),
+      warningsOfTheDay: getWarningBetweenTwoDates(
+        String(todayMinusTwentyFourHours),
+        String(today.getTime())
+      ),
+      warningsOfTheLastMonth: getWarningBetweenTwoDates(
+        String(firstDayOfTheLastMonth),
+        String(lastDayOfTheLastMonth)
+      ),
+      warningsOfTheLastYear: getWarningBetweenTwoDates(
+        String(firstDayOfTheLastYear),
+        String(lastDayOfTheLastYear)
+      ),
 
-    const allWarnings = await getWarningsData({ allWarnings: true });
+      allWarnings: getWarningsData({ allWarnings: true })
+    });
+
+    const activeMentors = data.mentors?.filter(mentor => mentor.isActive);
 
     return makeSuccessResponse(
       {
         mentorships_metrics: {
-          mentorshipsOfTheYear: mentorshipsOfTheYear.Count,
-          mentorshipsOfTheLastYear: mentorshipsOfTheLastYear.Count,
-          mentorshipsOfTheMonth: mentorshipsOfTheMonth.Count,
-          mentorshipsOfTheLastMonth: mentorshipsOfTheLastMonth.Count,
-          mentorshipsOfTheWeek: mentorshipsOfTheWeek.Count,
-          mentorshipsOfTheDay: mentorshipsOfTheDay.Count,
+          mentorshipsOfTheYear: data.mentorshipsOfTheYear.Count,
+          mentorshipsOfTheLastYear: data.mentorshipsOfTheLastYear.Count,
+          mentorshipsOfTheMonth: data.mentorshipsOfTheMonth.Count,
+          mentorshipsOfTheLastMonth: data.mentorshipsOfTheLastMonth.Count,
+          mentorshipsOfTheWeek: data.mentorshipsOfTheWeek.Count,
+          mentorshipsOfTheDay: data.mentorshipsOfTheDay.Count,
           mentorshipsOfTheCurrentMonthOverLastMonth:
-            mentorshipsOfTheMonth.Count / mentorshipsOfTheLastMonth.Count,
+            data.mentorshipsOfTheMonth.Count /
+            data.mentorshipsOfTheLastMonth.Count,
           mentorshipsOfTheCurrentYearOverLastYear:
-            mentorshipsOfTheYear.Count / mentorshipsOfTheLastYear.Count,
-          mentorshipsTotal: allMentorships.Count,
+            data.mentorshipsOfTheYear.Count /
+            data.mentorshipsOfTheLastYear.Count,
+          mentorshipsTotal: data.allMentorships.Count,
           mentorshipsTotalOverActiveMentorsOfTheMonth:
-            mentorshipsOfTheYear.Count / activeMentors.length,
+            data.mentorshipsOfTheYear.Count / activeMentors.length,
           mentorshipsTotalOverActiveMentorsOfTheYear:
-            mentorshipsOfTheMonth.Count / activeMentors.length,
-          all_mentorships: allMentorships.Items,
+            data.mentorshipsOfTheMonth.Count / activeMentors.length,
+          all_mentorships: data.allMentorships.Items
         },
         warnings_metrics: {
-          warningsOfTheYear: warningsOfTheYear.Count,
-          warningsOfTheLastYear: warningsOfTheLastYear.Count,
-          warningsOfTheMonth: warningsOfTheMonth.Count,
-          warningsOfTheLastMonth: warningsOfTheLastMonth.Count,
-          warningsOfTheWeek: warningsOfTheWeek.Count,
-          warningsOfTheDay: warningsOfTheDay.Count,
+          warningsOfTheYear: data.warningsOfTheYear.Count,
+          warningsOfTheLastYear: data.warningsOfTheLastYear.Count,
+          warningsOfTheMonth: data.warningsOfTheMonth.Count,
+          warningsOfTheLastMonth: data.warningsOfTheLastMonth.Count,
+          warningsOfTheWeek: data.warningsOfTheWeek.Count,
+          warningsOfTheDay: data.warningsOfTheDay.Count,
           warningsOfTheCurrentMonthOverLastMonth:
-            warningsOfTheMonth.Count / warningsOfTheLastMonth.Count,
+            data.warningsOfTheMonth.Count / data.warningsOfTheLastMonth.Count,
           warningsOfTheCurrentYearOverLastYear:
-            warningsOfTheYear.Count / warningsOfTheLastYear.Count,
-          warningsTotal: warningsOfTheYear.ScannedCount,
+            data.warningsOfTheYear.Count / data.warningsOfTheLastYear.Count,
+          warningsTotal: data.warningsOfTheYear.ScannedCount,
           warningsOverMentorshipsOfTheWeek:
-            warningsOfTheWeek.Count / mentorshipsOfTheWeek.Count,
+            data.warningsOfTheWeek.Count / data.mentorshipsOfTheWeek.Count,
           warningsOverMentorshipsOfTheMonth:
-            warningsOfTheMonth.Count / mentorshipsOfTheMonth.Count,
+            data.warningsOfTheMonth.Count / data.mentorshipsOfTheMonth.Count,
           warningsOverMentorshipsOfTheYear:
-            warningsOfTheYear.Count / mentorshipsOfTheYear.Count,
-          all_warnings: allWarnings.Items,
+            data.warningsOfTheYear.Count / data.mentorshipsOfTheYear.Count,
+          all_warnings: data.allWarnings.Items
         },
         mentors: {
-          total: mentors?.length,
-          active: activeMentors?.length,
+          total: data.mentors?.length,
+          active: activeMentors?.length
         },
         dates: {
           today,
@@ -155,18 +161,18 @@ export const getMetrics: APIGatewayProxyHandler = async (event) => {
           firstDayOfTheLastYear,
           firstDayOfTheLastMonth,
           lastDayOfTheLastYear,
-          lastDayOfTheLastMonth,
-        },
+          lastDayOfTheLastMonth
+        }
       },
-      "999"
+      '999'
     );
   } catch (error) {
-    return makeErrorResponse(400, "-999", error?.stack);
+    return makeErrorResponse(400, '-999', error?.stack);
   }
 };
 
 export const getMentorshipsMetricsBetweenTwoDates: APIGatewayProxyHandler =
-  async (event) => {
+  async event => {
     const { dateOne, dateTwo } = event.queryStringParameters;
 
     const today = String(Date.now());
@@ -176,36 +182,41 @@ export const getMentorshipsMetricsBetweenTwoDates: APIGatewayProxyHandler =
         dateOne,
         dateTwo || today
       );
-      const warnings = await getWarningBetweenTwoDates(dateOne, dateTwo || today);
+      const warnings = await getWarningBetweenTwoDates(
+        dateOne,
+        dateTwo || today
+      );
       return makeSuccessResponse(
         {
           // all_mentorships: mentorships.Items,
           mentorships_count: mentorships.Count,
-          warnings_count: warnings.Count,
+          warnings_count: warnings.Count
         },
-        "999"
+        '999'
       );
     } catch (error) {
-      return makeErrorResponse(400, "-999", error?.stack);
+      return makeErrorResponse(400, '-999', error?.stack);
     }
   };
 
-export const getWarningsMetricsBetweenTwoDates: APIGatewayProxyHandler = async (
-  event
-) => {
-  const { dateOne, dateTwo } = event.queryStringParameters;
+export const getWarningsMetricsBetweenTwoDates: APIGatewayProxyHandler =
+  async event => {
+    const { dateOne, dateTwo } = event.queryStringParameters;
 
-  const today = String(Date.now());
-  try {
-    const warnings = await getWarningBetweenTwoDates(dateOne, dateTwo || today);
-    return makeSuccessResponse(
-      {
-        all_warnings: warnings.Items,
-        warnings_count: warnings.Count,
-      },
-      "999"
-    );
-  } catch (error) {
-    return makeErrorResponse(400, "-999", error?.stack);
-  }
-};
+    const today = String(Date.now());
+    try {
+      const warnings = await getWarningBetweenTwoDates(
+        dateOne,
+        dateTwo || today
+      );
+      return makeSuccessResponse(
+        {
+          all_warnings: warnings.Items,
+          warnings_count: warnings.Count
+        },
+        '999'
+      );
+    } catch (error) {
+      return makeErrorResponse(400, '-999', error?.stack);
+    }
+  };
