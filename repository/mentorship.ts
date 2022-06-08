@@ -58,15 +58,17 @@ export function getMentorshipsByUserId(
 
 export function getMentorshipsByName(
   name: string,
+  searchType: string,
   lastKeyId?: string,
   limit?: string
 ) {
+  const filtersContains = 
+    searchType === "mentor" 
+      ? `contains(searcheable_mentor_username_discord, :name) OR contains(searcheable_mentor_name, :name)`
+      : `contains(searcheable_mentee_username_discord, :name) OR contains(searcheable_mentee_name, :name) `
   const query: Parameters<typeof scan>[0] = {
     TableName,
-    FilterExpression: `contains(searcheable_mentee_username_discord, :name) OR 
-      contains(searcheable_mentee_name, :name) OR 
-      contains(searcheable_mentor_username_discord, :name) OR 
-      contains(searcheable_mentor_name, :name)`,
+    FilterExpression: filtersContains,
     ExpressionAttributeValues: { ':name': name.toLowerCase() }
   };
 

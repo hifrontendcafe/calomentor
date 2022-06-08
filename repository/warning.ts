@@ -16,23 +16,24 @@ export function getWarningsData(
     id?: string;
     allWarnings?: boolean;
     name?: string;
+    searchType?: string;
   },
   lastKeyId?: string,
-  limit?: string,
+  limit?: string
 ) {
-  const { id, allWarnings, name } = filter;
+  const { id, allWarnings, name, searchType } = filter;
 
   let query: Parameters<typeof scan>[0] = {
     TableName,
-    Select: "ALL_ATTRIBUTES"
+    Select: "ALL_ATTRIBUTES",
   };
 
   if (lastKeyId) {
-    query.ExclusiveStartKey = { id: lastKeyId  };
+    query.ExclusiveStartKey = { id: lastKeyId };
   }
 
-  if(limit) { 
-    query.Limit = Number.parseInt(limit)
+  if (limit) {
+    query.Limit = Number.parseInt(limit);
   }
 
   if (id) {
@@ -45,15 +46,17 @@ export function getWarningsData(
       query.ExpressionAttributeValues[":warning_status"] = WARNSTATE.ACTIVE;
     }
   } else if (name) {
-    query.FilterExpression = `
-      contains(searcheable_warning_author_name, :name) OR 
+    const filtersContains =
+      searchType === "mentor"
+        ? `contains(searcheable_warning_author_name, :name) OR 
       contains(searcheable_warning_author_username_discord, :name) OR 
-      contains(searcheable_mentee_name, :name) OR 
-      contains(searcheable_mentee_username_discord, :name) OR 
       contains(searcheable_mentor_name, :name) OR 
       contains(searcheable_mentor_username_discord, :name) OR 
       contains(searcheable_forgive_author_name, :name) OR 
-      contains(searcheable_forgive_author_username_discord, :name)`;
+    contains(searcheable_forgive_author_username_discord, :name)`
+        : `contains(searcheable_mentee_name, :name) OR 
+    contains(searcheable_mentee_username_discord, :name)`;
+    query.FilterExpression = filtersContains;
     query.ExpressionAttributeValues = {
       ":name": name.toLowerCase(),
     };

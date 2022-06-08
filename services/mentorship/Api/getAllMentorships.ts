@@ -22,6 +22,7 @@ const getMentorships: APIGatewayProxyHandler = async (event) => {
   const filter = queryStringParameters?.filter;
   const filter_dates = queryStringParameters?.filter_dates ?? FILTERDATES.ALL;
   const name = queryStringParameters?.name;
+  const searchType = event.queryStringParameters?.search_type;
   const lastKeyId = event.queryStringParameters?.last_key_id;
   const limit = queryStringParameters?.limit;
 
@@ -42,7 +43,13 @@ const getMentorships: APIGatewayProxyHandler = async (event) => {
       data = await getAllMentorships();
       // Order the mentorships by date and replace the data.Itemes for this
       // ordered array with the last 20 elements
-      data = { ...data, Items: orderMentorshipsByDate(data.Items, Number.parseInt(limit || "20")) };
+      data = {
+        ...data,
+        Items: orderMentorshipsByDate(
+          data.Items,
+          Number.parseInt(limit || "20")
+        ),
+      };
     }
 
     // ID can be mentor or mentee discord id
@@ -52,7 +59,7 @@ const getMentorships: APIGatewayProxyHandler = async (event) => {
 
     // NAME can be mentor or mentee discord username or real name
     if (name) {
-      data = await getMentorshipsByName(name, lastKeyId, limit);
+      data = await getMentorshipsByName(name, searchType, lastKeyId, limit);
     }
   } catch (err) {
     return makeErrorResponse(400, "-107", err);
