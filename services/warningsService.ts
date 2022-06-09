@@ -185,11 +185,12 @@ export const getAllWarnings: APIGatewayProxyHandler = async (event) => {
   const name = event.queryStringParameters?.name;
   const lastKeyId = event.queryStringParameters?.last_key_id;
   const limit = event.queryStringParameters?.limit;
+  const searchType = event.queryStringParameters?.search_type;
 
   try {
     let warnings: Awaited<ReturnType<typeof getWarningsData>>;
     if (name) {
-      warnings = await getWarningsData({ name }, lastKeyId, limit);
+      warnings = await getWarningsData({ name, searchType }, lastKeyId, limit);
     } else {
       warnings = await getWarningsData({});
       // Order the mentorships by date and replace the data.Itemes for this
