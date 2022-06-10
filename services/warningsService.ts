@@ -2,7 +2,11 @@ import { APIGatewayProxyHandler } from "aws-lambda";
 import { v4 as uuidv4 } from "uuid";
 import { STATUS, WARN, WARNSTATE } from "../constants";
 import { warningMail } from "../mails/warning";
-import { getMentorshipById, updateMentorship } from "../repository/mentorship";
+import {
+  getMentorshipBetweenTwoDates,
+  getMentorshipById,
+  updateMentorship,
+} from "../repository/mentorship";
 import { getUserById, getUserByToken } from "../repository/user";
 import {
   addWarning,
@@ -11,6 +15,7 @@ import {
   updateWarning,
 } from "../repository/warning";
 import { Warning } from "../types";
+import { getFirstDayOfMonth } from "../utils/dates";
 import { makeErrorResponse, makeSuccessResponse } from "../utils/makeResponses";
 import { orderWarningsByDate } from "../utils/orderBy";
 import { sendEmail } from "../utils/sendEmail";
@@ -158,10 +163,16 @@ export const getWarnings: APIGatewayProxyHandler = async (event) => {
       lastKeyId,
       limit
     );
-    if (warnings?.Items?.length === 0) {
-      return makeSuccessResponse(null, "301");
-    }
     if (allWarnings) {
+      const today = new Date();
+      const firstDayOfTheMonth = getFirstDayOfMonth(today.getTime());
+      const mentorships = (
+        await getMentorshipBetweenTwoDates(
+          firstDayOfTheMonth,
+          String(today.getTime()),
+          id
+        )
+      )?.Count;
       return makeSuccessResponse(
         {
           warnings_data: warnings.Items,
@@ -169,11 +180,15 @@ export const getWarnings: APIGatewayProxyHandler = async (event) => {
           active_warnings: warnings.Items?.filter(
             (warn) => warn.warning_status === WARNSTATE.ACTIVE
           )?.length,
+          mentorships,
         },
         "302",
         warnings.Count,
         warnings.LastEvaluatedKey
       );
+    }
+    if (warnings?.Items?.length === 0) {
+      return makeSuccessResponse(null, "301");
     }
     return makeErrorResponse(400, "-302", warnings.Items);
   } catch (error) {
